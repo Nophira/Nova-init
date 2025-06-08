@@ -1,11 +1,27 @@
 {
   "name": "nova-init",
   "version": "1.1.0",
+  "description": "Ein CLI-Tool zum Initialisieren von Nova-Projekten",
+  "main": "src/index.js",
   "bin": {
     "nova-init": "./bin/index.js"
   },
   "author": "Nophira",
   "license": "MIT",
+  "keywords": [
+    "cli",
+    "nova",
+    "init",
+    "template"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nophira/Nova-init.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nophira/Nova-init/issues"
+  },
+  "homepage": "https://github.com/nophira/Nova-init#readme",
   "dependencies": {
     "chalk": "^5.0.0",
     "commander": "^14.0.0",
@@ -14,5 +30,11 @@
     "minimist": "^1.2.8",
     "prompts": "^2.4.2"
   },
-  "type": "module"
+  "type": "module",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }
