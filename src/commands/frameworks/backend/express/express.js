@@ -14,6 +14,7 @@ export function installExpress(targetPath, _, language = 'JavaScript') {
   exec(`npm install express`);
 
   if (language === 'TypeScript') {
+    console.log(chalk.cyan('Installing TypeScript dependencies...'));
     exec(`npm install -D typescript @types/express ts-node-dev @types/node`);
     exec(`npx tsc --init`);
 
@@ -31,6 +32,7 @@ app.listen(port, () => {
 `;
     writeFileSync(path.join(targetPath, 'index.ts'), tsCode.trim());
   } else {
+    console.log(chalk.cyan('Installing JavaScript version...'));
     const jsCode = `
 import express from 'express';
 const app = express();

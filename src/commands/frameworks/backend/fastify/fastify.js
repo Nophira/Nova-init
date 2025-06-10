@@ -6,7 +6,7 @@ export function installfastify(targetPath, projectName, language = 'JavaScript')
 
   if(language === 'Typescript'){
    
-    console.log(chalk.green(`\n⚛️ Installing React (${language}) in "${targetPath}"...`));
+    console.log(chalk.green(`\n⚛️ Installing Fastify (${language}) in "${targetPath}"...`));
 
     
   
@@ -19,7 +19,7 @@ export function installfastify(targetPath, projectName, language = 'JavaScript')
 
 
 
-    console.log(chalk.green(`\n⚛️ Installing React (${language}) in "${targetPath}"...`));
+    console.log(chalk.green(`\n⚛️ Installing Fastify (${language}) in "${targetPath}"...`));
 
    
   

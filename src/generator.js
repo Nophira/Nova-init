@@ -73,9 +73,9 @@ export async function generateProject(config) {
     if (framework) {
       const installer = await frameworkInstallers[framework]();
       console.log(chalk.bold.cyan('\n╔════════════════════════════════════════════════════════════╗'));
-      console.log(chalk.bold.cyan('║') + chalk.bold.white(` ⚙️ Installing ${framework} (${lang})...`) + chalk.bold.cyan('                         ║'));
+      console.log(chalk.bold.cyan('║') + chalk.bold.white(` ⚙️ Installing ${framework} (${backendLang || frontendLang})...`) + chalk.bold.cyan('                         ║'));
       console.log(chalk.bold.cyan('╚════════════════════════════════════════════════════════════╝'));
-      await installer(installPath, projectName, lang, useVite);
+      await installer(installPath, projectName, backendLang || frontendLang, useVite);
     }
   }
 

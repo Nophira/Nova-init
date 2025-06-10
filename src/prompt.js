@@ -55,7 +55,7 @@ function requiresViteOnly(framework) {
 }
 
 function validateProjectName(input) {
-  // Entferne führende und nachfolgende Leerzeichen
+
   const trimmedInput = input.trim();
   
   if (!trimmedInput) {
