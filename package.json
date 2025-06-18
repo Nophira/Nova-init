@@ -1,11 +1,12 @@
 {
   "name": "nova-init",
-  "version": "1.1.2",
-  "bin": {
-    "nova-init": "bin/index.js"
-  },
+  "version": "1.2.1",
   "author": "Nophira",
   "license": "MIT",
+  "repository": "Nophira/Nova-init",
+  "bin": {
+    "nova-init": "./bin/index.js"
+  },
   "dependencies": {
     "chalk": "^5.0.0",
     "commander": "^14.0.0",
@@ -14,5 +15,14 @@
     "minimist": "^1.2.8",
     "prompts": "^2.4.2"
   },
-  "type": "module"
+  "type": "module",
+
+  "keywords":[
+    "cli",
+    "frontend",
+    "backend",
+    "fullstack",
+    "Nova-init",
+    "frameworks"
+  ]  
 }

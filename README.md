@@ -1,6 +1,6 @@
 # Nova Init CLI
 
-A modern CLI tool for scaffolding web applications with various frontend and backend frameworks.
+A modern CLI tool for scaffolding web applications with various frontend and backend frameworks. It also supports various databases and predefined tech stack combinations. 
 
 ## 📦 Usage
 
@@ -29,6 +29,12 @@ Available frontend frameworks:
 - Vue (JavaScript/TypeScript, Vite only)
 - Lit (JavaScript/TypeScript, Vite only)
 
+**Parameters for Frontend Setup:**
+- `--folder <name>`: Custom folder name for the frontend project.
+- `--framework <name>`: Specifies the frontend framework to use (e.g., `react`, `angular`, `nextjs`). (Required)
+- `--lang <name>`: Programming language for the frontend (e.g., `JavaScript`, `TypeScript`).
+- `--vite`: Use Vite for project scaffolding (optional, available for specific frameworks).
+
 #### Backend Setup
 
 ```bash
@@ -39,6 +45,11 @@ Available backend frameworks:
 - Express (JavaScript/TypeScript)
 - NestJS (TypeScript only)
 - Fastify (JavaScript/TypeScript)
+
+**Parameters for Backend Setup:**
+- `--folder <name>`: Custom folder name for the backend project.
+- `--framework <name>`: Specifies the backend framework to use (e.g., `express`, `nestjs`, `fastify`). (Required)
+- `--lang <name>`: Programming language for the backend (e.g., `JavaScript`, `TypeScript`).
 
 #### Database Setup
 
@@ -52,13 +63,27 @@ Available databases:
 - MySQL (SQL)
 - Redis (In-Memory)
 
-### Parameters
+**Parameters for Database Setup:**
+- `--folder <name>`: Custom folder name for the database setup.
+- `--database <name>`: Specifies the database to set up (e.g., `mongodb`, `postgres`). (Required)
 
-- `--folder <name>`: Custom folder name (default: frontend/backend/database)
-- `--framework <name>`: Framework selection (required)
-- `--lang <name>`: Programming language (JavaScript/TypeScript)
-- `--vite`: Use Vite instead of Create React App (React only)
-- `--database <name>`: Database selection (required for database setup)
+#### Tech Stack Setup
+
+```bash
+npx nova-init add techstack --folder <name> --techstack <techstack>
+```
+
+Available Tech Stacks:
+- MERN (MongoDB, Express, React, Node.js - JavaScript)
+- MEAN (MongoDB, Express, Angular, Node.js - JavaScript)
+- MEVN (MongoDB, Express, Vue, Node.js - JavaScript)
+- MERN_TS (MongoDB, Express, React, Node.js - TypeScript)
+- MEAN_TS (MongoDB, Express, Angular, Node.js - TypeScript)
+- MEVN_TS (MongoDB, Express, Vue, Node.js - TypeScript)
+
+**Parameters for Tech Stack Setup:**
+- `--folder <name>`: Custom folder name for the fullstack project.
+- `--techstack <name>`: Specifies the predefined tech stack to use (e.g., `MERN`, `MEAN_TS`). (Required)
 
 ### Examples
 
@@ -128,24 +153,27 @@ npx nova-init add database --folder db --database mysql
 npx nova-init add database --folder db --database redis
 ```
 
-## 🛠 Available Frameworks
+#### Tech Stack Examples
 
-### Backend
-- Express (JavaScript/TypeScript)
-- NestJS (TypeScript only)
-- Fastify (JavaScript/TypeScript)
+```bash
+# MERN Stack with JavaScript
+npx nova-init add techstack --folder my-mern-app --techstack MERN
 
-### Frontend
-- Angular (TypeScript only)
-- Lit (JavaScript/TypeScript, Vite only)
-- Next.js (JavaScript/TypeScript)
-- Nuxt.js (JavaScript/TypeScript, Vite only)
-- Preact (JavaScript/TypeScript, Vite only)
-- Qwik (JavaScript/TypeScript, Vite only)
-- React (JavaScript/TypeScript, with/without Vite)
-- Solid (JavaScript/TypeScript, with/without Vite)
-- Svelte (JavaScript/TypeScript, with/without Vite)
-- Vue (JavaScript/TypeScript, with/without Vite)
+# MEAN Stack with JavaScript
+npx nova-init add techstack --folder my-mean-app --techstack MEAN
+
+# MEVN Stack with JavaScript
+npx nova-init add techstack --folder my-mevn-app --techstack MEVN
+
+# MERN Stack with TypeScript
+npx nova-init add techstack --folder my-mern-ts-app --techstack MERN_TS
+
+# MEAN Stack with TypeScript
+npx nova-init add techstack --folder my-mean-ts-app --techstack MEAN_TS
+
+# MEVN Stack with TypeScript
+npx nova-init add techstack --folder my-mevn-ts-app --techstack MEVN_TS
+```
 
 ## 📝 Next Steps
 
@@ -174,3 +202,4 @@ After setting up your project:
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+

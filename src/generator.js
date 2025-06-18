@@ -6,6 +6,59 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
                       
+// Definieren der Konfigurationen für vordefinierte Tech-Stacks
+const techStackConfigurations = {
+  MERN: {
+    projectType: 'fullstack',
+    frontendFramework: 'React',
+    backendFramework: 'Express',
+    frontendLang: 'JavaScript',
+    backendLang: 'JavaScript',
+    useVite: true,
+  },
+  MEAN: {
+    projectType: 'fullstack',
+    frontendFramework: 'Angular',
+    backendFramework: 'Express',
+    frontendLang: 'TypeScript',
+    backendLang: 'JavaScript',
+    useVite: false, // Angular typically doesn't use Vite
+  },
+  MEVN: {
+    projectType: 'fullstack',
+    frontendFramework: 'Vue',
+    backendFramework: 'Express',
+    frontendLang: 'JavaScript',
+    backendLang: 'JavaScript',
+    useVite: true,
+  },
+  MERN_TS: {
+    projectType: 'fullstack',
+    frontendFramework: 'React',
+    backendFramework: 'Express',
+    frontendLang: 'TypeScript',
+    backendLang: 'TypeScript',
+    useVite: true,
+  },
+  MEAN_TS: {
+    projectType: 'fullstack',
+    frontendFramework: 'Angular',
+    backendFramework: 'Express',
+    frontendLang: 'TypeScript',
+    backendLang: 'TypeScript',
+    useVite: false,
+  },
+  MEVN_TS: {
+    projectType: 'fullstack',
+    frontendFramework: 'Vue',
+    backendFramework: 'Express',
+    frontendLang: 'TypeScript',
+    backendLang: 'TypeScript',
+    useVite: true,
+  },
+  // Hier können weitere Tech-Stacks hinzugefügt werden
+};
+
 // Dynamischer Import für Frameworks
 const frameworkInstallers = {
   React: async () => (await import('./commands/frameworks/frontend/react/react.js')).installReact,
@@ -24,7 +77,7 @@ const frameworkInstallers = {
 };
 
 export async function generateProject(config) {
-  const {
+  let {
     projectName,
     projectType,
     frontendFramework,
@@ -32,7 +85,24 @@ export async function generateProject(config) {
     frontendLang,
     backendLang,
     useVite,
+    techStack,
   } = config;
+
+  // Wenn ein Tech-Stack ausgewählt wurde, überschreibe die Konfigurationswerte
+  if (techStack) {
+    const stackConfig = techStackConfigurations[techStack];
+    if (stackConfig) {
+      projectType = stackConfig.projectType;
+      frontendFramework = stackConfig.frontendFramework;
+      backendFramework = stackConfig.backendFramework;
+      frontendLang = stackConfig.frontendLang;
+      backendLang = stackConfig.backendLang;
+      useVite = stackConfig.useVite;
+    } else {
+      console.error(chalk.red(`Error: Configuration for tech stack '${techStack}' not found.`));
+      return;
+    }
+  }
 
   const projectRoot = path.join(process.cwd(), projectName);
   
