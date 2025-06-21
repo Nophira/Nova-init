@@ -1,6 +1,6 @@
 {
   "name": "nova-init",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "author": "Nophira",
   "license": "MIT",
   "repository": "Nophira/Nova-init",
@@ -16,13 +16,12 @@
     "prompts": "^2.4.2"
   },
   "type": "module",
-
-  "keywords":[
+  "keywords": [
     "cli",
     "frontend",
     "backend",
     "fullstack",
     "Nova-init",
     "frameworks"
-  ]  
+  ]
 }

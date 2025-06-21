@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 import { fileURLToPath } from 'url';
+import { createDockerCompose } from './commands/database/docker-compose.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -9,52 +10,58 @@ const __dirname = path.dirname(__filename);
 // Definieren der Konfigurationen für vordefinierte Tech-Stacks
 const techStackConfigurations = {
   MERN: {
-    projectType: 'fullstack',
+    projectType: 'techstack',
     frontendFramework: 'React',
     backendFramework: 'Express',
     frontendLang: 'JavaScript',
     backendLang: 'JavaScript',
     useVite: true,
+    database: 'mongodb',
   },
   MEAN: {
-    projectType: 'fullstack',
+    projectType: 'techstack',
     frontendFramework: 'Angular',
     backendFramework: 'Express',
     frontendLang: 'TypeScript',
     backendLang: 'JavaScript',
-    useVite: false, // Angular typically doesn't use Vite
+    useVite: false, 
+    database: 'mongodb',
   },
   MEVN: {
-    projectType: 'fullstack',
+    projectType: 'techstack',
     frontendFramework: 'Vue',
     backendFramework: 'Express',
     frontendLang: 'JavaScript',
     backendLang: 'JavaScript',
     useVite: true,
+    database: 'mongodb',
   },
   MERN_TS: {
-    projectType: 'fullstack',
+    projectType: 'techstack',
     frontendFramework: 'React',
     backendFramework: 'Express',
     frontendLang: 'TypeScript',
     backendLang: 'TypeScript',
     useVite: true,
+    database: 'mongodb',
   },
   MEAN_TS: {
-    projectType: 'fullstack',
+    projectType: 'techstack',
     frontendFramework: 'Angular',
     backendFramework: 'Express',
     frontendLang: 'TypeScript',
     backendLang: 'TypeScript',
     useVite: false,
+    database: 'mongodb',
   },
   MEVN_TS: {
-    projectType: 'fullstack',
+    projectType: 'techstack',
     frontendFramework: 'Vue',
     backendFramework: 'Express',
     frontendLang: 'TypeScript',
     backendLang: 'TypeScript',
     useVite: true,
+    database: 'mongodb',
   },
   // Hier können weitere Tech-Stacks hinzugefügt werden
 };
@@ -86,6 +93,7 @@ export async function generateProject(config) {
     backendLang,
     useVite,
     techStack,
+    database,
   } = config;
 
   // Wenn ein Tech-Stack ausgewählt wurde, überschreibe die Konfigurationswerte
@@ -98,12 +106,15 @@ export async function generateProject(config) {
       frontendLang = stackConfig.frontendLang;
       backendLang = stackConfig.backendLang;
       useVite = stackConfig.useVite;
+      database = stackConfig.database;
+
     } else {
       console.error(chalk.red(`Error: Configuration for tech stack '${techStack}' not found.`));
       return;
     }
   }
-
+ 
+ 
   const projectRoot = path.join(process.cwd(), projectName);
   
   console.log(chalk.bold.cyan('\n╔════════════════════════════════════════════════════════════════════════════════════════════╗'));
@@ -111,8 +122,8 @@ export async function generateProject(config) {
   console.log(chalk.bold.cyan('╚════════════════════════════════════════════════════════════════════════════════════════════╝'));
   
   fs.mkdirSync(projectRoot, { recursive: true });
-
-  if (projectType === 'fullstack') {
+  
+  if (projectType === 'techstack') {
     const frontendPath = path.join(projectRoot, 'frontend');
     const backendPath = path.join(projectRoot, 'backend');
 
@@ -135,6 +146,37 @@ export async function generateProject(config) {
       await installBackend(backendPath, projectName, backendLang);
     }
 
+    
+    if (database) {
+     
+      createDockerCompose(projectRoot, database);
+    } else {
+      console.log(chalk.bold.red('Fehler: Für diesen Tech-Stack wurde keine Datenbank konfiguriert.'));
+    }
+
+  } else if (projectType === 'fullstack') {
+    const frontendPath = path.join(projectRoot, 'frontend');
+    const backendPath = path.join(projectRoot, 'backend');
+
+    fs.mkdirSync(frontendPath, { recursive: true });
+    fs.mkdirSync(backendPath, { recursive: true });
+
+    if (frontendFramework) {
+      const installFrontend = await frameworkInstallers[frontendFramework]();
+      console.log(chalk.bold.cyan('\n╔════════════════════════════════════════════════════╗'));
+      console.log(chalk.bold.cyan('║') + chalk.bold.white(` 🎨 Installing ${frontendFramework} (${frontendLang}) in frontend...`) + chalk.bold.cyan('    ║'));
+      console.log(chalk.bold.cyan('╚════════════════════════════════════════════════════╝'));
+      await installFrontend(frontendPath, projectName, frontendLang, useVite);
+    }
+
+    if (backendFramework) {
+      const installBackend = await frameworkInstallers[backendFramework]();
+      console.log(chalk.bold.cyan('\n╔════════════════════════════════════════════════════╗'));
+      console.log(chalk.bold.cyan('║') + chalk.bold.white(` 🛠 Installing ${backendFramework} (${backendLang}) in backend...`) + chalk.bold.cyan('    ║'));
+      console.log(chalk.bold.cyan('╚════════════════════════════════════════════════════╝'));
+      await installBackend(backendPath, projectName, backendLang);
+    }
+    
   } else {
     const installPath = projectRoot;
     const framework = frontendFramework || backendFramework;
@@ -148,6 +190,8 @@ export async function generateProject(config) {
       await installer(installPath, projectName, backendLang || frontendLang, useVite);
     }
   }
+
+
 
   console.log(chalk.bold.green('\n╔════════════════════════════════════════════════════════════╗'));
   console.log(chalk.bold.green('║') + chalk.bold.white(' ✅ Project setup complete!') + chalk.bold.green('                                 ║'));

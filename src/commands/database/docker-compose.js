@@ -94,6 +94,7 @@ export function createDockerCompose(targetPath, database) {
     console.log(chalk.bold.cyan('║') + chalk.bold.white(` 🐳 Erstelle Docker Compose für ${database}...`) + chalk.bold.cyan('                 ║'));
     console.log(chalk.bold.cyan('╚════════════════════════════════════════════════════════════╝'));
 
+
     fs.writeFileSync(dockerComposePath, config.compose);
 
     console.log(chalk.bold.green('\n╔════════════════════════════════════════════════════════════╗'));
