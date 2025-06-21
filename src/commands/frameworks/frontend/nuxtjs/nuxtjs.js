@@ -3,11 +3,11 @@ import { execSync } from 'child_process';
 import chalk from 'chalk';
 
 export function installNuxtJs(targetPath, projectName, language = 'JavaScript') {
-  console.log(chalk.green(`\n⚛️ Installing Nuxt.js (${language}) in "${targetPath}"...`));
+  console.log(chalk.green(`\n⚛️ Installing Nuxt.js in "${targetPath}"...`));
 
-  const templateFlag = language === 'TypeScript' ? '--typescript' : '';
+  
 
-  execSync(`npx nuxi@latest init . ${templateFlag}`, {
+  execSync(`npx nuxi@latest init .`, {
     cwd: targetPath,
     stdio: 'inherit',
   });

@@ -22,7 +22,6 @@ const supportsLangChoice = [
   'Fastify',
   'Lit',
   'NextJs',
-  'NuxtJs',
   'Preact',
   'Qwik',
   'Solid',
