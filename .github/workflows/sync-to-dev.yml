@@ -1,0 +1,86 @@
+name: Sync Main Issues & Comments to Dev
+
+on:
+  issues:
+    types: [opened, closed]
+  issue_comment:
+    types: [created]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync Issues and Comments to Dev Repo
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.REPO_SYNC_TOKEN }}
+          script: |
+            const issue = context.payload.issue;
+            const action = context.payload.action;
+            const comment = context.payload.comment;
+            const devOwner = "nophira-admin";  // z. B. "my-org" oder "maxmustermann"
+            const devRepo = "development-nova-init";              // z. B. "webhost-dev"
+
+            const isMirrored = issue.body && issue.body.includes("<!-- mirrored:main:");
+
+            if (context.eventName === "issues" && action === "opened" && !isMirrored) {
+              // Neues Issue → nach Dev-Repo spiegeln
+              const created = await github.rest.issues.create({
+                owner: devOwner,
+                repo: devRepo,
+                title: `[From Main] ${issue.title}`,
+                body: `${issue.body}\n\n---\n🔁 Dieses Issue wurde aus dem Haupt-Repo gespiegelt.\n<!-- mirrored:main:${issue.number} -->`
+              });
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `📤 Gespiegelt nach Dev-Repo: [#${created.data.number}](${created.data.html_url})`
+              });
+            }
+
+            if (context.eventName === "issues" && action === "closed" && isMirrored) {
+              // Issue wurde geschlossen → Gegenstück im Dev-Repo schließen
+              const match = issue.body.match(/<!-- mirrored:main:(\d+) -->/);
+              const mainId = issue.number;
+              if (match) {
+                const issues = await github.rest.issues.listForRepo({
+                  owner: devOwner,
+                  repo: devRepo,
+                  state: "open"
+                });
+
+                for (const i of issues.data) {
+                  if (i.body && i.body.includes(`<!-- mirrored:main:${mainId} -->`)) {
+                    await github.rest.issues.update({
+                      owner: devOwner,
+                      repo: devRepo,
+                      issue_number: i.number,
+                      state: "closed"
+                    });
+                  }
+                }
+              }
+            }
+
+            if (context.eventName === "issue_comment" && isMirrored) {
+              // Kommentar spiegeln
+              const mainId = issue.number;
+              const issues = await github.rest.issues.listForRepo({
+                owner: devOwner,
+                repo: devRepo,
+                state: "all"
+              });
+
+              for (const i of issues.data) {
+                if (i.body && i.body.includes(`<!-- mirrored:main:${mainId} -->`)) {
+                  await github.rest.issues.createComment({
+                    owner: devOwner,
+                    repo: devRepo,
+                    issue_number: i.number,
+                    body: `💬 Kommentar aus Haupt-Repo von @${comment.user.login}:\n\n${comment.body}`
+                  });
+                }
+              }
+            }
