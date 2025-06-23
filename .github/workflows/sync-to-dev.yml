@@ -18,8 +18,8 @@ jobs:
             const issue = context.payload.issue;
             const action = context.payload.action;
             const comment = context.payload.comment;
-            const devOwner = "nophira-admin";  // z. B. "my-org" oder "maxmustermann"
-            const devRepo = "development-nova-init";              // z. B. "webhost-dev"
+            const devOwner = "Nophira"; 
+            const devRepo = "development-nova-init";           
 
             const isMirrored = issue.body && issue.body.includes("<!-- mirrored:main:");
 
