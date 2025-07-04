@@ -81,6 +81,7 @@ const frameworkInstallers = {
   Express: async () => (await import('./commands/frameworks/backend/express/express.js')).installExpress,
   NestJs: async () => (await import('./commands/frameworks/backend/nestjs/nestjs.js')).installNestJs,
   Fastify: async () => (await import('./commands/frameworks/backend/fastify/fastify.js')).installfastify,
+  Astro: async () => (await import('./commands/frameworks/frontend/astro/astro.js')).installAstro,
 };
 
 export async function generateProject(config) {
