@@ -13,6 +13,8 @@ import { installQwik } from '../frameworks/frontend/qwik/qwik.js';
 import { installSolid } from '../frameworks/frontend/solid/solid.js';
 import { installSvelte } from '../frameworks/frontend/svelte/svelte.js';
 import { installVue } from '../frameworks/frontend/vue/vue.js';
+import { installRemix } from '../frameworks/frontend/remix/remix.js';
+import { installAstro } from '../frameworks/frontend/astro/astro.js';
 
 const viteOnlyFrameworks = ['solid', 'svelte', 'vue', 'lit', 'preact', 'nuxtjs', 'qwik'];
 
@@ -45,6 +47,10 @@ export default async function addFrontend(argv) {
       console.log(chalk.gray('  • Svelte (JavaScript/TypeScript, Vite only)'));
       console.log(chalk.gray('  • Vue (JavaScript/TypeScript, Vite only)'));
       console.log(chalk.gray('  • Lit (JavaScript/TypeScript, Vite only)'));
+      console.log(chalk.gray('  • Astro (TypeScript only)'));
+      console.log(chalk.gray('  • Remix (TypeScript/ Vite only)'));
+
+
 
       console.log(chalk.bold.yellow('\n⚙️ Optional arguments:'));
       console.log(chalk.cyan('  --folder <name>') + chalk.gray('    Specify custom folder name (default: frontend)'));
@@ -109,6 +115,12 @@ export default async function addFrontend(argv) {
         break;
       case 'lit':
         await installLit(targetPath, folderName, lang);
+        break;
+      case 'astro':
+        await installAstro(targetPath, folderName, lang);
+        break;
+      case 'remix':
+        await installRemix(targetPath, folderName, lang);
         break;
       default:
         console.log(chalk.bold.red('\n╔════════════════════════════════════════════════════════════╗'));

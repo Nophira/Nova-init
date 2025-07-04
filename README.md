@@ -28,6 +28,8 @@ Available frontend frameworks:
 - Svelte (JavaScript/TypeScript, Vite only)
 - Vue (JavaScript/TypeScript, Vite only)
 - Lit (JavaScript/TypeScript, Vite only)
+- Astro (TypeScript only)
+- Remix (TypeScript/ Vite only)
 
 **Parameters for Frontend Setup:**
 - `--folder <name>`: Custom folder name for the frontend project.
@@ -98,6 +100,12 @@ npx nova-init add frontend --folder web --framework react --lang TypeScript --vi
 
 # Angular
 npx nova-init add frontend --folder web --framework angular
+
+# Astro
+npx nova-init add frontend --folder web --framework astro
+
+# Remix
+npx nova-init add frontend --folder web --framework remix
 
 # Next.js
 npx nova-init add frontend --folder web --framework nextjs --lang TypeScript

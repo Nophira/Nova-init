@@ -11,7 +11,9 @@ const frontendFrameworks = [
   'Solid',
   'Svelte',
   'Vue',
-  'Lit'
+  'Lit',
+  'Astro',
+  'Remix'
 ];
 
 const backendFrameworks = ['Express', 'NestJs', 'Fastify'];
@@ -38,7 +40,8 @@ const requiresVite = [
   'Lit',
   'Preact',
   'NuxtJs',
-  'Qwik'
+  'Qwik',
+  'Remix'
 ];
 
 function needsLangChoice(framework) {
