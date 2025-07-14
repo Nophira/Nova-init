@@ -1,6 +1,6 @@
 # Nova Init CLI
 
-A modern CLI tool for scaffolding web applications with various frontend and backend frameworks. It also supports various databases and predefined tech stack combinations. 
+A modern CLI tool for scaffolding web applications with various frontend and backend frameworks, databases, and monorepo tools. Fast, simple, and modern – create your next application in seconds!
 
 ## 📦 Usage
 
@@ -12,69 +12,55 @@ npx nova-init
 ### Command Line Mode
 
 #### Frontend Setup
-
 ```bash
-npx nova-init add frontend --folder <name> --framework <framework> --lang <language> [--vite]
+npx nova-init add frontend --framework <framework> --lang <js|ts> [--vite] [--folder <name>]
 ```
-
 Available frontend frameworks:
-- React (with/without Vite)
-- Angular (TypeScript only)
-- Next.js (JavaScript/TypeScript)
-- Nuxt.js (JavaScript/TypeScript, Vite only)
-- Preact (JavaScript/TypeScript, Vite only)
-- Qwik (JavaScript/TypeScript, Vite only)
-- Solid (JavaScript/TypeScript, Vite only)
-- Svelte (JavaScript/TypeScript, Vite only)
-- Vue (JavaScript/TypeScript, Vite only)
-- Lit (JavaScript/TypeScript, Vite only)
-- Astro (TypeScript only)
-- Remix (TypeScript/ Vite only)
-
-**Parameters for Frontend Setup:**
-- `--folder <name>`: Custom folder name for the frontend project.
-- `--framework <name>`: Specifies the frontend framework to use (e.g., `react`, `angular`, `nextjs`). (Required)
-- `--lang <name>`: Programming language for the frontend (e.g., `JavaScript`, `TypeScript`).
-- `--vite`: Use Vite for project scaffolding (optional, available for specific frameworks).
+- React (default: Create React App, use `--vite` for Vite)
+- Next.js
+- Vue.js
+- Svelte
+- Angular
+- Nuxt.js
+- Astro
+- Remix
+- Solid
+- Qwik
+- Preact
+- Lit
 
 #### Backend Setup
-
 ```bash
-npx nova-init add backend --folder <name> --framework <framework> --lang <language>
+npx nova-init add backend --framework <framework> --lang <js|ts> [--folder <name>]
 ```
-
 Available backend frameworks:
-- Express (JavaScript/TypeScript)
-- NestJS (TypeScript only)
-- Fastify (JavaScript/TypeScript)
-
-**Parameters for Backend Setup:**
-- `--folder <name>`: Custom folder name for the backend project.
-- `--framework <name>`: Specifies the backend framework to use (e.g., `express`, `nestjs`, `fastify`). (Required)
-- `--lang <name>`: Programming language for the backend (e.g., `JavaScript`, `TypeScript`).
+- Express.js
+- NestJS
+- Fastify
 
 #### Database Setup
-
 ```bash
-npx nova-init add database --folder <name> --database <database>
+npx nova-init add database --database <mongodb|postgres|mysql|redis> [--folder <name>]
 ```
-
 Available databases:
-- MongoDB (NoSQL)
-- PostgreSQL (SQL)
-- MySQL (SQL)
-- Redis (In-Memory)
+- MongoDB
+- PostgreSQL
+- MySQL
+- Redis
 
-**Parameters for Database Setup:**
-- `--folder <name>`: Custom folder name for the database setup.
-- `--database <name>`: Specifies the database to set up (e.g., `mongodb`, `postgres`). (Required)
+#### Monorepo Tools
+```bash
+npx nova-init add monorepo --tool <lerna|nx|turborepo> [--folder <name>]
+```
+Available monorepo tools:
+- Lerna
+- Nx
+- Turborepo
 
 #### Tech Stack Setup
-
 ```bash
 npx nova-init add techstack --folder <name> --techstack <techstack>
 ```
-
 Available Tech Stacks:
 - MERN (MongoDB, Express, React, Node.js - JavaScript)
 - MEAN (MongoDB, Express, Angular, Node.js - JavaScript)
@@ -83,131 +69,155 @@ Available Tech Stacks:
 - MEAN_TS (MongoDB, Express, Angular, Node.js - TypeScript)
 - MEVN_TS (MongoDB, Express, Vue, Node.js - TypeScript)
 
-**Parameters for Tech Stack Setup:**
-- `--folder <name>`: Custom folder name for the fullstack project.
-- `--techstack <name>`: Specifies the predefined tech stack to use (e.g., `MERN`, `MEAN_TS`). (Required)
+### Parameters & Options
+- `--framework <name>`: Framework selection (required for frontend/backend)
+- `--lang <js|ts>`: Programming language (JavaScript/TypeScript)
+- `--vite`: Use Vite instead of Create React App (React only)
+- `--database <name>`: Database selection (required for DB setup)
+- `--tool <name>`: Monorepo tool selection (required for monorepo)
+- `--folder <name>`: Custom folder name (default: frontend/backend/database/monorepo)
+- `--techstack <name>`: Predefined tech stack (required for techstack setup)
 
-### Examples
+## 🚀 Examples
 
-#### Frontend Examples
-
+### Frontend Examples
 ```bash
-# React with Create React App
-npx nova-init add frontend --folder web --framework react --lang JavaScript
-
-# React with Vite
-npx nova-init add frontend --folder web --framework react --lang TypeScript --vite
-
-# Angular
-npx nova-init add frontend --folder web --framework angular
-
-# Astro
-npx nova-init add frontend --folder web --framework astro
-
-# Remix
-npx nova-init add frontend --folder web --framework remix
-
+# React (Create React App)
+npx nova-init add frontend --framework react --lang js
+# React (Vite)
+npx nova-init add frontend --framework react --lang ts --vite
 # Next.js
-npx nova-init add frontend --folder web --framework nextjs --lang TypeScript
-
-# Nuxt.js
-npx nova-init add frontend --folder web --framework nuxtjs --lang TypeScript
-
-# Preact
-npx nova-init add frontend --folder web --framework preact --lang TypeScript
-
-# Qwik
-npx nova-init add frontend --folder web --framework qwik --lang TypeScript
-
-# Solid
-npx nova-init add frontend --folder web --framework solid --lang TypeScript
-
+npx nova-init add frontend --framework nextjs --lang ts
+# Vue.js
+npx nova-init add frontend --framework vue --lang ts
 # Svelte
-npx nova-init add frontend --folder web --framework svelte --lang TypeScript
-
-# Vue
-npx nova-init add frontend --folder web --framework vue --lang TypeScript
-
+npx nova-init add frontend --framework svelte --lang ts
+# Angular
+npx nova-init add frontend --framework angular
+# Nuxt.js
+npx nova-init add frontend --framework nuxtjs --lang ts
+# Astro
+npx nova-init add frontend --framework astro --lang ts
+# Remix
+npx nova-init add frontend --framework remix --lang ts
+# Solid
+npx nova-init add frontend --framework solid --lang ts
+# Qwik
+npx nova-init add frontend --framework qwik --lang ts
+# Preact
+npx nova-init add frontend --framework preact --lang ts
 # Lit
-npx nova-init add frontend --folder web --framework lit --lang TypeScript
+npx nova-init add frontend --framework lit --lang ts
 ```
 
-#### Backend Examples
-
+### Backend Examples
 ```bash
-# Express
-npx nova-init add backend --folder api --framework express --lang TypeScript
-
+# Express.js
+npx nova-init add backend --framework express --lang ts
 # NestJS
-npx nova-init add backend --folder api --framework nestjs
-
+npx nova-init add backend --framework nestjs
 # Fastify
-npx nova-init add backend --folder api --framework fastify --lang TypeScript
+npx nova-init add backend --framework fastify --lang ts
 ```
 
-#### Database Examples
-
+### Database Examples
 ```bash
 # MongoDB
-npx nova-init add database --folder db --database mongodb
-
+npx nova-init add database --database mongodb
 # PostgreSQL
-npx nova-init add database --folder db --database postgres
-
+npx nova-init add database --database postgres
 # MySQL
-npx nova-init add database --folder db --database mysql
-
+npx nova-init add database --database mysql
 # Redis
-npx nova-init add database --folder db --database redis
+npx nova-init add database --database redis
 ```
 
-#### Tech Stack Examples
+### Monorepo Examples
+```bash
+# Lerna
+npx nova-init add monorepo --tool lerna --folder my-lerna-repo
+# Nx
+npx nova-init add monorepo --tool nx --folder my-nx-repo
+# Turborepo
+npx nova-init add monorepo --tool turborepo --folder my-turbo-repo
+```
 
+### Tech Stack Examples
 ```bash
 # MERN Stack with JavaScript
 npx nova-init add techstack --folder my-mern-app --techstack MERN
-
 # MEAN Stack with JavaScript
 npx nova-init add techstack --folder my-mean-app --techstack MEAN
-
 # MEVN Stack with JavaScript
 npx nova-init add techstack --folder my-mevn-app --techstack MEVN
-
 # MERN Stack with TypeScript
 npx nova-init add techstack --folder my-mern-ts-app --techstack MERN_TS
-
 # MEAN Stack with TypeScript
 npx nova-init add techstack --folder my-mean-ts-app --techstack MEAN_TS
-
 # MEVN Stack with TypeScript
 npx nova-init add techstack --folder my-mevn-ts-app --techstack MEVN_TS
 ```
 
-## 📝 Next Steps
+## 📚 Available Technologies
 
+### Backend
+- **Express.js** – Minimalist Node.js framework
+- **NestJS** – Enterprise-ready Node.js framework
+- **Fastify** – Fast and efficient Node.js framework
+
+### Frontend
+- **React** – JavaScript library for building UIs
+- **Next.js** – React framework for production
+- **Vue.js** – Progressive JavaScript framework
+- **Svelte** – Cybernetically enhanced web apps
+- **Angular** – Platform for mobile and desktop apps
+- **Nuxt.js** – Vue.js framework for production
+- **Astro** – Web framework for content websites
+- **Remix** – Full-stack React framework
+- **Solid** – JavaScript UI library
+- **Qwik** – Instant-loading web apps
+- **Preact** – Fast 3kB alternative to React
+- **Lit** – Simple and fast web components
+
+### Databases
+- **MongoDB** – NoSQL database
+- **PostgreSQL** – Object-relational database
+- **MySQL** – Relational database
+- **Redis** – In-memory data structure store
+
+### Monorepo Tools
+- **Lerna** – Tool for managing JavaScript projects
+- **Nx** – Smart, fast and extensible build system
+- **Turborepo** – High-performance build system
+
+## 📝 Next Steps
 After setting up your project:
 
 1. Change to project directory:
    ```bash
    cd <project-name>
    ```
-
 2. Install dependencies:
    ```bash
    npm install
    ```
-
 3. Start development server:
    ```bash
+   npm run dev
+   # or
    npm start
    ```
-
 4. For database setup:
    ```bash
    docker-compose up -d
    ```
 
-## 📄 License
+## 💡 Tips
+- Use `--help` after each command for specific help
+- Combine frontend and backend for full-stack projects
+- Monorepo tools are perfect for large projects
+- Docker is required for database setup
 
+## 📄 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
