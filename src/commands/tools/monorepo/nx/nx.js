@@ -2,7 +2,7 @@
 import { execSync } from 'child_process';
 import chalk from 'chalk';
 
-export function installNextJs(targetPath, projectName, language = 'JavaScript') {
+export function installNx(targetPath, projectName, language = 'JavaScript') {
   console.log(chalk.green(`\n Installing NX (Monorepo) in "${targetPath}"...`));
 
   
