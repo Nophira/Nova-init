@@ -8,6 +8,7 @@ import addBackend from '../src/commands/setup_commands/addBackend.js';
 import addDatabase from '../src/commands/setup_commands/addDatabase.js';
 import showHelp from '../src/commands/setup_commands/help.js';
 import addTechstack from '../src/commands/setup_commands/addTechstack.js';
+import addMonorepo from '../src/commands/setup_commands/addMonorepo.js'
 
 const args = minimist(process.argv.slice(2));
 const command = args._[0];
@@ -23,8 +24,10 @@ async function handleCustomCommand() {
       await addDatabase(process.argv.slice(3));
     } else if (type === 'techstack') {
       await addTechstack(process.argv.slice(3));
+    }else if(type === 'monorepo'){
+     await addMonorepo(process.argv.slice(3));
     } else {
-      console.log('Unknown command type. Use "frontend", "backend", "database" or "techstack"');
+      console.log('Unknown command type. Use "frontend", "backend", "database", "monorepo" or "techstack"');
     }
   } else if (command === 'help') {
     showHelp();
