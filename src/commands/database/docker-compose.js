@@ -2,100 +2,42 @@ import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 
-const databaseConfigs = {
+import getMongoCompose from './docker/mongodb/mongodb.js';
+import getPostgresCompose from './docker/postgresql/postgres.js';
+import getMysqlCompose from './docker/mysql/mysql.js';
+import getRedisCompose from './docker/redis/redis.js';
+
+const composeMap = {
   mongodb: {
-    compose: `version: '3.8'
-
-services:
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb
-    ports:
-      - "27017:27017"
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=password123
-    volumes:
-      - mongodb_data:/data/db
-
-volumes:
-  mongodb_data:`,
+    getCompose: getMongoCompose,
     description: 'MongoDB - Dokumentenorientierte NoSQL-Datenbank'
   },
   postgres: {
-    compose: `version: '3.8'
-
-services:
-  postgres:
-    image: postgres:latest
-    container_name: postgres
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=password123
-      - POSTGRES_DB=mydatabase
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:`,
+    getCompose: getPostgresCompose,
     description: 'PostgreSQL - Objektrelationale Datenbank'
   },
   mysql: {
-    compose: `version: '3.8'
-
-services:
-  mysql:
-    image: mysql:latest
-    container_name: mysql
-    ports:
-      - "3306:3306"
-    environment:
-      - MYSQL_ROOT_PASSWORD=password123
-      - MYSQL_DATABASE=mydatabase
-      - MYSQL_USER=admin
-      - MYSQL_PASSWORD=password123
-    volumes:
-      - mysql_data:/var/lib/mysql
-
-volumes:
-  mysql_data:`,
+    getCompose: getMysqlCompose,
     description: 'MySQL - Relationale Datenbank'
   },
   redis: {
-    compose: `version: '3.8'
-
-services:
-  redis:
-    image: redis:latest
-    container_name: redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-
-volumes:
-  redis_data:`,
+    getCompose: getRedisCompose,
     description: 'Redis - In-Memory Datenbank'
   }
 };
 
-export function createDockerCompose(targetPath, database) {
+
+export function createDockerCompose(targetPath, database, options = {}) {
   try {
-    const config = databaseConfigs[database.toLowerCase()];
+    const config = composeMap[database.toLowerCase()];
     if (!config) {
       throw new Error(`Unbekannte Datenbank: ${database}`);
     }
 
     const dockerComposePath = path.join(targetPath, 'docker-compose.yml');
-    
-    console.log(chalk.bold.cyan('\n╔════════════════════════════════════════════════════════════╗'));
-    console.log(chalk.bold.cyan('║') + chalk.bold.white(` 🐳 Erstelle Docker Compose für ${database}...`) + chalk.bold.cyan('                 ║'));
-    console.log(chalk.bold.cyan('╚════════════════════════════════════════════════════════════╝'));
+    const composeContent = config.getCompose(options);
 
-
-    fs.writeFileSync(dockerComposePath, config.compose);
+    fs.writeFileSync(dockerComposePath, composeContent);
 
     console.log(chalk.bold.green('\n╔════════════════════════════════════════════════════════════╗'));
     console.log(chalk.bold.green('║') + chalk.bold.white(' ✅ Docker Compose Datei erstellt!') + chalk.bold.green('                          ║'));
@@ -122,9 +64,9 @@ export function createDockerCompose(targetPath, database) {
 }
 
 export function getAvailableDatabases() {
-  return Object.keys(databaseConfigs).map(db => ({
+  return Object.keys(composeMap).map(db => ({
     name: db.charAt(0).toUpperCase() + db.slice(1),
     value: db,
-    description: databaseConfigs[db].description
+    description: composeMap[db].description
   }));
-} 
+}

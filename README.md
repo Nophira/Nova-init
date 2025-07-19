@@ -122,6 +122,8 @@ npx nova-init add backend --framework fastify --lang ts
 
 ### Database Examples
 ```bash
+# Database Interactive Mode
+npx nova-init add database
 # MongoDB
 npx nova-init add database --database mongodb
 # PostgreSQL
