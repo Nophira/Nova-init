@@ -73,18 +73,31 @@ ${chalk.bold.yellow('🎨 Frontend Frameworks:')}
     ${chalk.green('npx nova-init add frontend --framework lit --lang js')}
     ${chalk.green('npx nova-init add frontend --framework lit --lang ts')}
 
-${chalk.bold.yellow('🗄️ Databases:')}
-  ${chalk.bold.cyan('MongoDB:')}
-    ${chalk.green('npx nova-init add database --database mongodb')}
-
-  ${chalk.bold.cyan('PostgreSQL:')}
-    ${chalk.green('npx nova-init add database --database postgres')}
-
-  ${chalk.bold.cyan('MySQL:')}
-    ${chalk.green('npx nova-init add database --database mysql')}
-
-  ${chalk.bold.cyan('Redis:')}
-    ${chalk.green('npx nova-init add database --database redis')}
+  ${chalk.bold.yellow('🗄️ Databases:')}
+    ${chalk.bold.cyan('MongoDB:')}
+      ${chalk.green('npx nova-init add database --database mongodb')}
+    ${chalk.bold.cyan('PostgreSQL:')}
+      ${chalk.green('npx nova-init add database --database postgres')}
+    ${chalk.bold.cyan('MySQL:')}
+      ${chalk.green('npx nova-init add database --database mysql')}
+    ${chalk.bold.cyan('MariaDB:')}
+      ${chalk.green('npx nova-init add database --database mariadb')}
+    ${chalk.bold.cyan('Redis:')}
+      ${chalk.green('npx nova-init add database --database redis')}
+    ${chalk.bold.cyan('Cassandra:')}
+      ${chalk.green('npx nova-init add database --database cassandra')}
+    ${chalk.bold.cyan('CockroachDB:')}
+      ${chalk.green('npx nova-init add database --database cockroachdb')}
+    ${chalk.bold.cyan('CouchDB:')}
+      ${chalk.green('npx nova-init add database --database couchdb')}
+    ${chalk.bold.cyan('EdgeDB:')}
+      ${chalk.green('npx nova-init add database --database edgedb')}
+    ${chalk.bold.cyan('Neo4j:')}
+      ${chalk.green('npx nova-init add database --database neo4j')}
+    ${chalk.bold.cyan('SurrealDB:')}
+      ${chalk.green('npx nova-init add database --database surrealdb')}
+    ${chalk.bold.cyan('YugabyteDB:')}
+      ${chalk.green('npx nova-init add database --database yugabytedb')}
 
 ${chalk.bold.yellow('⚙️ Monorepo Tools:')}
   ${chalk.bold.cyan('Turborepo:')}
@@ -128,7 +141,15 @@ ${chalk.bold.yellow('📚 Available Technologies:')}
     ${chalk.gray('• MongoDB - NoSQL database')}
     ${chalk.gray('• PostgreSQL - Object-relational database')}
     ${chalk.gray('• MySQL - Relational database')}
+    ${chalk.gray('• MariaDB - MySQL-compatible open source database')}
     ${chalk.gray('• Redis - In-memory data structure store')}
+    ${chalk.gray('• Cassandra - Distributed NoSQL database')}
+    ${chalk.gray('• CockroachDB - Distributed SQL database')}
+    ${chalk.gray('• CouchDB - Document-oriented NoSQL database')}
+    ${chalk.gray('• EdgeDB - Next-generation relational database')}
+    ${chalk.gray('• Neo4j - Graph database')}
+    ${chalk.gray('• SurrealDB - Multi-model database')}
+    ${chalk.gray('• YugabyteDB - Distributed SQL database')}
 
   ${chalk.bold.cyan('Monorepo Tools:')}
     ${chalk.gray('• Turborepo - High-performance build system')}

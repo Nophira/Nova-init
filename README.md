@@ -40,13 +40,21 @@ Available backend frameworks:
 
 #### Database Setup
 ```bash
-npx nova-init add database --database <mongodb|postgres|mysql|redis> [--folder <name>]
+npx nova-init add database --database <mongodb|postgres|mysql|mariadb|redis|cassandra|cockroachdb|couchdb|edgedb|neo4j|surrealdb|yugabytedb> [--folder <name>]
 ```
 Available databases:
 - MongoDB
 - PostgreSQL
 - MySQL
+- MariaDB
 - Redis
+- Cassandra
+- CockroachDB
+- CouchDB
+- EdgeDB
+- Neo4j
+- SurrealDB
+- YugabyteDB
 
 #### Monorepo Tools
 ```bash
@@ -130,9 +138,26 @@ npx nova-init add database --database mongodb
 npx nova-init add database --database postgres
 # MySQL
 npx nova-init add database --database mysql
+# MariaDB
+npx nova-init add database --database mariadb
 # Redis
 npx nova-init add database --database redis
+# Cassandra
+npx nova-init add database --database cassandra
+# CockroachDB
+npx nova-init add database --database cockroachdb
+# CouchDB
+npx nova-init add database --database couchdb
+# EdgeDB
+npx nova-init add database --database edgedb
+# Neo4j
+npx nova-init add database --database neo4j
+# SurrealDB
+npx nova-init add database --database surrealdb
+# YugabyteDB
+npx nova-init add database --database yugabytedb
 ```
+
 
 ### Monorepo Examples
 ```bash
@@ -185,7 +210,15 @@ npx nova-init add techstack --folder my-mevn-ts-app --techstack MEVN_TS
 - **MongoDB** – NoSQL database
 - **PostgreSQL** – Object-relational database
 - **MySQL** – Relational database
+- **MariaDB** – MySQL-compatible open source database
 - **Redis** – In-memory data structure store
+- **Cassandra** – Distributed NoSQL database
+- **CockroachDB** – Distributed SQL database
+- **CouchDB** – Document-oriented NoSQL database
+- **EdgeDB** – Next-generation relational database
+- **Neo4j** – Graph database
+- **SurrealDB** – Multi-model database
+- **YugabyteDB** – Distributed SQL database
 
 ### Monorepo Tools
 - **Lerna** – Tool for managing JavaScript projects

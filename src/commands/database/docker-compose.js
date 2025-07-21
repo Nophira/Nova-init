@@ -2,30 +2,69 @@ import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 
+import getCassandraCompose from './docker/cassandra/cassandra.js';
+import getCockroachdbCompose from './docker/cockroachdb/cockroachdb.js';
+import getCouchdbCompose from './docker/couchdb/couchdb.js';
+import getEdgedbCompose from './docker/edgedb/edgedb.js';
+import getMariadbCompose from './docker/mariadb/mariadb.js';
 import getMongoCompose from './docker/mongodb/mongodb.js';
-import getPostgresCompose from './docker/postgresql/postgres.js';
 import getMysqlCompose from './docker/mysql/mysql.js';
+import getNeo4jCompose from './docker/neo4j/neo4j.js';
+import getPostgresCompose from './docker/postgresql/postgres.js';
 import getRedisCompose from './docker/redis/redis.js';
+import getSurrealdbCompose from './docker/surrealdb/surrealdb.js';
+import getYugabytedbCompose from './docker/yufabytedb/yufabytedb.js';
 
 const composeMap = {
+  cassandra: {
+    getCompose: getCassandraCompose,
+    description: 'Cassandra - Verteilte NoSQL-Datenbank'
+  },
+  cockroachdb: {
+    getCompose: getCockroachdbCompose,
+    description: 'CockroachDB - Distributed SQL database'
+  },
+  couchdb: {
+    getCompose: getCouchdbCompose,
+    description: 'CouchDB - Dokumentenorientierte NoSQL-Datenbank'
+  },
+  edgedb: {
+    getCompose: getEdgedbCompose,
+    description: 'EdgeDB - Next-generation relational database'
+  },
+  mariadb: {
+    getCompose: getMariadbCompose,
+    description: 'MariaDB - MySQL-kompatible Open-Source-Datenbank'
+  },
   mongodb: {
     getCompose: getMongoCompose,
     description: 'MongoDB - Dokumentenorientierte NoSQL-Datenbank'
-  },
-  postgres: {
-    getCompose: getPostgresCompose,
-    description: 'PostgreSQL - Objektrelationale Datenbank'
   },
   mysql: {
     getCompose: getMysqlCompose,
     description: 'MySQL - Relationale Datenbank'
   },
+  neo4j: {
+    getCompose: getNeo4jCompose,
+    description: 'Neo4j - Graphdatenbank'
+  },
+  postgres: {
+    getCompose: getPostgresCompose,
+    description: 'PostgreSQL - Objektrelationale Datenbank'
+  },
   redis: {
     getCompose: getRedisCompose,
     description: 'Redis - In-Memory Datenbank'
+  },
+  surrealdb: {
+    getCompose: getSurrealdbCompose,
+    description: 'SurrealDB - Multi-model database'
+  },
+  yugabytedb: {
+    getCompose: getYugabytedbCompose,
+    description: 'YugabyteDB - Distributed SQL database'
   }
 };
-
 
 export function createDockerCompose(targetPath, database, options = {}) {
   try {
