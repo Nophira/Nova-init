@@ -1,9 +1,8 @@
 /node_modules
-/.github
+
 .env
 .DS_Store
 
-<<<<<<< HEAD
-=======
+
 /.github
->>>>>>> ce394f3b68e4b7bf1f84dc781478eab450534091
+
