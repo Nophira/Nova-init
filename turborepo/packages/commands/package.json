@@ -1,0 +1,20 @@
+{
+  "name": "@nova/commands",
+  "version": "2.0.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "export" :{
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies":{
+    "@nova/prompts": "workspace:*",
+    "@nova/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2",
+    "ts-node": "^10.0.0"
+  }
+}
