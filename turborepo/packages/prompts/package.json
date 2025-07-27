@@ -10,11 +10,14 @@
     "build": "tsc"
   },
   "dependencies":{
-    "@nova/prompts": "workspace:*",
-    "@nova/utils": "workspace:*"
+    "@nova/utils": "workspace:*",
+    "inquirer": "^9.0.0"
   },
   "devDependencies": {
-    "typescript": "workspace:*",
-    "ts-node": "^10.0.0"
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/inquirer": "9.0.8",
+    "eslint": "^9.31.0",
+    "typescript": "5.8.2"
   }
 }

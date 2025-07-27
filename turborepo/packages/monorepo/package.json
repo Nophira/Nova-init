@@ -1,0 +1,22 @@
+{
+    "name": "@nova/monorepo",
+    "version": "2.0.0",
+    "type": "module",
+    "main": "./dist/index.js",
+    "export" :{
+      ".": "./dist/index.js"
+    },
+    "scripts": {
+      "build": "tsc"
+    },
+    "dependencies":{
+    
+    },
+    "devDependencies": {
+      "@repo/eslint-config": "workspace:*",
+      "@repo/typescript-config": "workspace:*",
+      "eslint": "^9.31.0",
+      "typescript": "5.8.2"
+    }
+  }
+  
