@@ -1,8 +1,6 @@
-import {promptProjectSetup } from '@nova/prompts';
-import { runCommand } from '@nova/utils';
+import { askQuestions } from '@nova/prompts';
 
-export async function runInit(){
-    const answer = await promptProjectSetup();
-
-    await runCommand('npx'[]);
+export async function runInit() {
+    const answer = await askQuestions();
+    // Hier kann weitere Logik folgen, z.B. Projekt-Setup basierend auf answer
 }

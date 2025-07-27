@@ -1,0 +1,12 @@
+{
+    "extends": "@repo/typescript-config/base.json",
+    "compilerOptions": {
+      "outDir": "dist",
+      "lib": ["es2016", "dom"]
+    },
+    "include": ["src"],
+    "exclude": [
+      "node_modules"
+    ]
+  }
+  

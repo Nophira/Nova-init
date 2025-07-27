@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { runInit } from '@nova/commands';
+import { askQuestions } from '@nova/prompts';
 
 const program = new Command();
 program
