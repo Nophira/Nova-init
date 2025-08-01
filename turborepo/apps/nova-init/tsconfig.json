@@ -1,8 +1,15 @@
 {
-  "extends": "@repo/typescript-config/base.json",
-  "compilerOptions": {
+  "compilerOptions": { 
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "moduleDetection": "force",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    
+
     "outDir": "dist",
     "rootDir": "src",
+
     "baseUrl": "./src",
     "paths": {
       "@cli/*": ["cli/*"],
@@ -10,8 +17,24 @@
       "@prompts/*": ["prompts/*"],
       "@templates/*": ["templates/*"],
       "@utils/*": ["utils/*"]
-    }
+    },
+
+
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+
+
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true
+
+    
   },
   "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["dist", "node_modules"]
 }

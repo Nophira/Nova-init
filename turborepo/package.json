@@ -1,6 +1,12 @@
 {
-  "name": "nova",
+  "name": "@nophira/nova",
   "private": true,
+  "license": "MIT",
+  "author": "Nophira",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -12,17 +18,13 @@
     "publish-nova-init": "turbo run build --filter=nova-init"
   },
   "devDependencies": {
-    "ts-node": "^10.0.0",
     "prettier": "^3.6.2",
+    "ts-node": "^10.9.2",
     "turbo": "^2.5.5",
     "typescript": "5.8.3"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {
     "node": ">=18"
-  },
-  "workspaces":[
-     "apps/*",
-     "packages/*"
-  ]
+  }
 }

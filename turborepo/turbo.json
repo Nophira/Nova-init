@@ -17,6 +17,11 @@
    "dev": {
 			"cache": false,
 			"persistent": true
-		}
+		},
+    "tsc":{
+      "dependsOn": ["^tsc"],
+      "outputs": ["dist/**"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"]
+    }
   }
 }
