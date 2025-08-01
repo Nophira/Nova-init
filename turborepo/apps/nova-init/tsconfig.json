@@ -2,15 +2,16 @@
   "extends": "@repo/typescript-config/base.json",
   "compilerOptions": {
     "outDir": "dist",
+    "rootDir": "src",
     "baseUrl": "./src",
     "paths": {
-      "@components/*": ["components/*"],
+      "@cli/*": ["cli/*"],
+      "@commands/*": ["commands/*"],
+      "@prompts/*": ["prompts/*"],
+      "@templates/*": ["templates/*"],
       "@utils/*": ["utils/*"]
     }
   },
   "include": ["src"],
-  "exclude": [
-    "node_modules"
-  ]
-
+  "exclude": ["node_modules", "dist"]
 }

@@ -1,0 +1,59 @@
+{
+  "name": "create-nova-init",
+  "version": "2.0.0",
+  "author": "Nophira",
+  "description":"A modern CLI tool for scaffolding your next project – choose from a variety of frameworks and customizable addons to tailor your architecture.",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "create-nova-init": "dist/index.js"
+  },
+  "files":[
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nophira/Nova-init.git",
+    "directory": "apps/nova-init"
+  },
+  "keywords": [
+    "nova-init",
+    "typescript",
+    "javascript",
+    "boilerplate",
+    "starter",
+    "cli",
+    "turborepo",
+    "nx",
+    "lerna",
+    "monorepo",
+    "fullstack",
+    "frameworks",
+    "databases",
+    "docker"
+  ],
+
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "tsc",
+    "prepublish":"npm run build"
+  },
+  "dependencies": {
+    "@types/minimist": "^1.2.5",
+    "chalk": "^5.4.1",
+    "commander": "^14.0.0",
+    "fs-extra": "^11.3.0",
+    "inquirer": "^9.3.7",
+    "minimist": "^1.2.8",
+    "prompts": "^2.4.2"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "@repo/typescript-config",
+    "@types/node": "^22.16.5",
+    "eslint": "^9.32.0",
+    "ts-node": "^10.9.2",
+    "typescript": "5.8.2"
+  }
+}
