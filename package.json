@@ -3,15 +3,11 @@
   "private": true,
   "license": "MIT",
   "author": "Nophira",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "dev:nova-init": "turbo run dev --filter=nova-init",
-    "nova-init": "cd packages/nova-init && ts-node dist/bin/index.js",
+    "dev:nova-init": "turbo run dev --filter=create-nova-init",
+    "nova-init": "cd apps/nova-init && ts-node dist/index.js",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "check": "turbo run check",
