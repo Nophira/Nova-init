@@ -1,19 +1,15 @@
 {
-  "name": "@nophira/nova",
+  "name": "main-root-projekt",
   "private": true,
-  "license": "MIT",
-  "author": "Nophira",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "build:nova-init": "cd apps/nova-init && npm run build",
+    "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types",
-    "check": "turbo run check"
+    "check-types": "turbo run check-types"
   },
   "devDependencies": {
     "prettier": "^3.6.2",
-    "ts-node": "^10.9.2",
     "turbo": "^2.5.5",
     "typescript": "5.8.3"
   },
