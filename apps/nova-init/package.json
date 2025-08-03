@@ -33,21 +33,21 @@
     "docker"
   ],
   "scripts": {
-    "dev": "ts-node src/index.js",
+    "dev": "node --loader ts-node/esm src/index.ts",
     "build": "tsc",
-    "prepublish": "npm run build",
-    "start": "node dist/index.js" 
+    "start": "node dist/index.js"
   },
   "dependencies": {
+    "@clack/prompts": "^0.11.0",
+    "@types/fs-extra": "^11.0.4",
     "@types/minimist": "^1.2.5",
     "chalk": "^5.4.1",
     "commander": "^14.0.0",
-    "fs-extra": "^11.3.0",
-    "execa": "^9.6.0",
     "consola": "^3.4.2",
+    "execa": "^9.6.0",
+    "fs-extra": "^11.3.0",
     "inquirer": "^9.3.7",
-    "prompts": "^2.4.2",
-    "@clack/prompts": "^0.11.0"
+    "prompts": "^2.4.2"
   },
   "devDependencies": {
     "@types/node": "^22.16.5",
