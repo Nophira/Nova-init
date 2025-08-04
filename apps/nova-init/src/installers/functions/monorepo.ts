@@ -33,22 +33,30 @@ export async function generateMonorepo(config: ProjectStructure): Promise<void> 
     },
 
     nx: async () => {
-      console.log(chalk.green(`📦 Installing Nx in "${root}" with ${pm}...`));
       const parent = path.dirname(root);
       const projectName = path.basename(root);
-      const [bin, args] = parseExecCommand(pmCmd.exec('create-nx-workspace@latest'), [
-        projectName,
-        '--preset=empty',
-        '--nxCloud=false',
+      console.log(chalk.green(`📦 Installing Nx in "${parent}" using ${pm}...`));
+    
+      const nxCommand = {
+        npm: `npx create-nx-workspace@latest`,
+        pnpm: `pnpm dlx create-nx-workspace@latest`,
+        bun: `bunx create-nx-workspace@latest`
+      }[pm];
+    
+      const [bin, args] = parseExecCommand(nxCommand, [
+        projectName
       ]);
-
+    
       await execa(bin, args, {
         cwd: parent,
         stdio: 'inherit',
       });
-
+    
+      // Update root path after creation
       config.paths.root = path.join(parent, projectName);
     },
+    
+    
 
     turborepo: async () => {
       if (!['npm', 'pnpm', 'bun'].includes(pm)) {
@@ -79,8 +87,4 @@ export async function generateMonorepo(config: ProjectStructure): Promise<void> 
 
   await installer();
 
-  // Optional: pnpm workspace file
-  if (pm === 'pnpm' && getPMCommands(pm).setupWorkspace) {
-    await getPMCommands(pm).setupWorkspace!(config.paths.root, ['apps', 'packages']);
-  }
 }

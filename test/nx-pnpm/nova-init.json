@@ -1,0 +1,25 @@
+{
+  "language": "ts",
+  "frontend": "react",
+  "backend": "express",
+  "database": "mongodb",
+  "monorepo": "nx",
+  "microservice": {
+    "enabled": false
+  },
+  "docker": {
+    "enabled": true
+  },
+  "git": {
+    "init": false
+  },
+  "techstack": "none",
+  "packageManagers": {
+    "monorepo": "pnpm",
+    "frontend": "npm",
+    "backend": "npm"
+  },
+  "paths": {
+    "root": "nx-pnpm"
+  }
+}
