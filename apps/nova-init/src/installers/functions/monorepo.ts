@@ -20,7 +20,7 @@ export async function generateMonorepo(config: ProjectStructure): Promise<void> 
   const commands: Record<MonorepoTool, () => Promise<void>> = {
     lerna: async () => {
       console.log(chalk.green(`📦 Installing Lerna in "${root}" with ${pm}...`));
-      const [bin, args] = parseExecCommand(pmCmd.exec('lerna'), ['init']);
+      const [bin, args] = parseExecCommand(pmCmd.exec(`lerna`), ['init']);
       await execa(bin, args, {
         cwd: root,
         stdio: 'inherit',
@@ -31,7 +31,7 @@ export async function generateMonorepo(config: ProjectStructure): Promise<void> 
       const parent = path.dirname(root);
       const projectName = path.basename(root);
       console.log(chalk.green(`📦 Installing Nx in "${parent}" with ${pm}...`));
-      const [bin, args] = parseExecCommand(pmCmd.exec('create-nx-workspace@latest'), [
+      const [bin, args] = parseExecCommand(pmCmd.exec(`${pm} create-nx-workspace@latest`), [
         projectName,
         '--preset=empty',
         '--nxCloud=false',
@@ -45,7 +45,7 @@ export async function generateMonorepo(config: ProjectStructure): Promise<void> 
 
     turborepo: async () => {
       console.log(chalk.green(`📦 Installing Turborepo in "${root}" with ${pm}...`));
-      const [bin, args] = parseExecCommand(pmCmd.exec('${}create-turbo@latest'), ['.']);
+      const [bin, args] = parseExecCommand(pmCmd.exec(`create-turbo@latest`), ['.']);
       await execa(bin, args, {
         cwd: root,
         stdio: 'inherit',
