@@ -45,7 +45,7 @@ export async function generateMonorepo(config: ProjectStructure): Promise<void> 
 
     turborepo: async () => {
       console.log(chalk.green(`📦 Installing Turborepo in "${root}" with ${pm}...`));
-      const [bin, args] = parseExecCommand(pmCmd.exec('create-turbo@latest'), ['.']);
+      const [bin, args] = parseExecCommand(pmCmd.exec('${}create-turbo@latest'), ['.']);
       await execa(bin, args, {
         cwd: root,
         stdio: 'inherit',
