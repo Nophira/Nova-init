@@ -7,9 +7,9 @@ const packageManagerOptions = [
   { label: 'pnpm', value: 'pnpm' },
 ];
 
-export async function promptPackageManager(): Promise<PackageManager> {
+export async function promptPackageManager(message = 'Select your package manager:'): Promise<PackageManager> {
   const pm = await select({
-    message: 'Select your package manager:',
+    message,
     options: packageManagerOptions,
   });
 

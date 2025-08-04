@@ -76,6 +76,11 @@ export interface ProjectStructure {
   microservice: MicroserviceConfig;
   docker: DockerConfig;
   git: GitConfig;
-  packageManager: PackageManager;
-  paths: Record<string, string>; 
+  packageManagers: {
+    monorepo: PackageManager;
+    frontend: PackageManager;
+    backend: PackageManager;
+  };
+  paths: Record<string, string>;
 }
+

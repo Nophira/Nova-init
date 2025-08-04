@@ -1,4 +1,6 @@
-import { confirm, text, isCancel, cancel} from '@clack/prompts';
+// src/prompts/setup.prompt.ts
+
+import { confirm, text, isCancel, cancel } from '@clack/prompts';
 
 import { promptLanguage } from './prompts/language.js';
 import { promptFrontend } from './prompts/frontend.js';
@@ -9,22 +11,24 @@ import { promptMicroservice } from './prompts/microservice.js';
 import { promptDocker } from './prompts/docker.js';
 import { promptGit } from './prompts/git.js';
 import { promptPackageManager } from './prompts/packageManager.js';
-import { promptTechstack } from './prompts/techstack.js'; // angenommen du hast diese Datei
+import { promptTechstack } from './prompts/techstack.js';
 
-import type { ProjectStructure, MonorepoTool, Techstack } from '../types/types.js';
+import type {
+  ProjectStructure,
+  MonorepoTool,
+  Techstack,
+  PackageManager,
+} from '../types/types.js';
 
 export async function promptSetup(): Promise<ProjectStructure> {
-
   const useTechstack = await confirm({
     message: 'Do you want to use a predefined techstack?'
   });
 
   if (useTechstack) {
- 
     const techstack = await promptTechstack();
 
-    
-    const language = 'ts';
+    const language: 'ts' = 'ts';
     const frontend = 'react';
     const backend = 'express';
     const database = 'mongodb';
@@ -32,24 +36,22 @@ export async function promptSetup(): Promise<ProjectStructure> {
     const microservice = { enabled: false };
     const docker = { enabled: false };
     const git = { init: false };
-    const packageManager = 'npm';
+
+    const packageManagers: {
+      monorepo: PackageManager;
+      frontend: PackageManager;
+      backend: PackageManager;
+    } = {
+      monorepo: 'npm',
+      frontend: 'npm',
+      backend: 'npm',
+    };
 
     const useCustomPaths = await confirm({
       message: 'Customize folder names?'
     });
 
-    let paths;
-    if (useCustomPaths) {
-      paths = await promptPaths();
-    } else {
-      paths = {
-        root: 'my-project',
-        frontend: 'frontend',
-        backend: 'backend',
-        database: 'database',
-        docker: 'docker',
-      };
-    }
+    const paths = useCustomPaths ? await promptPaths() : defaultPaths();
 
     return {
       language,
@@ -61,13 +63,11 @@ export async function promptSetup(): Promise<ProjectStructure> {
       microservice,
       docker,
       git,
-      packageManager,
-      paths,
+      packageManagers,
+      paths
     };
   } else {
-   
     const language = await promptLanguage();
-    const packageManager = await promptPackageManager();
     const monorepo = await promptMonorepo();
     const frontend = await promptFrontend();
     const backend = await promptBackend();
@@ -77,23 +77,21 @@ export async function promptSetup(): Promise<ProjectStructure> {
     const git = await promptGit();
     const techstack: Techstack = 'none';
 
+    const packageManagers: {
+      monorepo: PackageManager;
+      frontend: PackageManager;
+      backend: PackageManager;
+    } = {
+      monorepo: await promptPackageManager('Select a package manager for the monorepo:'),
+      frontend: await promptPackageManager('Select a package manager for the frontend:'),
+      backend: await promptPackageManager('Select a package manager for the backend:'),
+    };
 
     const useCustomPaths = await confirm({
       message: 'Customize folder names?'
     });
 
-    let paths;
-    if (useCustomPaths) {
-      paths = await promptPaths();
-    } else {
-      paths = {
-        root: 'my-project',
-        frontend: 'frontend',
-        backend: 'backend',
-        database: 'database',
-        docker: 'docker',
-      };
-    }
+    const paths = useCustomPaths ? await promptPaths() : defaultPaths();
 
     return {
       language,
@@ -104,65 +102,40 @@ export async function promptSetup(): Promise<ProjectStructure> {
       microservice,
       docker,
       git,
-      packageManager,
-      paths,
       techstack,
+      packageManagers,
+      paths
     };
   }
 }
 
-async function promptPaths() {
-  const root = await text({
-    message: 'Root project folder name:',
-    placeholder: 'my-project',
-  });
-
-  if (isCancel(root)) {
-    cancel('Abbruch beim Root-Verzeichnis');
-    process.exit(0);
-  }
-
-  const frontend = await text({
-    message: 'Frontend folder name:',
-    placeholder: 'frontend',
-  });
-  if (isCancel(frontend)) {
-    cancel('Abbruch beim Frontend-Verzeichnis');
-    process.exit(0);
-  }
-
-  const backend = await text({
-    message: 'Backend folder name:',
-    placeholder: 'backend',
-  });
-  if (isCancel(backend)) {
-    cancel('Abbruch beim Backend-Verzeichnis');
-    process.exit(0);
-  }
-
-  const database = await text({
-    message: 'Database folder name:',
-    placeholder: 'database',
-  });
-  if (isCancel(database)) {
-    cancel('Abbruch beim Database-Verzeichnis');
-    process.exit(0);
-  }
-
-  const docker = await text({
-    message: 'Docker folder name:',
-    placeholder: 'docker',
-  });
-  if (isCancel(docker)) {
-    cancel('Abbruch beim Docker-Verzeichnis');
-    process.exit(0);
-  }
-
+function defaultPaths() {
   return {
-    root: root,
-    frontend: frontend,
-    backend: backend,
-    database: database,
-    docker: docker,
+    root: 'my-project',
+    frontend: 'frontend',
+    backend: 'backend',
+    database: 'database',
+    docker: 'docker',
   };
+}
+
+async function promptPaths() {
+  const root = await promptText('Root project folder name:', 'my-project');
+  const frontend = await promptText('Frontend folder name:', 'frontend');
+  const backend = await promptText('Backend folder name:', 'backend');
+  const database = await promptText('Database folder name:', 'database');
+  const docker = await promptText('Docker folder name:', 'docker');
+
+  return { root, frontend, backend, database, docker };
+}
+
+async function promptText(message: string, placeholder: string) {
+  const result = await text({ message, placeholder });
+
+  if (isCancel(result)) {
+    cancel(`Cancelled on: ${message}`);
+    process.exit(0);
+  }
+
+  return result;
 }
