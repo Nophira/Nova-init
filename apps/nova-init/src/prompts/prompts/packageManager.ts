@@ -1,22 +1,25 @@
+// src/prompts/prompts/monorepoPackageManager.ts
 import { select, cancel, isCancel } from '@clack/prompts';
-import type { PackageManager } from '../../types/types.js';
+import type { PackageManager, MonorepoTool } from '../../types/types.js';
 
-const packageManagerOptions = [
-  { label: 'npm', value: 'npm' },
-  { label: 'bun', value: 'bun' },
-  { label: 'pnpm', value: 'pnpm' },
-];
+const supported: Record<MonorepoTool, PackageManager[]> = {
+  lerna: ['npm', 'pnpm'],        // 🎯 bun ausgeschlossen
+  nx: ['npm', 'pnpm', 'bun'],
+  turborepo: ['npm', 'pnpm', 'bun'],
+  none: ['npm', 'pnpm', 'bun'],
+};
 
-export async function promptPackageManager(message = 'Select your package manager:'): Promise<PackageManager> {
-  const pm = await select({
-    message,
-    options: packageManagerOptions,
+export async function promptMonorepoPackageManager(monorepo: MonorepoTool): Promise<PackageManager> {
+  const allowed = supported[monorepo];
+
+  const res = await select({
+    message: `Select a package manager for ${monorepo}:`,
+    options: allowed.map(pm => ({ label: pm, value: pm })),
   });
 
-  if (isCancel(pm)) {
+  if (isCancel(res)) {
     cancel('Package manager selection cancelled.');
     process.exit(0);
   }
-
-  return pm as PackageManager;
+  return res as PackageManager;
 }

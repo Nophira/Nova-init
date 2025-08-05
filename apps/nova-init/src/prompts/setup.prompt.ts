@@ -6,45 +6,43 @@ import { promptLanguage } from './prompts/language.js';
 import { promptFrontend } from './prompts/frontend.js';
 import { promptBackend } from './prompts/backend.js';
 import { promptDatabase } from './prompts/database.js';
-import { promptMonorepo } from './prompts/monorepo.js';
+import { promptMonorepoTool } from './prompts/monorepo.js';
+import { promptMonorepoPackageManager } from './prompts/packageManager.js';
 import { promptMicroservice } from './prompts/microservice.js';
 import { promptDocker } from './prompts/docker.js';
 import { promptGit } from './prompts/git.js';
-import { promptPackageManager } from './prompts/packageManager.js';
 import { promptTechstack } from './prompts/techstack.js';
 
 import type {
   ProjectStructure,
-  MonorepoTool,
   Techstack,
   PackageManager,
 } from '../types/types.js';
 
+/**
+ * Main entry prompt
+ */
 export async function promptSetup(): Promise<ProjectStructure> {
   const useTechstack = await confirm({
     message: 'Do you want to use a predefined techstack?'
   });
 
   if (useTechstack) {
+    // ----- PRESETS -----
     const techstack = await promptTechstack();
-
     const language: 'ts' = 'ts';
     const frontend = 'react';
     const backend = 'express';
     const database = 'mongodb';
-    const monorepo: MonorepoTool = 'none';
+    const monorepo = 'none';
     const microservice = { enabled: false };
     const docker = { enabled: false };
     const git = { init: false };
 
-    const packageManagers: {
-      monorepo: PackageManager;
-      frontend: PackageManager;
-      backend: PackageManager;
-    } = {
-      monorepo: 'npm',
-      frontend: 'npm',
-      backend: 'npm',
+    const packageManagers = {
+      monorepo: 'npm' as PackageManager,
+      frontend: 'npm' as PackageManager,
+      backend: 'npm' as PackageManager,
     };
 
     const useCustomPaths = await confirm({
@@ -67,8 +65,9 @@ export async function promptSetup(): Promise<ProjectStructure> {
       paths
     };
   } else {
+    // ----- CUSTOM SETUP -----
     const language = await promptLanguage();
-    const monorepo = await promptMonorepo();
+    const monorepo = await promptMonorepoTool();
     const frontend = await promptFrontend();
     const backend = await promptBackend();
     const microservice = await promptMicroservice();
@@ -77,14 +76,10 @@ export async function promptSetup(): Promise<ProjectStructure> {
     const git = await promptGit();
     const techstack: Techstack = 'none';
 
-    const packageManagers: {
-      monorepo: PackageManager;
-      frontend: PackageManager;
-      backend: PackageManager;
-    } = {
-      monorepo: await promptPackageManager('Select a package manager for the monorepo:'),
+    const packageManagers = {
+      monorepo: await promptMonorepoPackageManager(monorepo),
       frontend: await promptPackageManager('Select a package manager for the frontend:'),
-      backend: await promptPackageManager('Select a package manager for the backend:'),
+      backend: await promptPackageManager('Select a package manager for the backend:')
     };
 
     const useCustomPaths = await confirm({
@@ -108,6 +103,8 @@ export async function promptSetup(): Promise<ProjectStructure> {
     };
   }
 }
+
+// ----------------------------------------------
 
 function defaultPaths() {
   return {
