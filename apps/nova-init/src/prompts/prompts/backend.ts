@@ -1,23 +1,43 @@
-import { select, cancel, isCancel } from '@clack/prompts';
-import type { BackendFramework } from '../../types/types.js';
+import { 
+  askBackendLanguage, 
+  askBackendFramework, 
+  askBackendFolderName, 
+  askBackendPackageManager 
+} from '../../installers/functions/backend.js';
+import { askUseMicroservices, askMicroserviceNames } from '../../installers/functions/microservice.js';
+import type { PackageManager } from '../../types/types.js';
 
-const backendOptions: { label: string; value: BackendFramework }[] = [
-  { label: 'Express', value: 'express' },
-  { label: 'NestJS', value: 'nestjs' },
-  { label: 'Fastify', value: 'fastify' },
-  { label: 'None  ( Skip )', value: 'none' as BackendFramework },
-];
+export interface BackendSetup {
+  language: 'javascript' | 'typescript';
+  framework: string;
+  useMicroservices: boolean;
+  microserviceNames?: string[];
+  folderName?: string;
+  packageManager: PackageManager;
+}
 
-export async function promptBackend(): Promise<BackendFramework> {
-  const backend = await select({
-    message: 'Select a backend framework:',
-    options: backendOptions,
-  });
-
-  if (isCancel(backend)) {
-    cancel('Backend selection cancelled.');
-    process.exit(0);
+export async function promptBackend(hasMonorepo: boolean): Promise<BackendSetup> {
+  const language = await askBackendLanguage();
+  const framework = await askBackendFramework();
+  const useMicroservices = await askUseMicroservices();
+  
+  let microserviceNames: string[] | undefined;
+  let folderName: string | undefined;
+  
+  if (useMicroservices) {
+    microserviceNames = await askMicroserviceNames();
+  } else {
+    folderName = await askBackendFolderName();
   }
+  
+  const packageManager = await askBackendPackageManager();
 
-  return backend;
+  return {
+    language,
+    framework,
+    useMicroservices,
+    microserviceNames,
+    folderName,
+    packageManager,
+  };
 }

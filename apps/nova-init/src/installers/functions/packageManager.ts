@@ -1,47 +1,47 @@
-// src/utils/packageManagerCommands.ts
+// src/functions/packageManager.ts
+import { select, isCancel, cancel } from '@clack/prompts';
+import type { MonorepoTool, PackageManager } from '../../types/types.js';
 
-import fs from 'fs-extra';
-import * as path from 'path';
-import type { PackageManager } from '../../types/types.js';
-
-type PMCommandSet = {
-  install: string;
-  run: (script: string) => string;
-  exec: (command: string) => string;
-  setupWorkspace?: (rootPath: string, workspaces: string[]) => Promise<void>;
+// Monorepo-spezifische unterstützte Package Manager
+const supportedPackageManagers: Record<MonorepoTool, PackageManager[]> = {
+  lerna: ['npm', 'pnpm'],         // Bun wird nicht unterstützt
+  nx: ['npm', 'pnpm', 'bun'],
+  turborepo: ['npm', 'pnpm', 'bun'],
+  none: ['npm', 'pnpm', 'bun'],   // Falls kein Monorepo, alles erlaubt
 };
 
-const commandMap: Record<PackageManager, PMCommandSet> = {
-  npm: {
-    install: 'npm install',
-    run: (script) => `npm run ${script}`,
-    exec: (command) => `npx ${command}`,
-  },
-  bun: {
-    install: 'npm install && bun install',
-    run: (script) => `bun run ${script}`,
-    exec: (command) => `bunx ${command}`,
-  },
-  pnpm: {
-    install: 'pnpm install',
-    run: (script) => `pnpm ${script}`,
-    exec: (command) => `pnpm dlx ${command}`,
+export async function askMonorepoPackageManager(
+  monorepo: MonorepoTool
+): Promise<PackageManager> {
+  const allowed = supportedPackageManagers[monorepo];
 
-    async setupWorkspace(rootPath: string, workspaces: string[]) {
-      const workspacePath = path.join(rootPath, 'pnpm-workspace.yaml');
-      const yamlContent = `packages:\n${workspaces.map(ws => `  - ${ws}/`).join('\n')}\n`;
+  const pkg = await select({
+    message: `Select a package manager for the monorepo (${monorepo}):`,
+    options: allowed.map(pm => ({ value: pm, label: pm })),
+  });
 
-      try {
-        await fs.writeFile(workspacePath, yamlContent);
-        console.log(`📦 pnpm workspace created at: ${workspacePath}`);
-      } catch (error) {
-        console.error(`❌ Failed to write pnpm-workspace.yaml:`, error);
-        throw error;
-      }
-    },
-  },
-};
+  if (isCancel(pkg)) {
+    cancel('Package manager selection cancelled.');
+    process.exit(0);
+  }
 
-export function getPMCommands(pm: PackageManager): PMCommandSet {
-  return commandMap[pm];
+  return pkg as PackageManager;
+}
+
+export async function askPackageManager(message: string): Promise<PackageManager> {
+  const pkg = await select({
+    message,
+    options: [
+      { value: 'npm', label: 'npm' },
+      { value: 'pnpm', label: 'pnpm' },
+      { value: 'bun', label: 'bun' },
+    ],
+  });
+
+  if (isCancel(pkg)) {
+    cancel('Package manager selection cancelled.');
+    process.exit(0);
+  }
+
+  return pkg as PackageManager;
 }

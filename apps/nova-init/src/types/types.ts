@@ -1,86 +1,37 @@
-// src/prompts/types.ts
-
-export type Language = 'ts' | 'js';
-
-export type PackageManager = 'npm' | 'bun' | 'pnpm';
-
-export type FrontendFramework =
-  | 'react'
-  | 'nextjs'
-  | 'vue'
-  | 'svelte'
-  | 'angular'
-  | 'nuxtjs'
-  | 'astro'
-  | 'remix'
-  | 'solid'
-  | 'qwik'
-  | 'preact'
-  | 'lit'
-  | 'none';
-
-export type BackendFramework = 
-| 'express' 
-| 'nestjs' 
-| 'fastify' 
-| 'none';
-
-export type Database =
-  | 'mongodb'
-  | 'postgresql'
-  | 'mysql'
-  | 'mariadb'
-  | 'redis'
-  | 'cassandra'
-  | 'cockroachdb'
-  | 'couchdb'
-  | 'edgedb'
-  | 'neo4j'
-  | 'surrealdb'
-  | 'yugabytedb'
-  | 'none';
-
 export type MonorepoTool = 'lerna' | 'nx' | 'turborepo' | 'none';
+export type PackageManager = 'npm' | 'pnpm' | 'bun';
+export type SetupType = 'custom' | 'predefined';
+export type HostingType = 'docker' | 'none';
 
-export type Techstack =
-  | 'mern'
-  | 'mean'
-  | 'mevn'
-  | 'mern_ts'
-  | 'mean_ts'
-  | 'mevn_ts'
-  | 'none';
-
-export interface MicroserviceConfig {
-  enabled: boolean;
-  services?: string[]; // optionale Liste von Microservices
+export interface FrontendSetup {
+  language: 'javascript' | 'typescript';
+  framework: string;
+  folderName: string;
+  packageManager: PackageManager;
 }
 
-export interface DockerConfig {
-  enabled: boolean;
-  
-}
-
-export interface GitConfig {
-  init: boolean;
-  remoteUrl?: string;
+export interface BackendSetup {
+  language: 'javascript' | 'typescript';
+  framework: string;
+  useMicroservices: boolean;
+  microserviceNames?: string[];
+  folderName?: string;
+  packageManager: PackageManager;
 }
 
 export interface ProjectStructure {
-  language: Language;
-  frontend: FrontendFramework;
-  backend: BackendFramework;
-  database: Database;
+  projectName: string;
+  setupType: SetupType;
   monorepo: MonorepoTool;
-  techstack: Techstack;
-  microservice: MicroserviceConfig;
-  docker: DockerConfig;
-  git: GitConfig;
   packageManagers: {
-    monorepo: PackageManager;
-    frontend: PackageManager;
-    backend: PackageManager;
+    monorepo?: PackageManager;
+    frontend?: PackageManager;
+    backend?: PackageManager;
   };
-  paths: Record<string, string>;
+  frontend?: FrontendSetup;
+  backend?: BackendSetup;
+  databases: string[];
+  hosting: HostingType;
+  initializeGit: boolean;
+  techStack?: string;
 }
-
