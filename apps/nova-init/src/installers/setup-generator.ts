@@ -3,30 +3,100 @@ import * as path from 'path';
 import { execa } from 'execa';
 import consola from 'consola';
 import type { ProjectStructure } from '../types/types.js';
-import { envTemplate } from '../../templates/setup/env.js';
-import { gitignoreTemplate, gitAttributesTemplate } from '../../templates/setup/git.js';
+import { CreateCommands } from '../commands/commands/create-commands.js';
+// Template strings for environment and git files
+const envTemplate = `# Environment variables
+NODE_ENV=development
+PORT=3000
+DATABASE_URL=mongodb://localhost:27017/your-database
+API_KEY=your-api-key-here
+`;
+
+const gitignoreTemplate = `# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Production builds
+dist/
+build/
+.next/
+.nuxt/
+.output/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+`;
+
+const gitAttributesTemplate = `# Auto detect text files and perform LF normalization
+* text=auto
+
+# JS/TS files
+*.js text eol=lf
+*.ts text eol=lf
+*.jsx text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
+
+# CSS files
+*.css text eol=lf
+*.scss text eol=lf
+*.sass text eol=lf
+
+# HTML files
+*.html text eol=lf
+*.htm text eol=lf
+
+# Markdown files
+*.md text eol=lf
+
+# YAML files
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Docker files
+Dockerfile text eol=lf
+docker-compose*.yml text eol=lf
+
+# Git files
+.gitignore text eol=lf
+.gitattributes text eol=lf
+`;
 
 // Import database Docker Compose generators
 import { createDockerCompose } from './database/docker-compose.js';
-
-// Import frontend installers
-import { installReact } from './frameworks/frontend/react.js';
-import { installNextJs } from './frameworks/frontend/nextjs.js';
-import { installVue } from './frameworks/frontend/vue.js';
-import { installSvelte } from './frameworks/frontend/svelte.js';
-import { installAngular } from './frameworks/frontend/angular.js';
-import { installNuxtJs } from './frameworks/frontend/nuxtjs.js';
-import { installAstro } from './frameworks/frontend/astro.js';
-import { installRemix } from './frameworks/frontend/remix.js';
-import { installSolid } from './frameworks/frontend/solid.js';
-import { installQwik } from './frameworks/frontend/qwik.js';
-import { installPreact } from './frameworks/frontend/preact.js';
-import { installLit } from './frameworks/frontend/lit.js';
-
-// Import backend installers
-import { installExpress } from './frameworks/backend/express.js';
-import { installNestJS } from './frameworks/backend/nestjs.js';
-import { installFastify } from './frameworks/backend/fastify.js';
 
 export async function runSetup() {
   try {
@@ -110,54 +180,61 @@ async function generatePredefinedTechStack(techStack: string, projectPath: strin
 }
 
 function parseTechStack(techStack: string) {
-  // Parse tech stack string and return configuration
-  const config: any = {};
-  
-  if (techStack.includes('MERN') || techStack.includes('MEAN') || techStack.includes('MEVN')) {
-    config.databases = ['mongodb'];
-    
-    if (techStack.includes('React')) {
-      config.frontend = { framework: 'react', language: techStack.includes('_TS') ? 'typescript' : 'javascript' };
-    } else if (techStack.includes('Angular')) {
-      config.frontend = { framework: 'angular', language: techStack.includes('_TS') ? 'typescript' : 'javascript' };
-    } else if (techStack.includes('Vue')) {
-      config.frontend = { framework: 'vue', language: techStack.includes('_TS') ? 'typescript' : 'javascript' };
+  const stackMap: { [key: string]: any } = {
+    'MERN': {
+      frontend: { framework: 'react', language: 'javascript', folderName: 'client' },
+      backend: { framework: 'express', language: 'javascript', folderName: 'server' },
+      databases: ['mongodb']
+    },
+    'MEAN': {
+      frontend: { framework: 'angular', language: 'typescript', folderName: 'client' },
+      backend: { framework: 'express', language: 'javascript', folderName: 'server' },
+      databases: ['mongodb']
+    },
+    'MEVN': {
+      frontend: { framework: 'vue', language: 'javascript', folderName: 'client' },
+      backend: { framework: 'express', language: 'javascript', folderName: 'server' },
+      databases: ['mongodb']
+    },
+    'MERN_TS': {
+      frontend: { framework: 'react', language: 'typescript', folderName: 'client' },
+      backend: { framework: 'express', language: 'typescript', folderName: 'server' },
+      databases: ['mongodb']
+    },
+    'MEAN_TS': {
+      frontend: { framework: 'angular', language: 'typescript', folderName: 'client' },
+      backend: { framework: 'express', language: 'typescript', folderName: 'server' },
+      databases: ['mongodb']
+    },
+    'MEVN_TS': {
+      frontend: { framework: 'vue', language: 'typescript', folderName: 'client' },
+      backend: { framework: 'express', language: 'typescript', folderName: 'server' },
+      databases: ['mongodb']
     }
-    
-    config.backend = { framework: 'express', language: techStack.includes('_TS') ? 'typescript' : 'javascript' };
-  }
+  };
   
-  return config;
+  return stackMap[techStack] || stackMap['MERN'];
 }
 
 async function initializeMonorepo(monorepo: string, packageManager: string, projectPath: string) {
   consola.info(`📦 Initializing ${monorepo} monorepo with ${packageManager}...`);
   
-  const commands: Record<string, Record<string, string>> = {
-    turborepo: {
-      npm: 'npx create-turbo@latest --m npm',
-      pnpm: 'npx create-turbo@latest --m pnpm',
-      bun: 'npx create-turbo@latest --m bun'
-    },
-    lerna: {
-      npm: 'npx lerna init',
-      pnpm: 'pnpm dlx lerna init'
-    },
-    nx: {
-      npm: 'npx create-nx-workspace@latest --pm npm',
-      pnpm: 'npx create-nx-workspace@latest --pm pnpm',
-      bun: 'npx create-nx-workspace@latest --pm bun'
-    }
-  };
-
   try {
-    const command = commands[monorepo]?.[packageManager];
-    if (command) {
-      await execa(command, [], { cwd: projectPath, stdio: 'inherit' });
-      consola.success(`✅ ${monorepo} monorepo initialized successfully`);
-    } else {
-      consola.warn(`⚠️ No command found for ${monorepo} with ${packageManager}`);
+    switch (monorepo.toLowerCase()) {
+      case 'turborepo':
+        await CreateCommands.createTurborepo(projectPath, packageManager);
+        break;
+      case 'nx':
+        await CreateCommands.createNx(projectPath, packageManager);
+        break;
+      case 'lerna':
+        await CreateCommands.createLerna(projectPath, packageManager);
+        break;
+      default:
+        consola.warn(`⚠️ Unknown monorepo tool: ${monorepo}`);
+        return;
     }
+    consola.success(`✅ ${monorepo} monorepo initialized successfully`);
   } catch (error) {
     consola.warn(`⚠️ Failed to initialize ${monorepo} monorepo:`, error);
   }
@@ -179,44 +256,44 @@ async function generateFrontend(frontend: any, hasMonorepo: boolean, projectPath
 }
 
 async function installFrontendFramework(framework: string, targetPath: string, language: string) {
-  const languageFlag = language === 'typescript' ? 'TypeScript' : 'JavaScript';
+  const languageFlag = language === 'typescript' ? 'typescript' : 'javascript';
   
   switch (framework) {
     case 'react':
-      await installReact(targetPath, path.basename(targetPath), languageFlag, true); // Use Vite
+      await CreateCommands.createReact(targetPath, languageFlag, true); // Use Vite
       break;
     case 'next':
-      await installNextJs(targetPath, path.basename(targetPath), languageFlag);
+      await CreateCommands.createNextJs(targetPath, languageFlag);
       break;
     case 'vue':
-      await installVue(targetPath, path.basename(targetPath), languageFlag);
+      await CreateCommands.createVue(targetPath, languageFlag);
       break;
     case 'svelte':
-      await installSvelte(targetPath, path.basename(targetPath), languageFlag);
+      await CreateCommands.createSvelte(targetPath, languageFlag);
       break;
     case 'angular':
-      await installAngular(targetPath, path.basename(targetPath), languageFlag);
+      await CreateCommands.createAngular(targetPath, languageFlag);
       break;
     case 'nuxt':
-      await installNuxtJs(targetPath, path.basename(targetPath), languageFlag);
+      await CreateCommands.createNuxtJs(targetPath, languageFlag);
       break;
     case 'astro':
-      await installAstro(targetPath, path.basename(targetPath), languageFlag);
+      await CreateCommands.createAstro(targetPath, languageFlag);
       break;
     case 'remix':
-      await installRemix(targetPath, path.basename(targetPath), languageFlag);
+      await CreateCommands.createRemix(targetPath, languageFlag);
       break;
     case 'solid':
-      await installSolid(targetPath, path.basename(targetPath), languageFlag);
+      await CreateCommands.createSolid(targetPath, languageFlag);
       break;
     case 'qwik':
-      await installQwik(targetPath, path.basename(targetPath), languageFlag);
+      await CreateCommands.createQwik(targetPath, languageFlag);
       break;
     case 'preact':
-      await installPreact(targetPath, path.basename(targetPath), languageFlag);
+      await CreateCommands.createPreact(targetPath, languageFlag);
       break;
     case 'lit':
-      await installLit(targetPath, path.basename(targetPath), languageFlag);
+      await CreateCommands.createLit(targetPath, languageFlag);
       break;
     default:
       consola.warn(`⚠️ Unknown frontend framework: ${framework}`);
@@ -237,7 +314,7 @@ async function generateBackend(backend: any, hasMonorepo: boolean, projectPath: 
       await installBackendFramework(backend.framework, servicePath, backend.language);
       consola.success(`✅ Microservice ${serviceName} created successfully`);
     }
-  } else if (backend.folderName) {
+  } else {
     // Create single backend
     const backendPath = hasMonorepo 
       ? path.join(projectPath, 'apps', backend.folderName)
@@ -250,17 +327,17 @@ async function generateBackend(backend: any, hasMonorepo: boolean, projectPath: 
 }
 
 async function installBackendFramework(framework: string, targetPath: string, language: string) {
-  const languageFlag = language === 'typescript' ? 'TypeScript' : 'JavaScript';
+  const languageFlag = language === 'typescript' ? 'typescript' : 'javascript';
   
   switch (framework) {
     case 'express':
-      await installExpress(targetPath, languageFlag);
+      await CreateCommands.createExpress(targetPath, languageFlag);
       break;
     case 'nestjs':
-      await installNestJS(targetPath, languageFlag);
+      await CreateCommands.createNestJS(targetPath, languageFlag);
       break;
     case 'fastify':
-      await installFastify(targetPath, languageFlag);
+      await CreateCommands.createFastify(targetPath, languageFlag);
       break;
     default:
       consola.warn(`⚠️ Unknown backend framework: ${framework}`);

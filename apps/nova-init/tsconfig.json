@@ -14,7 +14,6 @@
       "@flows/*": ["flows/*"],
       "@installers/*": ["installers/*"],
       "@prompts/*": ["prompts/*"],
-      "@templates/*": ["templates/*"],
       "@utils/*": ["utils/*"]
     },
     "strict": true,
@@ -27,6 +26,6 @@
     "isolatedModules": true,
     "allowSyntheticDefaultImports": true
   },
-  "include": ["src", "templates"],
-  "exclude": ["dist", "node_modules", "templates/**/*"]
+  "include": ["src"],
+  "exclude": ["dist", "node_modules"]
 }

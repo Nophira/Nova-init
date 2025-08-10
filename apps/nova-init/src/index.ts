@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { runSetup } from './installers/setup-generator.js';
+import { setupCommand } from './commands/setup-commands.js';
 import { addCommand } from './commands/add.js';
 import { helpCommand } from './commands/help.js';
 import consola from 'consola';
@@ -7,14 +7,9 @@ import consola from 'consola';
 async function main() {
   const args = process.argv.slice(2);
   
-  // If no arguments, run interactive setup
+  // If no arguments, show help
   if (args.length === 0) {
-    try {
-      await runSetup();
-    } catch (error) {
-      consola.error('Error during setup:', error);
-      process.exit(1);
-    }
+    helpCommand();
     return;
   }
 
@@ -24,6 +19,9 @@ async function main() {
   switch (command) {
     case 'add':
       await addCommand(args.slice(1));
+      break;
+    case 'setup':
+      await setupCommand(args.slice(1));
       break;
     case 'help':
     case '--help':

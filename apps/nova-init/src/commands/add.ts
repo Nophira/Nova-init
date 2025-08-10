@@ -1,9 +1,9 @@
 import consola from 'consola';
-import { addFrontend } from '@installers/addFrontend.js';
-import { addBackend } from '@installers/addBackend.js';
-import { addDatabase } from '@installers/addDatabase.js';
-import { addMonorepo } from '@installers/addMonorepo.js';
-import { addTechstack } from '@installers/addTechstack.js';
+import { addFrontend } from '../installers/addFrontend.js';
+import { addBackend } from '../installers/addBackend.js';
+import { addDatabase } from '../installers/addDatabase.js';
+import { addMonorepo } from '../installers/addMonorepo.js';
+import { addTechstack } from '../installers/addTechstack.js';
 
 interface ParsedArgs {
   [key: string]: string | boolean;
