@@ -18,30 +18,10 @@ export async function installExpress(targetPath: string, language: string = 'Jav
       exec(`npm install -D typescript @types/express ts-node-dev @types/node`);
       exec(`npx tsc --init`);
 
-      const tsCode = `
-import express from 'express';
-
-const app = express();
-const port = 3000;
-
-app.get('/', (_, res) => res.send('Hello from Express + TypeScript!'));
-
-app.listen(port, () => {
-  console.log(\`🚀 Server ready at http://localhost:\${port}\`);
-});
-`;
-      writeFileSync(path.join(targetPath, 'index.ts'), tsCode.trim());
+    
     } else {
       consola.info('Installing JavaScript version...');
-      const jsCode = `
-import express from 'express';
-const app = express();
-const port = 3000;
-
-app.get('/', (req, res) => res.send('Hello from Express!'));
-app.listen(port, () => console.log(\`🚀 Server running at http://localhost:\${port}\`));
-`;
-      writeFileSync(path.join(targetPath, 'index.js'), jsCode.trim());
+      
     }
     
     consola.success(`✅ Express (${language}) installed successfully`);
