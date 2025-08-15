@@ -3,18 +3,18 @@ import * as path from 'path';
 import consola from 'consola';
 
 // Import database Docker Compose generators
-import getCassandraCompose from './docker/cassandra/cassandra.js';
-import getCockroachdbCompose from './docker/cockroachdb/cockroachdb.js';
-import getCouchdbCompose from './docker/couchdb/couchdb.js';
-import getEdgedbCompose from './docker/edgedb/edgedb.js';
-import getMariadbCompose from './docker/mariadb/mariadb.js';
-import getMongoCompose from './docker/mongodb/mongodb.js';
-import getMysqlCompose from './docker/mysql/mysql.js';
-import getNeo4jCompose from './docker/neo4j/neo4j.js';
-import getPostgresCompose from './docker/postgresql/postgres.js';
-import getRedisCompose from './docker/redis/redis.js';
-import getSurrealdbCompose from './docker/surrealdb/surrealdb.js';
-import getYugabytedbCompose from './docker/yugabytedb/yugabytedb.js';
+import getCassandraCompose from './docker/cassandra.js';
+import getCockroachdbCompose from './docker/cockroachdb.js';
+import getCouchdbCompose from './docker/couchdb.js';
+import getEdgedbCompose from './docker/edgedb.js';
+import getMariadbCompose from './docker/mariadb.js';
+import getMongoCompose from './docker/mongodb.js';
+import getMysqlCompose from './docker/mysql.js';
+import getNeo4jCompose from './docker/neo4j.js';
+import getPostgresCompose from './docker/postgres.js';
+import getRedisCompose from './docker/redis.js';
+import getSurrealdbCompose from './docker/surrealdb.js';
+import getYugabytedbCompose from './docker/yugabytedb.js';
 
 const composeMap: Record<string, { getCompose: Function; description: string }> = {
   cassandra: {

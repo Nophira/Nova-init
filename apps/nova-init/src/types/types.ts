@@ -1,5 +1,5 @@
 export type MonorepoTool = 'lerna' | 'nx' | 'turborepo' | 'none';
-export type PackageManager = 'npm' | 'pnpm' | 'bun';
+export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun';
 export type SetupType = 'custom' | 'predefined';
 export type HostingType = 'docker' | 'none';
 

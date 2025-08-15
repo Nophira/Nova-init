@@ -16,28 +16,31 @@ Setup Command (Complete Project Setup):
   nova-init setup [project-name] [options]
   
   Options:
-    -p, --project-name <name>        Project name (default: current directory name)
-    -m, --monorepo <type>            Monorepo type: turbo, nx, lerna
-    -mp, --monorepo-package-manager  Package manager for monorepo: npm, yarn, pnpm
-    -f, --frontend <framework>       Frontend framework
-    -fl, --frontend-language <lang>  Frontend language: typescript, javascript
-    -ff, --frontend-folder <name>    Frontend folder name
-    -fp, --frontend-package-manager  Package manager for frontend
-    -b, --backend <framework>        Backend framework
-    -bl, --backend-language <lang>   Backend language: typescript, javascript
-    -bf, --backend-folder <name>     Backend folder name
-    -bp, --backend-package-manager   Package manager for backend
-    -ms, --microservices <names>     Microservice names (comma-separated)
-    -d, --databases <names>          Database names (comma-separated)
-    -h, --hosting <type>             Hosting type
-    -g, --git                        Initialize git repository
-    -pm, --package-manager <pm>      Default package manager: npm, yarn, pnpm
+    -p,  --project-name <name>        Project name (default: current directory name)
+    -m,  --monorepo <type>            Monorepo type: turborepo, nx, lerna, none
+    -mp, --monorepo-package-manager   Package manager for monorepo: npm, pnpm, yarn, bun
+    -pm, --package-manager <pm>       Default package manager fallback: npm, pnpm, yarn, bun
+    -t,  --techstack <name>           Predefined tech stack: MERN, MEAN, MEVN, MERN_TS, MEAN_TS, MEVN_TS
+    -st, --setup-type <type>          Setup type: custom, predefined (auto 'predefined' if --techstack set)
+    -f,  --frontend <framework>       Frontend framework (react, next, vue, svelte, angular, nuxt, astro, remix, solid, qwik, preact, lit)
+    -fl, --frontend-language <lang>   Frontend language: typescript, javascript
+    -ff, --frontend-folder <name>     Frontend folder name (default: frontend)
+    -fp, --frontend-package-manager   Package manager for frontend
+    -b,  --backend <framework>        Backend framework (express, nestjs, fastify)
+    -bl, --backend-language <lang>    Backend language: typescript, javascript
+    -bf, --backend-folder <name>      Backend folder name (default: backend)
+    -bp, --backend-package-manager    Package manager for backend
+    -ms, --microservices <names>      Microservice names (comma-separated) or use flag to enable
+    -d,  --databases <names>          Databases (comma-separated). Examples: mongodb, postgres, mysql, mariadb, redis, cassandra, cockroachdb, couchdb, edgedb, neo4j, surrealdb, yugabytedb
+    -H,  --hosting <type>             Hosting type: docker, none
+    -g,  --git                        Initialize git repository
 
   Examples:
-    nova-init setup my-project -f react -b express -d postgresql
-    nova-init setup -p my-app -m turbo -f next -b nestjs -g
+    nova-init setup my-project -f react -b express -d postgres
+    nova-init setup -p my-app -m turborepo -pm pnpm -f next -fl ts -b nestjs -g
     nova-init setup -f vue -b fastify -ms auth,user,payment
     nova-init setup -p fullstack-app -m nx -f react -fl typescript -b express -bl typescript -d mongodb,redis -g
+    nova-init setup -t MERN_TS
 
 Add Command (Add Components to Existing Project):
   nova-init add <type> [options]

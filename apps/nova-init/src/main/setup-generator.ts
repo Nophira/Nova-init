@@ -127,6 +127,22 @@ export async function runSetup() {
   }
 }
 
+export async function executeSetup(config: ProjectStructure) {
+  try {
+    consola.info('🚀 Starting project setup (non-interactive)...');
+    const projectPath = path.join(process.cwd(), config.projectName);
+    await fs.mkdir(projectPath, { recursive: true });
+    consola.success(`✅ Created project directory: ${config.projectName}`);
+    await generateProjectStructure(config, projectPath);
+    await createNovaInitConfig(config, projectPath);
+    consola.success('🎉 Project setup completed successfully!');
+    consola.info(`📁 Project created at: ${projectPath}`);
+  } catch (error) {
+    consola.error('❌ Setup failed:', error);
+    process.exit(1);
+  }
+}
+
 async function generateProjectStructure(config: ProjectStructure, projectPath: string) {
   const { setupType, monorepo, frontend, backend, databases, hosting, initializeGit, techStack } = config;
 

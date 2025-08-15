@@ -3,7 +3,7 @@ import {
   askFrontendFramework, 
   askFrontendFolderName, 
   askFrontendPackageManager 
-} from '../../installers/functions/frontend.js';
+} from '../../main/functions/frontend.js';
 import type { PackageManager } from '../../types/types.js';
 
 export interface FrontendSetup {

@@ -3,7 +3,7 @@ import {
   askBackendFramework, 
   askBackendFolderName, 
   askBackendPackageManager 
-} from '../../installers/functions/backend.js';
+} from '../../main/functions/backend.js';
 import { askUseMicroservices, askMicroserviceNames } from '../functions/microservice.js';
 import type { PackageManager } from '../../types/types.js';
 
