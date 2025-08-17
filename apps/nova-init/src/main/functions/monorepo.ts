@@ -1,48 +1,85 @@
 // src/functions/monorepo.ts
 import { select, isCancel, cancel } from '@clack/prompts';
-import type { MonorepoTool, PackageManager } from '../../types/types.js';
+import type { MonorepoTool, PackageManager } from '../../types/index.js';
 
-// Monorepo-Optionen
-const monorepoOptions: { value: MonorepoTool; label: string }[] = [
-  { value: 'lerna', label: 'Lerna – Tool for managing JavaScript projects' },
-  { value: 'nx', label: 'Nx – Smart, fast and extensible build system' },
-  { value: 'turborepo', label: 'Turborepo – High-performance build system' },
-  { value: 'none', label: 'None (Skip)' },
-];
-
-export async function askMonorepoTool(): Promise<MonorepoTool> {
-  const choice = await select({
+export async function askMonorepo(): Promise<MonorepoTool> {
+  const monorepo = await select({
     message: 'Do you want to use a Monorepo?',
-    options: monorepoOptions,
+    options: [
+      { value: 'none', label: 'No Monorepo' },
+      { value: 'lerna', label: 'Lerna - Classic JavaScript monorepo tool' },
+      { value: 'nx', label: 'Nx - Powerful monorepo build system' },
+      { value: 'turborepo', label: 'Turborepo - High-performance build system' }
+    ],
   });
 
-  if (isCancel(choice)) {
+  if (isCancel(monorepo)) {
     cancel('Monorepo selection cancelled.');
     process.exit(0);
   }
 
-  return choice as MonorepoTool;
+  return monorepo as MonorepoTool;
 }
 
 export async function askMonorepoPackageManager(monorepo: MonorepoTool): Promise<PackageManager> {
-  const supportedPackageManagers: Record<MonorepoTool, PackageManager[]> = {
-    lerna: ['npm', 'pnpm'],         // Bun wird nicht unterstützt
-    nx: ['npm', 'pnpm', 'bun'],
-    turborepo: ['npm', 'pnpm', 'bun'],
-    none: ['npm', 'pnpm', 'bun'],   // Falls kein Monorepo, alles erlaubt
-  };
+  // Different monorepo tools support different package managers
+  let options: { value: PackageManager; label: string }[] = [];
+  
+  switch (monorepo) {
+    case 'lerna':
+      options = [
+        { value: 'npm', label: 'npm - Node Package Manager' },
+        { value: 'pnpm', label: 'pnpm - Fast, disk space efficient package manager' }
+      ];
+      break;
+    case 'nx':
+      options = [
+        { value: 'npm', label: 'npm - Node Package Manager' },
+        { value: 'pnpm', label: 'pnpm - Fast, disk space efficient package manager' }
+      ];
+      break;
+    case 'turborepo':
+      options = [
+        { value: 'npm', label: 'npm - Node Package Manager' },
+        { value: 'pnpm', label: 'pnpm - Fast, disk space efficient package manager' },
+        { value: 'bun', label: 'Bun - All-in-one JavaScript runtime & package manager' }
+      ];
+      break;
+    default:
+      throw new Error('Invalid monorepo tool');
+  }
 
-  const allowed = supportedPackageManagers[monorepo];
-
-  const pkg = await select({
-    message: `Select a package manager for the monorepo (${monorepo}):`,
-    options: allowed.map(pm => ({ value: pm, label: pm })),
+  const packageManager = await select({
+    message: `Choose package manager for ${monorepo}:`,
+    options,
   });
 
-  if (isCancel(pkg)) {
+  if (isCancel(packageManager)) {
     cancel('Package manager selection cancelled.');
     process.exit(0);
   }
 
-  return pkg as PackageManager;
+  return packageManager as PackageManager;
+}
+
+export function validateMonorepo(monorepo: string): MonorepoTool {
+  if (!['none', 'lerna', 'nx', 'turborepo'].includes(monorepo)) {
+    throw new Error('Invalid monorepo tool. Must be "none", "lerna", "nx", or "turborepo"');
+  }
+  return monorepo as MonorepoTool;
+}
+
+export function validateMonorepoPackageManager(monorepo: MonorepoTool, packageManager: string): PackageManager {
+  const validPackageManagers: Record<MonorepoTool, PackageManager[]> = {
+    none: [],
+    lerna: ['npm', 'pnpm'],
+    nx: ['npm', 'pnpm'],
+    turborepo: ['npm', 'pnpm', 'bun']
+  };
+
+  if (!validPackageManagers[monorepo].includes(packageManager as PackageManager)) {
+    throw new Error(`Package manager "${packageManager}" is not supported by ${monorepo}`);
+  }
+
+  return packageManager as PackageManager;
 }

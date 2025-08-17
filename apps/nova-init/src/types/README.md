@@ -1,112 +1,250 @@
-# Type System Documentation
+# NOVA-INIT Types
 
-Diese Dokumentation beschreibt die neue modulare Type-Struktur für das Nova-init Projekt.
+Diese Datei enthält alle zentralen Typdefinitionen für das Nova-Init Projekt. Alle Commands und Prompts sollten diese Types verwenden, um Konsistenz und Typsicherheit zu gewährleisten.
 
-## Struktur
+## 📁 Dateistruktur
 
 ```
-types/
-├── index.ts              # Zentrale Re-Export-Datei
-├── project.ts            # Projekt-bezogene Types
-├── framework.ts          # Frontend/Backend Framework Types
-├── database.ts           # Datenbank-bezogene Types
-├── package-manager.ts    # Package Manager Types
-├── setup.ts              # Setup-Konfiguration Types
-├── commands.ts           # Command-Line Interface Types
-├── prompts.ts            # Prompt und UI Types
-├── types.ts              # Legacy-Re-Export für Kompatibilität
-└── shims.d.ts            # Module-Deklarationen
+src/types/
+├── index.ts          # Haupttypes-Datei mit allen Exporten
+├── constants.ts      # Konstanten und Utility-Funktionen
+└── README.md         # Diese Dokumentation
 ```
 
-## Hauptmodule
+## 🚀 Verwendung
 
-### 1. **project.ts**
-- `ProjectStructure` - Hauptkonfiguration für Projekte
-- `MonorepoTool` - Unterstützte Monorepo-Tools
-- `ProjectConfig` - Package.json-Konfiguration
-- `ProjectPaths` - Projektpfade
-- `ProjectMetadata` - Projekt-Metadaten
+### Import der Types
 
-### 2. **framework.ts**
-- `FrontendFramework` - Unterstützte Frontend-Frameworks
-- `BackendFramework` - Unterstützte Backend-Frameworks
-- `FrontendSetup` / `BackendSetup` - Framework-Konfigurationen
-- `Language` - Programmiersprachen
-- Feature-Types für Styling, State Management, etc.
-
-### 3. **database.ts**
-- `DatabaseType` - Unterstützte Datenbanken
-- `DatabaseConfig` - JSON-Konfiguration für Datenbanken
-- `DatabaseSetup` - Runtime-Datenbank-Konfiguration
-- `DockerComposeConfig` - Docker-Compose-Konfiguration
-- `ConnectionInfo` - Verbindungsinformationen
-
-### 4. **package-manager.ts**
-- `PackageManager` - Unterstützte Package Manager
-- `PackageManagerConfig` - Package Manager-Konfiguration
-- `PackageJson` - Vollständige Package.json-Struktur
-
-### 5. **setup.ts**
-- `SetupType` - Setup-Arten
-- `HostingType` - Hosting-Optionen
-- `SetupOptions` - Setup-Optionen
-- `TechStack` - Vordefinierte Tech-Stacks
-
-### 6. **commands.ts**
-- `CommandOptions` - Basis-Command-Optionen
-- `ParsedArgs` - Parsed Command-Line-Argumente
-- `AddCommandOptions` - Add-Command-spezifische Optionen
-- `SetupCommandOptions` - Setup-Command-spezifische Optionen
-
-### 7. **prompts.ts**
-- `PromptOptions` - Basis-Prompt-Optionen
-- `PromptResult` - Prompt-Ergebnisse
-- `PromptContext` - Prompt-Kontext
-- `ValidationRule` - Validierungsregeln
-
-## Verwendung
-
-### Import aller Types
 ```typescript
+// Alle Types importieren
 import type { 
   ProjectStructure, 
   FrontendSetup, 
-  DatabaseSetup,
-  PackageManager 
+  BackendSetup,
+  DatabaseSetup 
 } from '../types/index.js';
+
+// Oder spezifische Types
+import type { PackageManager, Language } from '../types/index.js';
 ```
 
-### Spezifische Imports
-```typescript
-import type { DatabaseType } from '../types/database.js';
-import type { FrontendFramework } from '../types/framework.js';
-```
-
-## Vorteile der neuen Struktur
-
-1. **Modularität** - Types sind nach Funktionsbereichen organisiert
-2. **Wartbarkeit** - Einfache Änderungen ohne Beeinträchtigung anderer Module
-3. **Typsicherheit** - Vollständige TypeScript-Unterstützung
-4. **Erweiterbarkeit** - Neue Types können einfach hinzugefügt werden
-5. **Dokumentation** - Jeder Type ist vollständig dokumentiert
-6. **Kompatibilität** - Legacy-Imports funktionieren weiterhin
-
-## Migration von der alten Struktur
-
-Die alte `types.ts` Datei re-exportiert alle neuen Types für Rückwärtskompatibilität:
+### Beispiel für einen Command
 
 ```typescript
-// Alte Imports funktionieren weiterhin
-import type { ProjectStructure } from '../types/types.js';
+import type { AddCommandOptions, AddCommandResult } from '../types/index.js';
 
-// Neue Imports sind bevorzugt
-import type { ProjectStructure } from '../types/index.js';
+export async function addFrontend(options: AddCommandOptions): Promise<AddCommandResult> {
+  // Implementation hier
+  return {
+    success: true,
+    addedType: 'frontend',
+    createdFiles: ['package.json', 'src/'],
+    errors: [],
+    warnings: [],
+    nextSteps: ['npm install', 'npm run dev']
+  };
+}
 ```
 
-## Best Practices
+### Beispiel für einen Prompt
 
-1. **Verwende spezifische Imports** für bessere Tree-Shaking
-2. **Erweitere Types** durch Interface-Extension
-3. **Dokumentiere neue Types** mit JSDoc-Kommentaren
-4. **Verwende Union Types** für enums
-5. **Nutze Generic Types** für wiederverwendbare Strukturen
+```typescript
+import type { FrontendSetup, Language, FrontendFramework } from '../types/index.js';
+
+export async function promptFrontend(): Promise<FrontendSetup> {
+  const language: Language = await askLanguage();
+  const framework: FrontendFramework = await askFramework();
+  
+  return {
+    language,
+    framework,
+    packageManager: 'npm',
+    features: ['typescript', 'vite']
+  };
+}
+```
+
+## 📋 Verfügbare Types
+
+### Core Types
+- `ProjectStructure` - Hauptkonfiguration für das gesamte Projekt
+- `SetupType` - 'custom' | 'predefined'
+- `MonorepoTool` - 'none' | 'lerna' | 'nx' | 'turborepo'
+- `PackageManager` - 'npm' | 'yarn' | 'pnpm' | 'bun'
+- `Language` - 'javascript' | 'typescript'
+
+### Frontend Types
+- `FrontendSetup` - Komplette Frontend-Konfiguration
+- `FrontendFramework` - Alle verfügbaren Frontend-Frameworks
+- `FrontendFeature` - Frontend-spezifische Features
+- `FrontendStyling` - Styling-Optionen
+- `StateManagement` - State Management Lösungen
+- `TestingFramework` - Testing-Frameworks
+- `BuildTool` - Build-Tools
+
+### Backend Types
+- `BackendSetup` - Komplette Backend-Konfiguration
+- `BackendFramework` - Alle verfügbaren Backend-Frameworks
+- `BackendFeature` - Backend-spezifische Features
+- `BackendTestingFramework` - Backend Testing-Frameworks
+- `DocumentationTool` - Dokumentations-Tools
+
+### Database Types
+- `DatabaseSetup` - Datenbank-Konfiguration
+- `DatabaseType` - Alle verfügbaren Datenbanktypen
+- `DockerDatabaseConfig` - Docker-spezifische Konfiguration
+- `HealthCheck` - Health Check Konfiguration
+
+### Command Types
+- `AddCommandOptions` - Optionen für den Add-Command
+- `SetupCommandOptions` - Optionen für den Setup-Command
+- `ParsedArgs` - Parsed Command Line Arguments
+
+### Result Types
+- `SetupResult` - Ergebnis des Setup-Prozesses
+- `AddCommandResult` - Ergebnis des Add-Commands
+
+### Utility Types
+- `PartialFrontendSetup` - Teilweise Frontend-Setup
+- `RequiredFrontendSetup` - Erforderliche Frontend-Eigenschaften
+- `ValidationRule` - Validierungsregeln
+- `ValidationResult` - Validierungsergebnis
+
+### Constants & Utilities
+- `FRONTEND_FRAMEWORKS` - Alle Frontend-Frameworks mit Metadaten
+- `BACKEND_FRAMEWORKS` - Alle Backend-Frameworks mit Metadaten
+- `DATABASES` - Alle Datenbanken mit Metadaten
+- `PACKAGE_MANAGERS` - Alle Package Manager mit Metadaten
+- `MONOREPO_TOOLS` - Alle Monorepo-Tools mit Metadaten
+- `HOSTING_OPTIONS` - Alle Hosting-Optionen mit Metadaten
+- `TECH_STACKS` - Vordefinierte Tech Stacks
+- Utility-Funktionen für Validierung und Port-Management
+
+## 🔧 Best Practices
+
+### 1. Immer Types verwenden
+```typescript
+// ✅ Gut - Mit Types
+function createProject(config: ProjectStructure): void {
+  // Implementation
+}
+
+// ❌ Schlecht - Ohne Types
+function createProject(config: any): void {
+  // Implementation
+}
+```
+
+### 2. Spezifische Types statt generische
+```typescript
+// ✅ Gut - Spezifische Types
+function setupFrontend(frontend: FrontendSetup): void {
+  // Implementation
+}
+
+// ❌ Schlecht - Zu generisch
+function setupFrontend(frontend: object): void {
+  // Implementation
+}
+```
+
+### 3. Union Types für enums
+```typescript
+// ✅ Gut - Union Types
+type Language = 'javascript' | 'typescript';
+
+// ❌ Schlecht - String
+type Language = string;
+```
+
+### 4. Optionale Properties mit ?
+```typescript
+// ✅ Gut - Optionale Properties
+interface FrontendSetup {
+  language: Language;
+  framework: FrontendFramework;
+  features?: FrontendFeature[]; // Optional
+}
+
+// ❌ Schlecht - Alle Properties required
+interface FrontendSetup {
+  language: Language;
+  framework: FrontendFramework;
+  features: FrontendFeature[]; // Immer required
+}
+```
+
+## 🆕 Neue Types hinzufügen
+
+Wenn du neue Types hinzufügen möchtest:
+
+1. **Type definieren** in `index.ts`
+2. **JSDoc Kommentar** hinzufügen
+3. **Export** in der Export-Sektion hinzufügen
+4. **README aktualisieren** mit dem neuen Type
+
+### Beispiel für einen neuen Type
+
+```typescript
+/**
+ * Neue Konfiguration für CI/CD
+ */
+export interface CIConfig {
+  provider: 'github' | 'gitlab' | 'bitbucket';
+  autoDeploy: boolean;
+  environment: 'staging' | 'production';
+}
+
+// In der Export-Sektion hinzufügen:
+export type {
+  // ... andere Types
+  CIConfig,
+};
+```
+
+### Beispiel für neue Konstanten
+
+```typescript
+// In constants.ts hinzufügen:
+export const CI_PROVIDERS = {
+  github: {
+    name: 'GitHub Actions',
+    description: 'CI/CD platform integrated with GitHub',
+    website: 'https://github.com/features/actions'
+  },
+  gitlab: {
+    name: 'GitLab CI/CD',
+    description: 'Built-in CI/CD for GitLab',
+    website: 'https://docs.gitlab.com/ee/ci/'
+  }
+} as const;
+
+// In index.ts exportieren (wird automatisch durch export * from './constants.js' gemacht)
+```
+
+## 🐛 Fehlerbehebung
+
+### Type nicht gefunden
+```typescript
+// ❌ Fehler: Type 'FrontendSetup' not found
+import type { FrontendSetup } from '../types/index.js';
+
+// ✅ Lösung: Überprüfe den Import-Pfad
+import type { FrontendSetup } from '../../types/index.js';
+```
+
+### Type Mismatch
+```typescript
+// ❌ Fehler: Type 'string' is not assignable to type 'Language'
+const language: Language = 'js'; // 'js' ist nicht in Language
+
+// ✅ Lösung: Verwende gültige Werte
+const language: Language = 'javascript';
+```
+
+## 📚 Weitere Ressourcen
+
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [TypeScript Best Practices](https://github.com/typescript-eslint/typescript-eslint)
+- [Nova-Init Commands](../commands/)
+- [Nova-Init Prompts](../main/prompts/)

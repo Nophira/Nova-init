@@ -1,9 +1,8 @@
-import { askMonorepoTool, askMonorepoPackageManager } from '../functions/monorepo.js';
-import { askPackageManager } from '../functions/packageManager.js';
-import type { MonorepoTool, PackageManager } from '../../types/types.js';
+import { askMonorepo, askMonorepoPackageManager } from '../functions/monorepo.js';
+import type { MonorepoTool, PackageManager } from '../../types/index.js';
 
 export async function promptMonorepo(): Promise<MonorepoTool> {
-  return await askMonorepoTool();
+  return await askMonorepo();
 }
 
 export async function promptMonorepoPackageManager(monorepo: MonorepoTool): Promise<PackageManager> {

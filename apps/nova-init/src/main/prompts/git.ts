@@ -1,5 +1,5 @@
-import { askInitializeGit } from '../functions/git.js';
+import { askGitInitialization } from '../functions/git.js';
 
 export async function promptGit(): Promise<boolean> {
-  return await askInitializeGit();
+  return await askGitInitialization();
 }

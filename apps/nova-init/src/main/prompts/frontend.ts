@@ -1,28 +1,10 @@
-import { 
-  askFrontendLanguage, 
-  askFrontendFramework, 
-  askFrontendFolderName, 
-  askFrontendPackageManager 
-} from '../../main/functions/frontend.js';
-import type { PackageManager } from '../../types/types.js';
-
-export interface FrontendSetup {
-  language: 'javascript' | 'typescript';
-  framework: string;
-  folderName: string;
-  packageManager: PackageManager;
-}
+import { askFrontendSetup } from '../functions/frontend.js';
+import type { FrontendSetup } from '../../types/index.js';
 
 export async function promptFrontend(hasMonorepo: boolean): Promise<FrontendSetup> {
-  const language = await askFrontendLanguage();
-  const framework = await askFrontendFramework();
-  const folderName = await askFrontendFolderName();
-  const packageManager = await askFrontendPackageManager();
-
-  return {
-    language,
-    framework,
-    folderName,
-    packageManager,
-  };
+  return await askFrontendSetup(hasMonorepo);
 }
+
+// 🆕 BEISPIEL: Utility Types verwenden
+export type PartialFrontendSetup = Partial<FrontendSetup>;
+export type RequiredFrontendSetup = Required<Pick<FrontendSetup, 'language' | 'framework'>>;

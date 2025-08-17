@@ -127,6 +127,6 @@ Databases:
   - Docker is required for database setup
   - Use --help after any command for specific help
 
-📚 For more information, visit: https://github.com/your-repo/nova-init
+
 `);
 }

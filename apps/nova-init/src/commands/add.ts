@@ -4,6 +4,9 @@ import { addFrontend } from './addFrontend.ts';
 import { addBackend } from './addBackend.ts';
 import { addDatabase } from './addDatabase.ts';
 import { getAvailableDatabases, getDatabaseParameters } from '../installers/database/json-docker-generator.js';
+import { readFile, access } from 'fs/promises';
+import path from 'path';
+import type { AddCommandOptions, ProjectStructure } from '../types/index.js';
 
 interface ParsedArgs {
   [key: string]: string | boolean;
@@ -29,6 +32,18 @@ function parseArgs(args: string[]): ParsedArgs {
   }
 
   return parsed;
+}
+
+async function getProjectConfig(): Promise<ProjectStructure | null> {
+  try {
+    const novaInitPath = path.join(process.cwd(), 'nova-init.json');
+    await access(novaInitPath);
+    
+    const content = await readFile(novaInitPath, 'utf-8');
+    return JSON.parse(content) as ProjectStructure;
+  } catch (error) {
+    return null;
+  }
 }
 
 async function showDatabaseHelp(database?: string) {
@@ -180,6 +195,15 @@ export async function addCommand(args: string[]) {
     showAddHelp(type);
     return;
   }
+
+  // Check if we're in a nova-init project
+  const projectConfig = await getProjectConfig();
+  if (!projectConfig) {
+    consola.error('❌ Not in a nova-init project. Please run "nova-init setup" first.');
+    process.exit(1);
+  }
+
+  consola.info(`📁 Adding to project: ${projectConfig.projectName}`);
 
   try {
     switch (type) {
