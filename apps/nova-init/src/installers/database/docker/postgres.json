@@ -1,0 +1,86 @@
+{
+  "name": "postgres",
+  "description": "Relational Database",
+  "image": "postgres:latest",
+  "defaultPort": 5432,
+  "internalPort": 5432,
+  "parameters": {
+    "containerName": {
+      "type": "string",
+      "default": "pgsql_db",
+      "description": "Name des Docker-Containers"
+    },
+    "database": {
+      "type": "string",
+      "default": "local",
+      "description": "Name der Datenbank"
+    },
+    "username": {
+      "type": "string",
+      "default": "admin",
+      "description": "Benutzername für die Datenbank"
+    },
+    "password": {
+      "type": "string",
+      "default": "password123",
+      "description": "Passwort für die Datenbank"
+    },
+    "port": {
+      "type": "number",
+      "default": 5432,
+      "description": "Port für die Datenbank"
+    },
+    "networkName": {
+      "type": "string",
+      "default": "local_dbs_network",
+      "description": "Name des Docker-Netzwerks"
+    },
+    "volumeName": {
+      "type": "string",
+      "default": "pgsql_db_data",
+      "description": "Name des Data-Volumes"
+    }
+  },
+  "dockerCompose": {
+    "version": "3.8",
+    "services": {
+      "pgsql": {
+        "image": "postgres:latest",
+        "container_name": "${containerName}",
+        "environment": {
+          "POSTGRES_DB": "${database}",
+          "POSTGRES_USER": "${username}",
+          "POSTGRES_PASSWORD": "${password}"
+        },
+        "healthcheck": {
+          "test": ["CMD", "pg_isready", "-q", "-d", "${database}", "-U", "${username}"],
+          "retries": 3,
+          "timeout": "5s"
+        },
+        "networks": ["local"],
+        "ports": ["${port}:5432"],
+        "volumes": ["${volumeName}:/var/lib/postgresql/data"]
+      }
+    },
+    "networks": {
+      "local": {
+        "driver": "bridge",
+        "name": "${networkName}"
+      }
+    },
+    "volumes": {
+      "${volumeName}": {
+        "driver": "local",
+        "name": "${volumeName}"
+      }
+    }
+  },
+  "connectionInfo": {
+    "host": "localhost",
+    "port": "${port}",
+    "database": "${database}",
+    "username": "${username}",
+    "password": "${password}",
+    "connectionString": "postgresql://${username}:${password}@localhost:${port}/${database}"
+  }
+}

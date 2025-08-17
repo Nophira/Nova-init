@@ -1,0 +1,64 @@
+{
+  "name": "cockroachdb",
+  "description": "Distributed SQL Database",
+  "image": "cockroachdb/cockroach:latest",
+  "defaultPort": 26257,
+  "internalPort": 26257,
+  "parameters": {
+    "containerName": {
+      "type": "string",
+      "default": "cockroachdb",
+      "description": "Name des Docker-Containers"
+    },
+    "port": {
+      "type": "number",
+      "default": 26257,
+      "description": "Port für die Datenbank"
+    },
+    "networkName": {
+      "type": "string",
+      "default": "local_dbs_network",
+      "description": "Name des Docker-Netzwerks"
+    },
+    "volumeName": {
+      "type": "string",
+      "default": "cockroachdb_data",
+      "description": "Name des Data-Volumes"
+    }
+  },
+  "dockerCompose": {
+    "version": "3.8",
+    "services": {
+      "cockroachdb": {
+        "image": "cockroachdb/cockroach:latest",
+        "container_name": "${containerName}",
+        "command": "cockroach start-single-node --insecure",
+        "healthcheck": {
+          "test": ["CMD", "cockroach", "node", "status", "--insecure"],
+          "retries": 3,
+          "timeout": "5s"
+        },
+        "networks": ["local"],
+        "ports": ["${port}:26257"],
+        "volumes": ["${volumeName}:/cockroach/cockroach-data"]
+      }
+    },
+    "networks": {
+      "local": {
+        "driver": "bridge",
+        "name": "${networkName}"
+      }
+    },
+    "volumes": {
+      "${volumeName}": {
+        "driver": "local",
+        "name": "${volumeName}"
+      }
+    }
+  },
+  "connectionInfo": {
+    "host": "localhost",
+    "port": "${port}",
+    "connectionString": "postgresql://root@localhost:${port}/defaultdb?sslmode=disable"
+  }
+}

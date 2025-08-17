@@ -1,9 +1,9 @@
 import consola from 'consola';
-import { addFrontend } from '../installers/addFrontend.js';
-import { addBackend } from '../installers/addBackend.js';
-import { addDatabase } from '../installers/addDatabase.js';
-import { addMonorepo } from '../installers/addMonorepo.js';
-import { addTechstack } from '../installers/addTechstack.js';
+import { runTerminalCommand } from '../utils/runTerminalCommand.js';
+import { addFrontend } from './addFrontend.ts';
+import { addBackend } from './addBackend.ts';
+import { addDatabase } from './addDatabase.ts';
+import { getAvailableDatabases, getDatabaseParameters } from '../installers/database/json-docker-generator.js';
 
 interface ParsedArgs {
   [key: string]: string | boolean;
@@ -11,14 +11,14 @@ interface ParsedArgs {
 
 function parseArgs(args: string[]): ParsedArgs {
   const parsed: ParsedArgs = {};
-  
+
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    
+
     if (arg.startsWith('--')) {
       const key = arg.slice(2);
       const nextArg = args[i + 1];
-      
+
       if (nextArg && !nextArg.startsWith('--')) {
         parsed[key] = nextArg;
         i++; // Skip the next argument since we consumed it
@@ -27,8 +27,60 @@ function parseArgs(args: string[]): ParsedArgs {
       }
     }
   }
-  
+
   return parsed;
+}
+
+async function showDatabaseHelp(database?: string) {
+  if (!database) {
+    const availableDbs = await getAvailableDatabases();
+    consola.info(`
+🗄 Database Setup:
+  nova-init add database --database <database> [options]
+
+Available databases: ${availableDbs.join(', ')}
+
+Common Parameters:
+  --port <number>           - Custom port for the database
+  --containerName <string>  - Custom container name
+  --networkName <string>    - Custom network name
+  --volumeName <string>     - Custom volume name
+
+Database-specific Parameters:
+  --database <string>       - Database name (for SQL databases)
+  --username <string>       - Username (for SQL databases)
+  --password <string>       - Password (for SQL databases)
+
+Examples:
+  nova-init add database --database mongodb
+  nova-init add database --database postgresql --port 5433 --username myuser --password mypass
+  nova-init add database --database redis --port 6380
+  nova-init add database --database mysql --database myapp --username admin --password secret123
+
+Use "nova-init add database --database <database> --help" for specific database parameters
+`);
+    return;
+  }
+
+  try {
+    const parameters = await getDatabaseParameters(database);
+    
+    consola.info(`
+🗄 ${database.toUpperCase()} Database Setup:
+  nova-init add database --database ${database} [options]
+
+Available Parameters:
+${Object.entries(parameters).map(([name, config]) => 
+  `  --${name} <${config.type}>     - ${config.description} (default: ${config.default})`
+).join('\n')}
+
+Examples:
+  nova-init add database --database ${database}
+  nova-init add database --database ${database} --port 5433 --username myuser --password mypass
+`);
+  } catch (error) {
+    consola.error(`Unknown database: ${database}`);
+  }
 }
 
 function showAddHelp(type?: string) {
@@ -76,16 +128,7 @@ Examples:
 `);
       break;
     case 'database':
-      consola.info(`
-🗄 Database Setup:
-  nova-init add database --database <database> [--folder <name>]
-
-Available databases: mongodb, postgresql, mysql, mariadb, redis, cassandra, cockroachdb, couchdb, edgedb, neo4j, surrealdb, yugabytedb
-
-Examples:
-  nova-init add database --database mongodb
-  nova-init add database --database postgresql
-`);
+      showDatabaseHelp();
       break;
     case 'monorepo':
       consola.info(`
@@ -123,13 +166,13 @@ export async function addCommand(args: string[]) {
   }
 
   const type = args[0];
-  
+
   // Check if first argument is --help or -h
   if (type === '--help' || type === '-h') {
     showAddHelp();
     return;
   }
-  
+
   const options = parseArgs(args.slice(1));
 
   // Show help for specific type
@@ -140,20 +183,57 @@ export async function addCommand(args: string[]) {
 
   try {
     switch (type) {
+      case 'monorepo':
+        if (!options.tool) {
+          consola.error('--tool is required when adding a monorepo');
+          process.exit(1);
+        }
+        // await addMonorepo(options);
+        consola.warn("addMonorepo is not implemented yet.");
+        break;
+      case 'techstack':
+        if (!options.techstack) {
+          consola.error('--techstack is required when adding a techstack');
+          process.exit(1);
+        }
+        // await addTechstack(options);
+        consola.warn("addTechstack is not implemented yet.");
+        break;
       case 'frontend':
+         if (!options.framework) {
+          consola.error('--framework is required when adding a frontend');
+          process.exit(1);
+        }
         await addFrontend(options);
         break;
       case 'backend':
+        if (!options.framework) {
+          consola.error('--framework is required when adding a backend');
+          process.exit(1);
+        }
+
+        if (options.microservices && !options.framework) {
+          consola.error('--framework is required when using microservices');
+          process.exit(1);
+        }
         await addBackend(options);
         break;
       case 'database':
+        if (options.help || options.h) {
+          await showDatabaseHelp(options.database);
+          return;
+        }
+        if (!options.database) {
+          consola.error('--database is required when adding a database');
+          process.exit(1);
+        }
+        try {
+          await runTerminalCommand({ command: 'docker -v', is_background: false });
+        } catch (error) {
+          consola.error('Docker is not installed. Please install Docker to add a database.');
+          process.exit(1);
+        }
         await addDatabase(options);
-        break;
-      case 'monorepo':
-        await addMonorepo(options);
-        break;
-      case 'techstack':
-        await addTechstack(options);
         break;
       default:
         consola.error(`Unknown type: ${type}`);

@@ -1,37 +1,13 @@
-export type MonorepoTool = 'lerna' | 'nx' | 'turborepo' | 'none';
-export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun';
-export type SetupType = 'custom' | 'predefined';
-export type HostingType = 'docker' | 'none';
+// Re-export all types from the new modular structure
+export * from './index.js';
 
-export interface FrontendSetup {
-  language: 'javascript' | 'typescript';
-  framework: string;
-  folderName: string;
-  packageManager: PackageManager;
-}
-
-export interface BackendSetup {
-  language: 'javascript' | 'typescript';
-  framework: string;
-  useMicroservices: boolean;
-  microserviceNames?: string[];
-  folderName?: string;
-  packageManager: PackageManager;
-}
-
-export interface ProjectStructure {
-  projectName: string;
-  setupType: SetupType;
-  monorepo: MonorepoTool;
-  packageManagers: {
-    monorepo?: PackageManager;
-    frontend?: PackageManager;
-    backend?: PackageManager;
-  };
-  frontend?: FrontendSetup;
-  backend?: BackendSetup;
-  databases: string[];
-  hosting: HostingType;
-  initializeGit: boolean;
-  techStack?: string;
-}
+// Legacy exports for backward compatibility
+export type { 
+  ProjectStructure, 
+  MonorepoTool, 
+  PackageManager, 
+  SetupType, 
+  HostingType,
+  FrontendSetup,
+  BackendSetup 
+} from './index.js';

@@ -2,7 +2,13 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { execa } from 'execa';
 import consola from 'consola';
-import type { ProjectStructure } from '../types/types.js';
+import type { 
+  ProjectStructure, 
+  DatabaseSetup, 
+  MonorepoTool, 
+  PackageManager,
+  SetupResult 
+} from '../types/index.js';
 import { CreateCommands } from '../commands/commands/create-commands.js';
 // Template strings for environment and git files
 const envTemplate = `# Environment variables
@@ -96,7 +102,7 @@ docker-compose*.yml text eol=lf
 `;
 
 // Import database Docker Compose generators
-import { createDockerCompose } from './database/docker-compose.js';
+import { generateDockerComposeFromJson } from '../installers/database/json-docker-generator.js';
 
 export async function runSetup() {
   try {
@@ -360,8 +366,8 @@ async function installBackendFramework(framework: string, targetPath: string, la
   }
 }
 
-async function generateDatabases(databases: string[], projectPath: string) {
-  consola.info(`🗄️ Setting up databases: ${databases.join(', ')}`);
+async function generateDatabases(databases: DatabaseSetup[], projectPath: string) {
+  consola.info(`🗄️ Setting up databases: ${databases.map(db => db.name).join(', ')}`);
   
   const dbPath = path.join(projectPath, 'db');
   await fs.mkdir(dbPath, { recursive: true });
@@ -373,8 +379,17 @@ async function generateDatabases(databases: string[], projectPath: string) {
   
   for (const database of databases) {
     try {
-      // Generate individual database compose
-      const dbCompose = await generateDatabaseCompose(database);
+      // Generate individual database compose using JSON generator
+      const dbCompose = await generateDockerComposeFromJson(database.type, {
+        containerName: database.containerName,
+        port: database.port,
+        username: database.username,
+        password: database.password,
+        database: database.database,
+        networkName: database.networkName,
+        volumeName: database.volumeName,
+        ...database.customOptions
+      });
       
       // Extract service, network, and volume definitions
       const serviceMatch = dbCompose.match(/services:\n([\s\S]*?)(?=\nnetworks:|volumes:|$)/);
@@ -394,7 +409,7 @@ async function generateDatabases(databases: string[], projectPath: string) {
       }
       
     } catch (error) {
-      consola.warn(`⚠️ Failed to generate compose for ${database}:`, error);
+      consola.warn(`⚠️ Failed to generate compose for ${database.name}:`, error);
     }
   }
   

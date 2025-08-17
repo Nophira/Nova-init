@@ -1,0 +1,64 @@
+{
+  "name": "redis",
+  "description": "In-Memory Key-Value Store",
+  "image": "redis:latest",
+  "defaultPort": 6379,
+  "internalPort": 6379,
+  "parameters": {
+    "containerName": {
+      "type": "string",
+      "default": "redis",
+      "description": "Name des Docker-Containers"
+    },
+    "port": {
+      "type": "number",
+      "default": 6379,
+      "description": "Port für die Datenbank"
+    },
+    "networkName": {
+      "type": "string",
+      "default": "local_dbs_network",
+      "description": "Name des Docker-Netzwerks"
+    },
+    "volumeName": {
+      "type": "string",
+      "default": "redis_data",
+      "description": "Name des Data-Volumes"
+    }
+  },
+  "dockerCompose": {
+    "version": "3.8",
+    "services": {
+      "redis": {
+        "image": "redis:latest",
+        "container_name": "${containerName}",
+        "command": "redis-server --appendonly yes",
+        "healthcheck": {
+          "test": ["CMD", "redis-cli", "ping"],
+          "retries": 3,
+          "timeout": "5s"
+        },
+        "networks": ["local"],
+        "ports": ["${port}:6379"],
+        "volumes": ["${volumeName}:/data"]
+      }
+    },
+    "networks": {
+      "local": {
+        "driver": "bridge",
+        "name": "${networkName}"
+      }
+    },
+    "volumes": {
+      "${volumeName}": {
+        "driver": "local",
+        "name": "${volumeName}"
+      }
+    }
+  },
+  "connectionInfo": {
+    "host": "localhost",
+    "port": "${port}",
+    "connectionString": "redis://localhost:${port}"
+  }
+}

@@ -7,7 +7,13 @@ import { promptDatabases } from './prompts/database.js';
 import { promptHosting } from './prompts/hosting.js';
 import { promptGit } from './prompts/git.js';
 import { promptTechStack } from './prompts/techstack.js';
-import type { ProjectStructure } from '../types/types.js';
+import type { 
+  ProjectStructure, 
+  SetupType, 
+  MonorepoTool, 
+  PackageManager,
+  DatabaseSetup 
+} from '../types/index.js';
 
 export async function promptSetup(): Promise<ProjectStructure> {
   // 1. Project name
@@ -19,6 +25,7 @@ export async function promptSetup(): Promise<ProjectStructure> {
   let techStack: string | undefined;
   let frontend: any;
   let backend: any;
+  let databases: DatabaseSetup[] = [];
   
   if (setupType === 'predefined') {
     // Predefined tech stack
@@ -36,7 +43,7 @@ export async function promptSetup(): Promise<ProjectStructure> {
     backend = await promptBackend(monorepo !== 'none');
     
     // 6. Databases
-    const databases = await promptDatabases();
+    databases = await promptDatabases();
     
     // 7. Hosting
     const hosting = await promptHosting();
@@ -50,8 +57,8 @@ export async function promptSetup(): Promise<ProjectStructure> {
       monorepo,
       packageManagers: {
         monorepo: monorepoPM,
-        frontend: frontend.packageManager,
-        backend: backend.packageManager,
+        frontend: frontend?.packageManager,
+        backend: backend?.packageManager,
       },
       frontend,
       backend,
@@ -67,7 +74,7 @@ export async function promptSetup(): Promise<ProjectStructure> {
     setupType,
     monorepo: 'none',
     packageManagers: {},
-    databases: ['mongodb'], // Default for predefined stacks
+    databases: [{ type: 'mongodb', name: 'mongodb' }], // Default for predefined stacks
     hosting: 'none',
     initializeGit: false,
     techStack,

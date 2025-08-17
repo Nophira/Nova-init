@@ -1,0 +1,98 @@
+{
+  "name": "mongodb",
+  "description": "Document-Store Database",
+  "image": "mongo:latest",
+  "defaultPort": 27017,
+  "internalPort": 27017,
+  "parameters": {
+    "containerName": {
+      "type": "string",
+      "default": "mongodb",
+      "description": "Name des Docker-Containers"
+    },
+    "database": {
+      "type": "string",
+      "default": "local",
+      "description": "Name der Datenbank"
+    },
+    "username": {
+      "type": "string",
+      "default": "admin",
+      "description": "Benutzername für die Datenbank"
+    },
+    "password": {
+      "type": "string",
+      "default": "password123",
+      "description": "Passwort für die Datenbank"
+    },
+    "port": {
+      "type": "number",
+      "default": 27017,
+      "description": "Port für die Datenbank"
+    },
+    "networkName": {
+      "type": "string",
+      "default": "local_dbs_network",
+      "description": "Name des Docker-Netzwerks"
+    },
+    "configVolume": {
+      "type": "string",
+      "default": "mongodb_config",
+      "description": "Name des Config-Volumes"
+    },
+    "dataVolume": {
+      "type": "string",
+      "default": "mongodb_data",
+      "description": "Name des Data-Volumes"
+    }
+  },
+  "dockerCompose": {
+    "version": "3.8",
+    "services": {
+      "mongodb": {
+        "image": "mongo:latest",
+        "container_name": "${containerName}",
+        "environment": {
+          "MONGO_INITDB_DATABASE": "${database}",
+          "MONGO_INITDB_ROOT_USERNAME": "${username}",
+          "MONGO_INITDB_ROOT_PASSWORD": "${password}"
+        },
+        "healthcheck": {
+          "test": "echo 'db.runCommand(\"ping\").ok' | mongo mongodb:27017/test --quiet",
+          "retries": 3,
+          "timeout": "5s"
+        },
+        "networks": ["local"],
+        "ports": ["${port}:27017"],
+        "volumes": [
+          "${configVolume}:/data/configdb",
+          "${dataVolume}:/data/db"
+        ]
+      }
+    },
+    "networks": {
+      "local": {
+        "driver": "bridge",
+        "name": "${networkName}"
+      }
+    },
+    "volumes": {
+      "${configVolume}": {
+        "driver": "local",
+        "name": "${configVolume}"
+      },
+      "${dataVolume}": {
+        "driver": "local",
+        "name": "${dataVolume}"
+      }
+    }
+  },
+  "connectionInfo": {
+    "host": "localhost",
+    "port": "${port}",
+    "database": "${database}",
+    "username": "${username}",
+    "password": "${password}",
+    "connectionString": "mongodb://${username}:${password}@localhost:${port}/${database}"
+  }
+}

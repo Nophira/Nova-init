@@ -1,0 +1,63 @@
+{
+  "name": "yugabytedb",
+  "description": "Distributed SQL Database",
+  "image": "yugabytedb/yugabyte:latest",
+  "defaultPort": 5433,
+  "internalPort": 5433,
+  "parameters": {
+    "containerName": {
+      "type": "string",
+      "default": "yugabytedb",
+      "description": "Name des Docker-Containers"
+    },
+    "port": {
+      "type": "number",
+      "default": 5433,
+      "description": "Port für die Datenbank"
+    },
+    "networkName": {
+      "type": "string",
+      "default": "local_dbs_network",
+      "description": "Name des Docker-Netzwerks"
+    },
+    "volumeName": {
+      "type": "string",
+      "default": "yugabytedb_data",
+      "description": "Name des Data-Volumes"
+    }
+  },
+  "dockerCompose": {
+    "version": "3.8",
+    "services": {
+      "yugabytedb": {
+        "image": "yugabytedb/yugabyte:latest",
+        "container_name": "${containerName}",
+        "healthcheck": {
+          "test": ["CMD", "pg_isready", "-h", "localhost", "-p", "5433"],
+          "retries": 3,
+          "timeout": "5s"
+        },
+        "networks": ["local"],
+        "ports": ["${port}:5433"],
+        "volumes": ["${volumeName}:/var/lib/yugabyte"]
+      }
+    },
+    "networks": {
+      "local": {
+        "driver": "bridge",
+        "name": "${networkName}"
+      }
+    },
+    "volumes": {
+      "${volumeName}": {
+        "driver": "local",
+        "name": "${volumeName}"
+      }
+    }
+  },
+  "connectionInfo": {
+    "host": "localhost",
+    "port": "${port}",
+    "connectionString": "postgresql://yugabyte:yugabyte@localhost:${port}/yugabyte"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "name": "surrealdb",
+  "description": "Multi-Model Database",
+  "image": "surrealdb/surrealdb:latest",
+  "defaultPort": 8000,
+  "internalPort": 8000,
+  "parameters": {
+    "containerName": {
+      "type": "string",
+      "default": "surrealdb",
+      "description": "Name des Docker-Containers"
+    },
+    "port": {
+      "type": "number",
+      "default": 8000,
+      "description": "Port für die Datenbank"
+    },
+    "networkName": {
+      "type": "string",
+      "default": "local_dbs_network",
+      "description": "Name des Docker-Netzwerks"
+    },
+    "volumeName": {
+      "type": "string",
+      "default": "surrealdb_data",
+      "description": "Name des Data-Volumes"
+    }
+  },
+  "dockerCompose": {
+    "version": "3.8",
+    "services": {
+      "surrealdb": {
+        "image": "surrealdb/surrealdb:latest",
+        "container_name": "${containerName}",
+        "command": "surreal start --log trace --user root --pass root memory",
+        "healthcheck": {
+          "test": ["CMD", "curl", "-f", "http://localhost:8000/health"],
+          "retries": 3,
+          "timeout": "5s"
+        },
+        "networks": ["local"],
+        "ports": ["${port}:8000"],
+        "volumes": ["${volumeName}:/data"]
+      }
+    },
+    "networks": {
+      "local": {
+        "driver": "bridge",
+        "name": "${networkName}"
+      }
+    },
+    "volumes": {
+      "${volumeName}": {
+        "driver": "local",
+        "name": "${volumeName}"
+      }
+    }
+  },
+  "connectionInfo": {
+    "host": "localhost",
+    "port": "${port}",
+    "username": "root",
+    "password": "root",
+    "connectionString": "http://localhost:${port}"
+  }
+}
