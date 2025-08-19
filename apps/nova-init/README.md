@@ -67,7 +67,7 @@ The `nova-init setup` command guides you through:
 4. **Frontend** - Language (JavaScript/TypeScript), framework, folder name, package manager
 5. **Backend** - Language (JavaScript/TypeScript), framework, microservices support, folder name, package manager
 6. **Databases** - Multiple databases with Docker configuration (ports, container names, networks, volumes)
-7. **Hosting** - Docker containerization with custom ports for frontend and backend
+7. **Hosting** - Docker containerization with custom ports for frontend and backend (Docker only)
 8. **Git** - Initialize repository with first commit and .gitignore
 9. **Dependencies** - Install all packages automatically with chosen package managers
 
@@ -160,7 +160,7 @@ Options:
   --backend-package-manager <pm> - Backend package manager: npm | pnpm | bun
   --microservices               - Use microservices architecture
   --databases <list>            - Comma-separated list of databases
-  --hosting <option>            - Hosting option: none | docker
+  --hosting <option>            - Hosting option: docker
   --git                         - Initialize Git repository
   --package-manager <pm>        - Default package manager: npm | pnpm | bun
   --techstack <name>            - Predefined tech stack name

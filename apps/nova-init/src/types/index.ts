@@ -35,7 +35,7 @@ export type MonorepoTool = 'none' | 'lerna' | 'nx' | 'turborepo';
 /**
  * Verfügbare Package Manager
  */
-export type PackageManager = 'npm' | 'pnpm' | 'bun';
+export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun';
 
 /**
  * Verfügbare Programmiersprachen
@@ -84,7 +84,7 @@ export type DatabaseType =
 /**
  * Verfügbare Hosting-Optionen
  */
-export type HostingOption = 'none' | 'docker';
+export type HostingOption = 'docker';
 
 // ============================================================================
 // PACKAGE MANAGER CONFIGURATION

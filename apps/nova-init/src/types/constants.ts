@@ -274,13 +274,7 @@ export const DATABASES: Record<DatabaseType, {
   }
 };
 
-// ============================================================================
-// PACKAGE MANAGER CONSTANTS
-// ============================================================================
 
-/**
- * Alle verfügbaren Package Manager mit Metadaten
- */
 export const PACKAGE_MANAGERS: Record<PackageManager, {
   name: string;
   description: string;
@@ -294,13 +288,6 @@ export const PACKAGE_MANAGERS: Record<PackageManager, {
     website: 'https://www.npmjs.com/',
     lockFile: 'package-lock.json',
     features: ['built-in', 'registry', 'scripts', 'workspaces']
-  },
-  yarn: {
-    name: 'Yarn',
-    description: 'Fast, reliable, and secure dependency management',
-    website: 'https://yarnpkg.com/',
-    lockFile: 'yarn.lock',
-    features: ['offline-mode', 'deterministic', 'workspaces', 'plugnplay']
   },
   pnpm: {
     name: 'pnpm',
@@ -318,13 +305,7 @@ export const PACKAGE_MANAGERS: Record<PackageManager, {
   }
 };
 
-// ============================================================================
-// MONOREPO TOOL CONSTANTS
-// ============================================================================
 
-/**
- * Alle verfügbaren Monorepo-Tools mit Metadaten
- */
 export const MONOREPO_TOOLS: Record<MonorepoTool, {
   name: string;
   description: string;

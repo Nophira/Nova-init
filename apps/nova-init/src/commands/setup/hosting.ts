@@ -1,10 +1,9 @@
 type ArgMap = Record<string, string | boolean>;
 
-export function buildHosting(options: ArgMap): 'docker' | 'none' {
+export function buildHosting(options: ArgMap): 'docker' {
   const raw = options['hosting'];
-  if (!raw || typeof raw === 'boolean') return 'none';
-  const v = (raw as string).toLowerCase();
-  return v === 'docker' ? 'docker' : 'none';
+  if (!raw || typeof raw === 'boolean') return 'docker';
+  return 'docker';
 }
 
 

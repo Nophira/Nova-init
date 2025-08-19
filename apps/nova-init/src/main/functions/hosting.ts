@@ -1,11 +1,10 @@
 import { select, text, confirm, isCancel, cancel } from '@clack/prompts';
 import type { HostingOption } from '../../types/index.js';
 
-export async function askHostingOption(): Promise<HostingOption> {
+export async function askHosting(): Promise<HostingOption> {
   const hosting = await select({
     message: 'Choose hosting option:',
     options: [
-      { value: 'none', label: 'No hosting - Local development only' },
       { value: 'docker', label: 'Docker - Containerized hosting' }
     ],
   });
@@ -148,21 +147,21 @@ export async function askHostingSetup(): Promise<HostingOption | {
   type: 'docker';
   config: any;
 }> {
-  const hosting = await askHostingOption();
+  const hosting = await askHosting();
   
   if (hosting === 'docker') {
     const config = await askDockerConfiguration();
     return { type: 'docker', config };
   }
   
-  return hosting;
+  return 'docker';
 }
 
 export function validateHostingOption(hosting: string): HostingOption {
-  if (!['none', 'docker'].includes(hosting)) {
-    throw new Error('Invalid hosting option. Must be "none" or "docker"');
+  if (hosting !== 'docker') {
+    throw new Error('Invalid hosting option. Only "docker" is supported');
   }
-  return hosting as HostingOption;
+  return 'docker';
 }
 
 export function validatePort(port: number): number {

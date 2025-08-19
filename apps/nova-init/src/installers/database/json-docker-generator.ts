@@ -89,7 +89,13 @@ function convertJsonToYaml(obj: any, options: Record<string, any>, indent: numbe
       } else if (Array.isArray(value)) {
         yaml += `${spaces}${key}:\n${convertJsonToYaml(value, options, indent + 1)}`;
       } else {
-        const resolvedValue = resolveTemplate(value.toString(), options);
+        // Da 'value' vom Typ 'unknown' ist, prüfen wir den Typ, bevor wir toString aufrufen
+        let resolvedValue: string;
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+          resolvedValue = resolveTemplate(value.toString(), options);
+        } else {
+          resolvedValue = resolveTemplate(String(value), options);
+        }
         yaml += `${spaces}${key}: ${resolvedValue}\n`;
       }
     }

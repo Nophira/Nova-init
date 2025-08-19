@@ -2,7 +2,7 @@ import consola from 'consola';
 import { runTerminalCommand } from '../utils/runTerminalCommand.js';
 import { addFrontend } from './addFrontend.ts';
 import { addBackend } from './addBackend.ts';
-import { addDatabase } from './addDatabase.ts';
+import { addDatabase } from './add/addDatabase.ts';
 import { getAvailableDatabases, getDatabaseParameters } from '../installers/database/json-docker-generator.js';
 import { readFile, access } from 'fs/promises';
 import path from 'path';

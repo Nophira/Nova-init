@@ -1,6 +1,6 @@
 // src/functions/packageManager.ts
 import { select, isCancel, cancel } from '@clack/prompts';
-import type { MonorepoTool, PackageManager } from '../../types/types.js';
+import type { MonorepoTool, PackageManager } from '../../types/index.js';
 
 // Monorepo-spezifische unterstützte Package Manager
 const supportedPackageManagers: Record<MonorepoTool, PackageManager[]> = {

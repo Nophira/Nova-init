@@ -21,16 +21,37 @@ import type {
   PackageManager,
   DatabaseSetup,
   FrontendSetup,
-  BackendSetup
+  BackendSetup,
+  SetupCommandOptions,
+  HostingOption,
+  DatabaseType
 } from '../types/index.js';
 
-export async function promptSetup(): Promise<ProjectStructure> {
+function getDefaultDbPort(db: DatabaseType): number {
+  const mapping: Record<string, number> = {
+    postgres: 5432,
+    mysql: 3306,
+    mariadb: 3306,
+    mongodb: 27017,
+    redis: 6379,
+    cassandra: 9042,
+    cockroachdb: 26257,
+    couchdb: 5984,
+    edgedb: 5656,
+    neo4j: 7687,
+    surrealdb: 8000,
+    yugabytedb: 5433,
+  };
+  return mapping[db] ?? 5432;
+}
+
+export async function promptSetup(options: SetupCommandOptions = {}): Promise<ProjectStructure> {
   // 1. Project name
-  const projectName = await promptProjectName();
+  const projectName = options['project-name'] ? options['project-name'] : await promptProjectName();
   const projectPath = await createProjectDirectory(projectName);
   
   // 2. Setup type
-  const setupType = await promptSetupType();
+  let setupType: SetupType = options.techstack ? 'predefined' : (options['setup-type'] ?? await promptSetupType());
   
   let techStack: PredefinedTechStack | undefined;
   let frontend: FrontendSetup | undefined;
@@ -41,68 +62,129 @@ export async function promptSetup(): Promise<ProjectStructure> {
   
   if (setupType === 'predefined') {
     // Predefined tech stack
-    techStack = await promptTechStack();
+    techStack = (options.techstack as PredefinedTechStack) || await promptTechStack();
     const config = getTechStackConfig(techStack);
     
     // Set up based on predefined config
-    monorepo = config.monorepo as MonorepoTool;
+    monorepo = (options.monorepo as MonorepoTool) ?? (config.monorepo as MonorepoTool);
     packageManagers = {
-      monorepo: config.monorepo !== 'none' ? config.monorepo as PackageManager : undefined,
-      frontend: config.frontend.packageManager as PackageManager,
-      backend: config.backend.packageManager as PackageManager,
+      monorepo: (options['monorepo-package-manager'] as PackageManager) ?? (config.monorepo !== 'none' ? config.monorepo as PackageManager : undefined),
+      frontend: (options['frontend-package-manager'] as PackageManager) ?? (config.frontend.packageManager as PackageManager),
+      backend: (options['backend-package-manager'] as PackageManager) ?? (config.backend.packageManager as PackageManager),
     };
+    // Apply default fallback package manager if provided
+    if (options['package-manager']) {
+      packageManagers = {
+        monorepo: packageManagers.monorepo ?? (options['package-manager'] as PackageManager),
+        frontend: packageManagers.frontend ?? (options['package-manager'] as PackageManager),
+        backend: packageManagers.backend ?? (options['package-manager'] as PackageManager),
+      };
+    }
     
     frontend = {
-      language: config.frontend.language as 'javascript' | 'typescript',
-      framework: config.frontend.framework as any,
-      folderName: 'frontend',
-      packageManager: config.frontend.packageManager as PackageManager,
+      language: (options['frontend-language'] as 'javascript' | 'typescript') ?? (config.frontend.language as 'javascript' | 'typescript'),
+      framework: (options.frontend as any) ?? (config.frontend.framework as any),
+      folderName: options['frontend-folder'] ?? 'frontend',
+      packageManager: packageManagers.frontend as PackageManager,
     };
     
     backend = {
-      language: config.backend.language as 'javascript' | 'typescript',
-      framework: config.backend.framework as any,
-      useMicroservices: false,
-      folderName: 'backend',
-      packageManager: config.backend.packageManager as PackageManager,
+      language: (options['backend-language'] as 'javascript' | 'typescript') ?? (config.backend.language as 'javascript' | 'typescript'),
+      framework: (options.backend as any) ?? (config.backend.framework as any),
+      useMicroservices: Boolean(options.microservices),
+      microserviceNames: typeof options.microservices === 'string' ? String(options.microservices).split(',').map(s => s.trim()).filter(Boolean) : undefined,
+      folderName: options['backend-folder'] ?? 'backend',
+      packageManager: packageManagers.backend as PackageManager,
     };
     
-    databases = [{ 
-      type: config.database as any, 
-      name: config.database,
-      port: config.database === 'postgres' ? 5432 : 27017,
-      containerName: `${config.database}_db`,
-      networkName: 'local_dbs_network',
-      volumeName: `${config.database}_data`
-    }];
+    if (options.databases && options.databases.length > 0) {
+      databases = (options.databases as DatabaseType[]).map((db) => ({
+        type: db as any,
+        name: db,
+        port: getDefaultDbPort(db as DatabaseType),
+        containerName: `${db}_db`,
+        networkName: 'local_dbs_network',
+        volumeName: `${db}_data`,
+      }));
+    } else {
+      databases = [{ 
+        type: config.database as any, 
+        name: config.database,
+        port: getDefaultDbPort(config.database as any),
+        containerName: `${config.database}_db`,
+        networkName: 'local_dbs_network',
+        volumeName: `${config.database}_data`
+      }];
+    }
     
   } else {
     // Custom setup
     // 3. Monorepo
-    monorepo = await promptMonorepo();
-    const monorepoPM = monorepo !== 'none' ? await promptMonorepoPackageManager(monorepo) : undefined;
+    monorepo = (options.monorepo as MonorepoTool) ?? await promptMonorepo();
+    const monorepoPM = (options['monorepo-package-manager'] as PackageManager) ?? (monorepo !== 'none' ? await promptMonorepoPackageManager(monorepo) : undefined);
     
     // 4. Frontend
-    frontend = await promptFrontend(monorepo !== 'none');
+    if (options.frontend) {
+      frontend = {
+        language: (options['frontend-language'] as 'javascript' | 'typescript') ?? 'typescript',
+        framework: options.frontend as any,
+        folderName: options['frontend-folder'] ?? 'frontend',
+        packageManager: (options['frontend-package-manager'] as PackageManager) ?? (options['package-manager'] as PackageManager) ?? 'npm',
+      };
+    } else {
+      frontend = await promptFrontend(monorepo !== 'none');
+    }
     
     // 5. Backend
-    backend = await promptBackend(monorepo !== 'none');
+    if (options.backend) {
+      const msNames = typeof options.microservices === 'string' ? String(options.microservices).split(',').map(s => s.trim()).filter(Boolean) : undefined;
+      backend = {
+        language: (options['backend-language'] as 'javascript' | 'typescript') ?? 'typescript',
+        framework: options.backend as any,
+        useMicroservices: Boolean(options.microservices),
+        microserviceNames: msNames,
+        folderName: options['backend-folder'] ?? 'backend',
+        packageManager: (options['backend-package-manager'] as PackageManager) ?? (options['package-manager'] as PackageManager) ?? 'npm',
+      };
+    } else {
+      backend = await promptBackend(monorepo !== 'none');
+    }
     
     // 6. Databases
-    databases = await promptDatabases();
+    if (options.databases && options.databases.length > 0) {
+      databases = (options.databases as DatabaseType[]).map((db) => ({
+        type: db as any,
+        name: db,
+        port: getDefaultDbPort(db as DatabaseType),
+        containerName: `${db}_db`,
+        networkName: 'local_dbs_network',
+        volumeName: `${db}_data`,
+      }));
+    } else {
+      databases = await promptDatabases();
+    }
     
     packageManagers = {
       monorepo: monorepoPM,
       frontend: frontend?.packageManager,
       backend: backend?.packageManager,
     };
+    // Apply default fallback package manager if provided
+    if (options['package-manager']) {
+      packageManagers = {
+        monorepo: packageManagers.monorepo ?? (options['package-manager'] as PackageManager),
+        frontend: packageManagers.frontend ?? (options['package-manager'] as PackageManager),
+        backend: packageManagers.backend ?? (options['package-manager'] as PackageManager),
+      };
+    }
   }
   
   // 7. Hosting
-  const hosting = await promptHosting();
+  const hostingInput = options.hosting ? (options.hosting as HostingOption) : await promptHosting();
+  const hosting: HostingOption = typeof hostingInput === 'string' ? hostingInput : hostingInput.type;
   
   // 8. Git
-  const initializeGit = await promptGit();
+  const initializeGit = typeof options.git === 'boolean' ? Boolean(options.git) : await promptGit();
   
   // 9. Install dependencies
   const installDeps = await askInstallDependencies();
