@@ -15,20 +15,27 @@ export async function installExpress(
     const exec = (cmd: string) =>
       execSync(cmd, { cwd: targetPath, stdio: 'inherit' }); 
 
-    // Initialize package.json
-    exec(`${packageManager} init -y`);
-    
     // Install Express
-    if (packageManager === 'pnpm') exec(`${packageManager} add express`);
-    else if (packageManager === 'bun') exec(`${packageManager} add express`);
-    else exec(`${packageManager} install express`);
+    if (packageManager === 'pnpm') {
+      exec('pnpm install');
+      exec('pnpm add express');
+    } else if (packageManager === 'bun') {
+      exec('bun install');
+      exec('bun add express');
+    } else {
+      exec('npm install express');
+    }
 
     if (language === 'typescript') {
       consola.info('Installing TypeScript dependencies...');
-      if (packageManager === 'pnpm') exec(`${packageManager} add -D typescript @types/express ts-node-dev @types/node`);
-      else if (packageManager === 'bun') exec(`${packageManager} add -d typescript @types/express ts-node-dev @types/node`);
-      else exec(`${packageManager} install -D typescript @types/express ts-node-dev @types/node`);
-      exec(`npx tsc --init`);
+      if (packageManager === 'pnpm') {
+        exec('pnpm add -D typescript @types/express ts-node-dev @types/node');
+      } else if (packageManager === 'bun') {
+        exec('bun add -d typescript @types/express ts-node-dev @types/node');
+      } else {
+        exec('npm install -D typescript @types/express ts-node-dev @types/node');
+      }
+      exec('npx tsc --init');
 
       const tsConfig = {
         compilerOptions: {
