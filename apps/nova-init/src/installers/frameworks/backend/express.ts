@@ -1,6 +1,6 @@
 import { execSync } from 'child_process';
 import consola from 'consola';
-import { writeFileSync } from 'fs';
+import { writeFileSync, readFileSync } from 'fs';
 import * as path from 'path';
 import type { Language, PackageManager } from '../../../types/index.js';
 
@@ -19,14 +19,17 @@ export async function installExpress(
     exec(`${packageManager} init -y`);
     
     // Install Express
-    exec(`${packageManager} add express`);
+    if (packageManager === 'pnpm') exec(`${packageManager} add express`);
+    else if (packageManager === 'bun') exec(`${packageManager} add express`);
+    else exec(`${packageManager} install express`);
 
     if (language === 'typescript') {
       consola.info('Installing TypeScript dependencies...');
-      exec(`${packageManager} add -D typescript @types/express ts-node-dev @types/node`);
+      if (packageManager === 'pnpm') exec(`${packageManager} add -D typescript @types/express ts-node-dev @types/node`);
+      else if (packageManager === 'bun') exec(`${packageManager} add -d typescript @types/express ts-node-dev @types/node`);
+      else exec(`${packageManager} install -D typescript @types/express ts-node-dev @types/node`);
       exec(`npx tsc --init`);
 
-      // Create TypeScript configuration
       const tsConfig = {
         compilerOptions: {
           target: "ES2020",
@@ -48,9 +51,7 @@ export async function installExpress(
         JSON.stringify(tsConfig, null, 2)
       );
 
-      // Create source directory and main file
       execSync('mkdir -p src', { cwd: targetPath });
-      
       const mainContent = `import express from 'express';
 
 const app = express();
@@ -66,32 +67,26 @@ app.listen(PORT, () => {
   console.log(\`🚀 Server running on port \${PORT}\`);
 });
 `;
-
       writeFileSync(
         path.join(targetPath, 'src/index.ts'),
         mainContent
       );
 
-      // Update package.json scripts
       const packageJsonPath = path.join(targetPath, 'package.json');
-      const packageJson = JSON.parse(require('fs').readFileSync(packageJsonPath, 'utf8'));
-      
+      const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
       packageJson.scripts = {
         ...packageJson.scripts,
         "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
         "build": "tsc",
         "start": "node dist/index.js"
       };
-
       writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
     } else {
       consola.info('Installing JavaScript version...');
-      
-      // Create source directory and main file
+
       execSync('mkdir -p src', { cwd: targetPath });
-      
-      const mainContent = `const express = require('express');
+      const mainContent = `import express from 'express';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -106,37 +101,25 @@ app.listen(PORT, () => {
   console.log(\`🚀 Server running on port \${PORT}\`);
 });
 `;
-
       writeFileSync(
         path.join(targetPath, 'src/index.js'),
         mainContent
       );
 
-      // Update package.json scripts
       const packageJsonPath = path.join(targetPath, 'package.json');
-      const packageJson = JSON.parse(require('fs').readFileSync(packageJsonPath, 'utf8'));
-      
+      const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+      packageJson.type = 'module';
       packageJson.scripts = {
         ...packageJson.scripts,
         "dev": "node src/index.js",
         "start": "node src/index.js"
       };
-
       writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
     }
 
-    // Create .env.example
     const envContent = `# Server Configuration
 PORT=5000
 NODE_ENV=development
-
-# Database Configuration (if applicable)
-# DATABASE_URL=mongodb://localhost:27017/your-database
-# REDIS_URL=redis://localhost:6379
-
-# JWT Configuration (if applicable)
-# JWT_SECRET=your-secret-key
-# JWT_EXPIRES_IN=24h
 `;
 
     writeFileSync(
