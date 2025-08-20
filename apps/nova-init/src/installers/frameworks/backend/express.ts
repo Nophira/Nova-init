@@ -17,9 +17,11 @@ export async function installExpress(
 
     // Install Express
     if (packageManager === 'pnpm') {
+      exec('npm init -y');
       exec('pnpm install');
       exec('pnpm add express');
     } else if (packageManager === 'bun') {
+      exec('npm init -y');
       exec('bun install');
       exec('bun add express');
     } else {
