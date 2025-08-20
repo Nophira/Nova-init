@@ -1,7 +1,6 @@
 import { promptProjectName } from './prompts/projectName.js';
 import { promptSetupType } from './prompts/setupType.js';
 import { promptMonorepo, promptMonorepoPackageManager } from './prompts/monorepo.js';
-import { installSelectedMonorepo } from './functions/monorepo.js';
 import { promptFrontend } from './prompts/frontend.js';
 import { promptBackend } from './prompts/backend.js';
 import { promptDatabases } from './prompts/database.js';
@@ -15,6 +14,7 @@ import { createEnvExample, createNovaInitJson } from './functions/env.js';
 import { initializeGitRepository } from './functions/git.js';
 import { installDependencies } from './functions/dependencies.js';
 import { getTechStackConfig, type PredefinedTechStack } from './functions/techstack.js';
+import { installSelectedMonorepo } from './functions/monorepo.js';
 import type { 
   ProjectStructure, 
   SetupType, 
@@ -27,6 +27,7 @@ import type {
   HostingOption,
   DatabaseType
 } from '../types/index.js';
+import path from 'path';
 
 function getDefaultDbPort(db: DatabaseType): number {
   const mapping: Record<string, number> = {
@@ -204,14 +205,17 @@ export async function promptSetup(options: SetupCommandOptions = {}): Promise<Pr
     techStack,
   };
   
+  // If monorepo selected, install it now before creating structure
+  if (monorepo !== 'none' && packageManagers.monorepo) {
+    await installSelectedMonorepo(projectPath, monorepo, packageManagers.monorepo);
+  }
+
   // Create project structure
   await createProjectStructure(projectPath, projectConfig);
   
-  // Install monorepo tooling if selected
-  if (projectConfig.monorepo !== 'none' && projectConfig.packageManagers.monorepo) {
-    await installSelectedMonorepo(projectPath, projectConfig.monorepo, projectConfig.packageManagers.monorepo);
-  }
-
+  // Install frameworks
+  await installFrameworks(projectPath, projectConfig);
+  
   // Create configuration files
   await createEnvExample(projectPath, projectConfig);
   await createNovaInitJson(projectPath, projectConfig);
@@ -227,4 +231,47 @@ export async function promptSetup(options: SetupCommandOptions = {}): Promise<Pr
   }
   
   return projectConfig;
+}
+
+async function installFrameworks(projectPath: string, config: ProjectStructure): Promise<void> {
+  // Frontend
+  if (config.frontend) {
+    const frontendPath = path.join(projectPath, config.frontend.folderName || 'frontend');
+    switch (config.frontend.framework) {
+      case 'react': {
+        const { installReact } = await import('../installers/frameworks/frontend/react.js');
+        await installReact(frontendPath, config.projectName, config.frontend.language, config.frontend.packageManager);
+        break;
+      }
+      // Weitere Frameworks können hier ergänzt werden (nextjs, vue, svelte, ...)
+      default:
+        console.log(`Frontend installer for ${config.frontend.framework} not implemented yet.`);
+    }
+  }
+
+  // Backend
+  if (config.backend) {
+    if (config.backend.useMicroservices && config.backend.microserviceNames && config.backend.microserviceNames.length > 0) {
+      for (const service of config.backend.microserviceNames) {
+        const servicePath = path.join(projectPath, 'services', service);
+        await installBackend(servicePath, config.backend);
+      }
+    } else {
+      const backendPath = path.join(projectPath, config.backend.folderName || 'backend');
+      await installBackend(backendPath, config.backend);
+    }
+  }
+}
+
+async function installBackend(targetPath: string, backend: BackendSetup): Promise<void> {
+  switch (backend.framework) {
+    case 'express': {
+      const { installExpress } = await import('../installers/frameworks/backend/express.js');
+      await installExpress(targetPath, backend.language, backend.packageManager);
+      break;
+    }
+    // Weitere Backend-Frameworks können hier ergänzt werden (fastify, nestjs)
+    default:
+      console.log(`Backend installer for ${backend.framework} not implemented yet.`);
+  }
 }
