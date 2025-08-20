@@ -83,3 +83,26 @@ export function validateMonorepoPackageManager(monorepo: MonorepoTool, packageMa
 
   return packageManager as PackageManager;
 }
+
+export async function installSelectedMonorepo(targetPath: string, monorepo: MonorepoTool, packageManager: PackageManager): Promise<void> {
+  switch (monorepo) {
+    case 'turborepo': {
+      const { installTurborepo } = await import('../../installers/monorepo/turborepo.js');
+      await installTurborepo(targetPath, packageManager);
+      break;
+    }
+    case 'nx': {
+      const { installNx } = await import('../../installers/monorepo/nx.js');
+      await installNx(targetPath, packageManager);
+      break;
+    }
+    case 'lerna': {
+      const { installLerna } = await import('../../installers/monorepo/lerna.js');
+      await installLerna(targetPath, packageManager);
+      break;
+    }
+    case 'none':
+    default:
+      return;
+  }
+}

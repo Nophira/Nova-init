@@ -62,9 +62,6 @@ async function installWithPackageManager(projectPath: string, packageManager: st
       case 'pnpm':
         execSync('pnpm install', { cwd: projectPath, stdio: 'inherit' });
         break;
-      case 'yarn':
-        execSync('yarn install', { cwd: projectPath, stdio: 'inherit' });
-        break;
       case 'bun':
         execSync('bun install', { cwd: projectPath, stdio: 'inherit' });
         break;
@@ -77,8 +74,8 @@ async function installWithPackageManager(projectPath: string, packageManager: st
 }
 
 export function validatePackageManager(packageManager: string): string {
-  if (!['npm', 'pnpm', 'yarn', 'bun'].includes(packageManager)) {
-    throw new Error('Invalid package manager. Must be "npm", "pnpm", "yarn", or "bun"');
+  if (!['npm', 'pnpm', 'bun'].includes(packageManager)) {
+    throw new Error('Invalid package manager. Must be "npm", "pnpm", or "bun"');
   }
   return packageManager;
 }

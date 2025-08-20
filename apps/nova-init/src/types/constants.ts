@@ -162,6 +162,72 @@ export const BACKEND_FRAMEWORKS: Record<BackendFramework, {
 };
 
 // ============================================================================
+// VITE SUPPORT CONSTANTS
+// ============================================================================
+
+/**
+ * Frontend-Frameworks, die Sprachauswahl unterstützen
+ */
+export const SUPPORTS_LANG_CHOICE: FrontendFramework[] = [
+  'react',
+  'lit',
+  'nextjs',
+  'preact',
+  'qwik',
+  'solid',
+  'svelte',
+  'vue'
+];
+
+/**
+ * Frontend-Frameworks, die Vite-Auswahl unterstützen (nur React)
+ */
+export const SUPPORTS_VITE_CHOICE: FrontendFramework[] = [
+  'react'
+];
+
+/**
+ * Frontend-Frameworks, die Vite benötigen
+ */
+export const REQUIRES_VITE: FrontendFramework[] = [
+  'solid',
+  'svelte',
+  'vue',
+  'lit',
+  'preact',
+  'nuxtjs',
+  'qwik',
+  'remix'
+];
+
+/**
+ * Alle unterstützten Frontend-Frameworks
+ */
+export const SUPPORTED_FRONTEND_FRAMEWORKS: FrontendFramework[] = [
+  'react',
+  'angular',
+  'nextjs',
+  'nuxtjs',
+  'preact',
+  'qwik',
+  'solid',
+  'svelte',
+  'vue',
+  'lit',
+  'astro',
+  'remix'
+];
+
+/**
+ * Alle unterstützten Backend-Frameworks
+ */
+export const SUPPORTED_BACKEND_FRAMEWORKS: BackendFramework[] = [
+  'express',
+  'nestjs',
+  'fastify'
+];
+
+// ============================================================================
 // DATABASE CONSTANTS
 // ============================================================================
 
@@ -274,6 +340,9 @@ export const DATABASES: Record<DatabaseType, {
   }
 };
 
+// ============================================================================
+// PACKAGE MANAGER CONSTANTS
+// ============================================================================
 
 export const PACKAGE_MANAGERS: Record<PackageManager, {
   name: string;
@@ -305,6 +374,9 @@ export const PACKAGE_MANAGERS: Record<PackageManager, {
   }
 };
 
+// ============================================================================
+// MONOREPO TOOL CONSTANTS
+// ============================================================================
 
 export const MONOREPO_TOOLS: Record<MonorepoTool, {
   name: string;
@@ -352,47 +424,11 @@ export const HOSTING_OPTIONS = {
     website: '',
     features: []
   },
-  vercel: {
-    name: 'Vercel',
-    description: 'Deploy frontend applications with zero configuration',
-    website: 'https://vercel.com/',
-    features: ['zero-config', 'edge-functions', 'analytics', 'previews']
-  },
-  netlify: {
-    name: 'Netlify',
-    description: 'All-in-one platform for web projects',
-    website: 'https://netlify.com/',
-    features: ['continuous-deployment', 'forms', 'functions', 'edge-functions']
-  },
-  railway: {
-    name: 'Railway',
-    description: 'Deploy code, databases, and services with zero configuration',
-    website: 'https://railway.app/',
-    features: ['zero-config', 'databases', 'services', 'monitoring']
-  },
-  heroku: {
-    name: 'Heroku',
-    description: 'Cloud platform for deploying and managing applications',
-    website: 'https://heroku.com/',
-    features: ['git-deployment', 'add-ons', 'scaling', 'monitoring']
-  },
-  aws: {
-    name: 'AWS',
-    description: 'Amazon Web Services cloud platform',
-    website: 'https://aws.amazon.com/',
-    features: ['ec2', 'lambda', 'rds', 's3', 'cloudfront']
-  },
-  gcp: {
-    name: 'Google Cloud Platform',
-    description: 'Google Cloud computing services',
-    website: 'https://cloud.google.com/',
-    features: ['compute-engine', 'cloud-functions', 'cloud-sql', 'cloud-storage']
-  },
-  azure: {
-    name: 'Microsoft Azure',
-    description: 'Microsoft cloud computing platform',
-    website: 'https://azure.microsoft.com/',
-    features: ['app-service', 'functions', 'sql-database', 'storage']
+  docker: {
+    name: 'Docker',
+    description: 'Containerized hosting',
+    website: 'https://www.docker.com/',
+    features: ['containerization', 'port-forwarding', 'network-isolation']
   }
 } as const;
 
@@ -547,4 +583,25 @@ export function getAvailablePackageManagers(): PackageManager[] {
  */
 export function getAvailableMonorepoTools(): MonorepoTool[] {
   return Object.keys(MONOREPO_TOOLS) as MonorepoTool[];
+}
+
+/**
+ * Überprüft, ob ein Framework Vite benötigt
+ */
+export function requiresVite(framework: FrontendFramework): boolean {
+  return REQUIRES_VITE.includes(framework);
+}
+
+/**
+ * Überprüft, ob ein Framework Vite-Auswahl unterstützt
+ */
+export function supportsViteChoice(framework: FrontendFramework): boolean {
+  return SUPPORTS_VITE_CHOICE.includes(framework);
+}
+
+/**
+ * Überprüft, ob ein Framework Sprachauswahl unterstützt
+ */
+export function supportsLanguageChoice(framework: FrontendFramework): boolean {
+  return SUPPORTS_LANG_CHOICE.includes(framework);
 }

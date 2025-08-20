@@ -5,7 +5,8 @@ export async function askHosting(): Promise<HostingOption> {
   const hosting = await select({
     message: 'Choose hosting option:',
     options: [
-      { value: 'docker', label: 'Docker - Containerized hosting' }
+      { value: 'docker', label: 'Docker - Containerized hosting' },
+      { value: 'none', label: 'None - No hosting' }
     ],
   });
 
@@ -154,14 +155,14 @@ export async function askHostingSetup(): Promise<HostingOption | {
     return { type: 'docker', config };
   }
   
-  return 'docker';
+  return 'none';
 }
 
 export function validateHostingOption(hosting: string): HostingOption {
-  if (hosting !== 'docker') {
-    throw new Error('Invalid hosting option. Only "docker" is supported');
+  if (hosting !== 'docker' && hosting !== 'none') {
+    throw new Error('Invalid hosting option. Only "docker" or "none" are supported');
   }
-  return 'docker';
+  return hosting as HostingOption;
 }
 
 export function validatePort(port: number): number {

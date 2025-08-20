@@ -44,7 +44,6 @@ turbo build
 
 # Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
 npx turbo build
-yarn dlx turbo build
 pnpm exec turbo build
 ```
 
@@ -56,7 +55,6 @@ turbo build --filter=docs
 
 # Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
 npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
 pnpm exec turbo build --filter=docs
 ```
 
@@ -72,7 +70,6 @@ turbo dev
 
 # Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
 npx turbo dev
-yarn exec turbo dev
 pnpm exec turbo dev
 ```
 
@@ -84,7 +81,6 @@ turbo dev --filter=web
 
 # Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
 npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
 pnpm exec turbo dev --filter=web
 ```
 
@@ -105,7 +101,6 @@ turbo login
 
 # Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
 npx turbo login
-yarn exec turbo login
 pnpm exec turbo login
 ```
 
@@ -119,7 +114,6 @@ turbo link
 
 # Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
 npx turbo link
-yarn exec turbo link
 pnpm exec turbo link
 ```
 

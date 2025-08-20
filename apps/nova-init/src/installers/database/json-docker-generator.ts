@@ -1,6 +1,11 @@
 import * as fs from 'fs/promises';
-import path from 'path';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
 import consola from 'consola';
+
+// ES Module compatibility
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 interface DatabaseParameter {
   type: string;
@@ -21,23 +26,23 @@ interface DatabaseConfig {
 
 export async function loadDatabaseConfig(database: string): Promise<DatabaseConfig> {
   try {
-    const configPath = path.join(__dirname, 'docker', `${database.toLowerCase()}.json`);
+    const configPath = path.join(process.cwd(), 'src/installers/database/docker', `${database.toLowerCase()}.json`);
     const configContent = await fs.readFile(configPath, 'utf-8');
     return JSON.parse(configContent);
   } catch (error) {
-    throw new Error(`Konfiguration für Datenbank '${database}' nicht gefunden`);
+    throw new Error(`Configuration for database '${database}' not found`);
   }
 }
 
 export async function getAvailableDatabases(): Promise<string[]> {
   try {
-    const dockerPath = path.join(__dirname, 'docker');
+    const dockerPath = path.join(process.cwd(), 'src/installers/database/docker');
     const files = await fs.readdir(dockerPath);
     return files
       .filter(file => file.endsWith('.json'))
       .map(file => file.replace('.json', ''));
   } catch (error) {
-    consola.error('Fehler beim Laden der verfügbaren Datenbanken:', error);
+    consola.error('Failed to load available databases:', error);
     return [];
   }
 }
@@ -48,65 +53,66 @@ export async function generateDockerComposeFromJson(
 ): Promise<string> {
   try {
     const config = await loadDatabaseConfig(database);
-    
-    // Verwende Standardwerte und überschreibe mit benutzerdefinierten Optionen
-    const options: Record<string, any> = {};
-    
-    // Setze Standardwerte
-    for (const [paramName, paramConfig] of Object.entries(config.parameters)) {
-      options[paramName] = paramConfig.default;
-    }
-    
-    // Überschreibe mit benutzerdefinierten Optionen
-    Object.assign(options, customOptions);
-
-    // Konvertiere JSON zu YAML-String
-    const dockerComposeYaml = convertJsonToYaml(config.dockerCompose, options);
-    
-    return dockerComposeYaml;
+    const options = resolveOptions(config, customOptions);
+    return jsonToYaml(config.dockerCompose, options);
   } catch (error) {
-    consola.error(`Fehler beim Generieren der Docker-Compose für ${database}:`, error);
+    consola.error(`Failed to generate docker-compose for ${database}:`, error);
     throw error;
   }
 }
 
-function convertJsonToYaml(obj: any, options: Record<string, any>, indent: number = 0): string {
-  const spaces = '  '.repeat(indent);
-  let yaml = '';
+function resolveOptions(config: DatabaseConfig, overrides: Record<string, any>): Record<string, any> {
+  const defaults: Record<string, any> = {};
+  for (const [key, param] of Object.entries(config.parameters)) {
+    defaults[key] = param.default;
+  }
+  return { ...defaults, ...overrides };
+}
 
-  if (Array.isArray(obj)) {
-    for (const item of obj) {
-      if (typeof item === 'object' && item !== null) {
-        yaml += `${spaces}- ${convertJsonToYaml(item, options, indent + 1).trim()}\n`;
-      } else {
-        yaml += `${spaces}- ${resolveTemplate(item.toString(), options)}\n`;
-      }
-    }
-  } else if (typeof obj === 'object' && obj !== null) {
-    for (const [key, value] of Object.entries(obj)) {
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        yaml += `${spaces}${key}:\n${convertJsonToYaml(value, options, indent + 1)}`;
-      } else if (Array.isArray(value)) {
-        yaml += `${spaces}${key}:\n${convertJsonToYaml(value, options, indent + 1)}`;
-      } else {
-        // Da 'value' vom Typ 'unknown' ist, prüfen wir den Typ, bevor wir toString aufrufen
-        let resolvedValue: string;
-        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-          resolvedValue = resolveTemplate(value.toString(), options);
-        } else {
-          resolvedValue = resolveTemplate(String(value), options);
+function jsonToYaml(node: any, options: Record<string, any>, indent: number = 0): string {
+  const pad = '  '.repeat(indent);
+
+  if (Array.isArray(node)) {
+    return node
+      .map(item => {
+        if (isPlainObject(item)) {
+          const child = jsonToYaml(item, options, indent + 1);
+          return `${pad}-\n${child}`;
         }
-        yaml += `${spaces}${key}: ${resolvedValue}\n`;
-      }
-    }
+        return `${pad}- ${resolveValue(item, options)}\n`;
+      })
+      .join('');
   }
 
-  return yaml;
+  if (isPlainObject(node)) {
+    return Object.entries(node)
+      .map(([key, value]) => {
+        if (Array.isArray(value) || isPlainObject(value)) {
+          return `${pad}${key}:\n${jsonToYaml(value, options, indent + 1)}`;
+        }
+        return `${pad}${key}: ${resolveValue(value, options)}\n`;
+      })
+      .join('');
+  }
+
+  return `${pad}${resolveValue(node, options)}\n`;
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function resolveValue(value: unknown, options: Record<string, any>): string {
+  if (typeof value === 'string') return resolveTemplate(value, options);
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (value == null) return '';
+  return resolveTemplate(String(value), options);
 }
 
 function resolveTemplate(template: string, options: Record<string, any>): string {
-  return template.replace(/\$\{([^}]+)\}/g, (match, key) => {
-    return options[key]?.toString() || match;
+  return template.replace(/\$\{([^}]+)\}/g, (_match, key) => {
+    const raw = options[key];
+    return raw !== undefined && raw !== null ? String(raw) : _match;
   });
 }
 
@@ -115,38 +121,26 @@ export async function getDatabaseParameters(database: string): Promise<Record<st
     const config = await loadDatabaseConfig(database);
     return config.parameters;
   } catch (error) {
-    consola.error(`Fehler beim Laden der Parameter für ${database}:`, error);
+    consola.error(`Failed to load parameters for ${database}:`, error);
     return {};
   }
 }
 
 export async function getConnectionInfo(
-  database: string, 
+  database: string,
   options: Record<string, any> = {}
 ): Promise<Record<string, string>> {
   try {
     const config = await loadDatabaseConfig(database);
-    
-    // Verwende Standardwerte und überschreibe mit benutzerdefinierten Optionen
-    const resolvedOptions: Record<string, any> = {};
-    
-    // Setze Standardwerte
-    for (const [paramName, paramConfig] of Object.entries(config.parameters)) {
-      resolvedOptions[paramName] = paramConfig.default;
-    }
-    
-    // Überschreibe mit benutzerdefinierten Optionen
-    Object.assign(resolvedOptions, options);
+    const resolved = resolveOptions(config, options);
 
-    // Löse Template-Variablen in connectionInfo auf
-    const connectionInfo: Record<string, string> = {};
-    for (const [key, value] of Object.entries(config.connectionInfo)) {
-      connectionInfo[key] = resolveTemplate(value, resolvedOptions);
+    const info: Record<string, string> = {};
+    for (const [key, template] of Object.entries(config.connectionInfo)) {
+      info[key] = resolveTemplate(template, resolved);
     }
-
-    return connectionInfo;
+    return info;
   } catch (error) {
-    consola.error(`Fehler beim Laden der Verbindungsinformationen für ${database}:`, error);
+    consola.error(`Failed to load connection info for ${database}:`, error);
     return {};
   }
 }

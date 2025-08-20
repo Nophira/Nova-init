@@ -39,9 +39,6 @@ export async function installReact(
       
       // Install with specified package manager
       switch (packageManager) {
-        case 'yarn':
-          execSync('yarn install', { cwd: targetPath, stdio: 'inherit' });
-          break;
         case 'pnpm':
           execSync('pnpm install', { cwd: targetPath, stdio: 'inherit' });
           break;

@@ -35,7 +35,7 @@ export type MonorepoTool = 'none' | 'lerna' | 'nx' | 'turborepo';
 /**
  * Verfügbare Package Manager
  */
-export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun';
+export type PackageManager = 'npm' | 'pnpm' | 'bun';
 
 /**
  * Verfügbare Programmiersprachen
@@ -84,7 +84,7 @@ export type DatabaseType =
 /**
  * Verfügbare Hosting-Optionen
  */
-export type HostingOption = 'docker';
+export type HostingOption = 'docker' | 'none';
 
 // ============================================================================
 // PACKAGE MANAGER CONFIGURATION
@@ -111,43 +111,13 @@ export interface FrontendSetup {
   framework: FrontendFramework;
   folderName?: string;
   packageManager: PackageManager;
-  features?: FrontendFeature[];
-  styling?: FrontendStyling;
-  stateManagement?: StateManagement;
-  testing?: TestingFramework;
   buildTool?: BuildTool;
 }
 
 /**
- * Verfügbare Frontend-Features
- */
-export type FrontendFeature = 
-  | 'typescript' 
-  | 'vite' 
-  | 'tailwind' 
-  | 'storybook' 
-  | 'cypress' 
-  | 'playwright';
-
-/**
- * Verfügbare Styling-Optionen
- */
-export type FrontendStyling = 'css' | 'scss' | 'tailwind' | 'styled-components' | 'emotion' | 'css-modules';
-
-/**
- * Verfügbare State Management Lösungen
- */
-export type StateManagement = 'context-api' | 'redux' | 'zustand' | 'jotai' | 'recoil' | 'mobx';
-
-/**
- * Verfügbare Testing-Frameworks
- */
-export type TestingFramework = 'jest' | 'vitest' | 'cypress' | 'playwright' | 'testing-library';
-
-/**
  * Verfügbare Build-Tools
  */
-export type BuildTool = 'vite' | 'webpack' | 'esbuild' | 'rollup' | 'parcel';
+export type BuildTool = 'vite';
 
 // ============================================================================
 // BACKEND CONFIGURATION
@@ -463,12 +433,6 @@ export interface ValidationError {
   message: string;
   code: string;
 }
-
-// ============================================================================
-// EXPORT CONSTANTS
-// ============================================================================
-
-export * from './constants.js';
 
 // ============================================================================
 // EXPORT CONSTANTS

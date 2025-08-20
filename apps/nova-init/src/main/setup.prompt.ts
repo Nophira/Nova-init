@@ -1,6 +1,7 @@
 import { promptProjectName } from './prompts/projectName.js';
 import { promptSetupType } from './prompts/setupType.js';
 import { promptMonorepo, promptMonorepoPackageManager } from './prompts/monorepo.js';
+import { installSelectedMonorepo } from './functions/monorepo.js';
 import { promptFrontend } from './prompts/frontend.js';
 import { promptBackend } from './prompts/backend.js';
 import { promptDatabases } from './prompts/database.js';
@@ -206,6 +207,11 @@ export async function promptSetup(options: SetupCommandOptions = {}): Promise<Pr
   // Create project structure
   await createProjectStructure(projectPath, projectConfig);
   
+  // Install monorepo tooling if selected
+  if (projectConfig.monorepo !== 'none' && projectConfig.packageManagers.monorepo) {
+    await installSelectedMonorepo(projectPath, projectConfig.monorepo, projectConfig.packageManagers.monorepo);
+  }
+
   // Create configuration files
   await createEnvExample(projectPath, projectConfig);
   await createNovaInitJson(projectPath, projectConfig);
