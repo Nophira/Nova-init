@@ -1,9 +1,14 @@
 import { select, text, confirm, isCancel, cancel } from '@clack/prompts';
 import type { DatabaseType, DatabaseSetup } from '../../types/index.js';
-import { getAvailableDatabases, getDatabaseParameters } from '../../installers/database/json-docker-generator.js';
+import { getAvailableDatabases, getDatabaseParameters } from '../../installers/database/databasedocker-generator.js';
 
 export async function askDatabaseSelection(): Promise<DatabaseType[]> {
   const availableDatabases = await getAvailableDatabases();
+  
+  if (!availableDatabases || availableDatabases.length === 0) {
+    console.error('❌ No available databases found. Please check the database configuration files.');
+    return [];
+  }
   
   const databases = await select({
     message: 'Select databases to use (you can select multiple):',

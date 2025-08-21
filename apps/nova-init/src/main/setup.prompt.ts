@@ -273,14 +273,13 @@ async function installFrameworks(projectPath: string, config: ProjectStructure):
 
 async function generateDockerCompose(projectPath: string, config: ProjectStructure): Promise<void> {
   try {
-    const { generateDockerCompose } = await import('../installers/database/json-docker-generator.js');
+    const { generateDockerCompose } = await import('../installers/database/databasedocker-generator.js');
     
     // Generate docker-compose.yml for databases
     if (config.databases.length > 0) {
       const composePath = path.join(projectPath, 'docker-compose.yml');
-      // Extract database names from DatabaseSetup array
-      const databaseNames = config.databases.map(db => db.type);
-      await generateDockerCompose(databaseNames, composePath);
+      // Pass the full DatabaseSetup array instead of just names
+      await generateDockerCompose(config.databases, composePath);
       console.log('✅ Docker Compose file generated for databases');
     }
     

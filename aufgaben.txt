@@ -1,1 +1,14 @@
-ordner werden bei turborepo nicht in apps verschoben und DB und docker hosting werden nicht erstellt
+du sollst für die installation der frameworks die sachen iin @installes/frameworks nutzen und es gibt nur postgresql als datenbank und die anderen aber keine postgres
+
+alle framework installer von der alten version nehmen und für package Manager eine datei machen wo die instalaltionen drinne sind
+wie npm init -y für backend und bun install und pnpm install für den rest
+
+if(packageMananger = pnpm){
+  exec(pnpm install);
+}else if(packageManager = bun) {
+    exec(bun install);
+}
+die package Manager sollen als letztes für die frameworks installiert werden
+die databasedocker-generator muss angepast werden weil damit er in DB ordner die compose file reinlegt.
+
+hosting funktion erstmal raus nehmen

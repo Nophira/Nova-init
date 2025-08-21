@@ -54,6 +54,7 @@ export async function installReact(
       // Install with specified package manager
       switch (packageManager) {
         case 'pnpm':
+    
           execSync('pnpm install', { cwd: targetPath, stdio: 'inherit', shell: '/bin/bash' });
           break;
         case 'bun':
