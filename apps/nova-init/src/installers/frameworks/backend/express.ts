@@ -1,6 +1,6 @@
 import { execSync } from 'child_process';
 import consola from 'consola';
-import { writeFileSync, readFileSync } from 'fs';
+import { writeFileSync, readFileSync, mkdirSync, existsSync } from 'fs';
 import * as path from 'path';
 import type { Language, PackageManager } from '../../../types/index.js';
 
@@ -12,19 +12,24 @@ export async function installExpress(
   try {
     consola.info(`🛠 Installing Express (${language}) in "${targetPath}"...`);
 
+    // Ensure target directory exists
+    if (!existsSync(targetPath)) {
+      mkdirSync(targetPath, { recursive: true });
+      consola.info(`📁 Created directory: ${targetPath}`);
+    }
+
     const exec = (cmd: string) =>
-      execSync(cmd, { cwd: targetPath, stdio: 'inherit' }); 
+      execSync(cmd, { cwd: targetPath, stdio: 'inherit', shell: '/bin/bash' }); 
 
     // Install Express
     if (packageManager === 'pnpm') {
-      exec('npm init -y');
-      exec('pnpm install');
+      exec('pnpm init');
       exec('pnpm add express');
     } else if (packageManager === 'bun') {
-      exec('npm init -y');
-      exec('bun install');
+      exec('bun init');
       exec('bun add express');
     } else {
+      exec('npm init -y');
       exec('npm install express');
     }
 
@@ -60,7 +65,7 @@ export async function installExpress(
         JSON.stringify(tsConfig, null, 2)
       );
 
-      execSync('mkdir -p src', { cwd: targetPath });
+      execSync('mkdir -p src', { cwd: targetPath, shell: '/bin/bash' });
       const mainContent = `import express from 'express';
 
 const app = express();
@@ -94,7 +99,7 @@ app.listen(PORT, () => {
     } else {
       consola.info('Installing JavaScript version...');
 
-      execSync('mkdir -p src', { cwd: targetPath });
+      execSync('mkdir -p src', { cwd: targetPath, shell: '/bin/bash' });
       const mainContent = `import express from 'express';
 
 const app = express();

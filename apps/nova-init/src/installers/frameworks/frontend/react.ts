@@ -1,4 +1,6 @@
 import { execSync } from 'child_process';
+import { mkdirSync, existsSync } from 'fs';
+import path from 'path';
 import consola from 'consola';
 import type { Language, PackageManager } from '../../../types/index.js';
 
@@ -10,6 +12,12 @@ export async function installReact(
   useVite: boolean = true
 ) {
   try {
+    // Ensure target directory exists
+    if (!existsSync(targetPath)) {
+      mkdirSync(targetPath, { recursive: true });
+      consola.info(`📁 Created directory: ${targetPath}`);
+    }
+
     if (useVite) {
       consola.info(`⚛️ Installing React (${language}) with Vite in "${targetPath}"...`);
 
@@ -18,6 +26,7 @@ export async function installReact(
       execSync(`npm create vite@latest . ${templateFlag}`, {
         cwd: targetPath,
         stdio: 'inherit',
+        shell: '/bin/bash'
       });
     } else {
       consola.info(`⚛️ Installing React (${language}) with Create React App in "${targetPath}"...`);
@@ -27,6 +36,7 @@ export async function installReact(
       execSync(`npx create-react-app . ${templateFlag}`, {
         cwd: targetPath,
         stdio: 'inherit',
+        shell: '/bin/bash'
       });
     }
 
@@ -35,15 +45,19 @@ export async function installReact(
       consola.info(`📦 Installing dependencies with ${packageManager}...`);
       
       // Remove package-lock.json if exists
-      execSync('rm -f package-lock.json', { cwd: targetPath, stdio: 'ignore' });
+      try {
+        execSync('rm -f package-lock.json', { cwd: targetPath, stdio: 'ignore', shell: '/bin/bash' });
+      } catch (error) {
+        // Ignore error if file doesn't exist
+      }
       
       // Install with specified package manager
       switch (packageManager) {
         case 'pnpm':
-          execSync('pnpm install', { cwd: targetPath, stdio: 'inherit' });
+          execSync('pnpm install', { cwd: targetPath, stdio: 'inherit', shell: '/bin/bash' });
           break;
         case 'bun':
-          execSync('bun install', { cwd: targetPath, stdio: 'inherit' });
+          execSync('bun install', { cwd: targetPath, stdio: 'inherit', shell: '/bin/bash' });
           break;
       }
     }
