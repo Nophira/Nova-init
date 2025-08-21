@@ -61,6 +61,53 @@ export async function generateDockerComposeFromJson(
   }
 }
 
+export async function generateDockerCompose(
+  databases: string[],
+  outputPath: string
+): Promise<void> {
+  try {
+    const compose = {
+      version: '3.8',
+      services: {} as Record<string, any>,
+      volumes: {} as Record<string, any>,
+      networks: {
+        default: {
+          driver: 'bridge'
+        }
+      }
+    };
+
+    // Add each database service
+    for (const db of databases) {
+      const config = await loadDatabaseConfig(db);
+      const serviceName = db.toLowerCase();
+      
+      compose.services[serviceName] = {
+        ...config.dockerCompose,
+        container_name: `${serviceName}-db`,
+        restart: 'unless-stopped'
+      };
+      
+      // Add volume if specified
+      if (config.dockerCompose.volumes) {
+        const volumeName = `${serviceName}_data`;
+        compose.volumes[volumeName] = {
+          driver: 'local'
+        };
+      }
+    }
+
+    // Convert to YAML and write to file
+    const yamlContent = jsonToYaml(compose, {});
+    await fs.writeFile(outputPath, yamlContent, 'utf-8');
+    
+    consola.success(`✅ Docker Compose file generated at ${outputPath}`);
+  } catch (error) {
+    consola.error('❌ Failed to generate Docker Compose file:', error);
+    throw error;
+  }
+}
+
 function resolveOptions(config: DatabaseConfig, overrides: Record<string, any>): Record<string, any> {
   const defaults: Record<string, any> = {};
   for (const [key, param] of Object.entries(config.parameters)) {

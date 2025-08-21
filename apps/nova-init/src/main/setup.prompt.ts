@@ -234,9 +234,12 @@ export async function promptSetup(options: SetupCommandOptions = {}): Promise<Pr
 }
 
 async function installFrameworks(projectPath: string, config: ProjectStructure): Promise<void> {
+  // Determine the correct path for frameworks based on monorepo
+  const basePath = config.monorepo !== 'none' ? path.join(projectPath, 'apps') : projectPath;
+  
   // Frontend
   if (config.frontend) {
-    const frontendPath = path.join(projectPath, config.frontend.folderName || 'frontend');
+    const frontendPath = path.join(basePath, config.frontend.folderName || 'frontend');
     switch (config.frontend.framework) {
       case 'react': {
         const { installReact } = await import('../installers/frameworks/frontend/react.js');
@@ -253,14 +256,62 @@ async function installFrameworks(projectPath: string, config: ProjectStructure):
   if (config.backend) {
     if (config.backend.useMicroservices && config.backend.microserviceNames && config.backend.microserviceNames.length > 0) {
       for (const service of config.backend.microserviceNames) {
-        const servicePath = path.join(projectPath, 'services', service);
+        const servicePath = path.join(basePath, 'services', service);
         await installBackend(servicePath, config.backend);
       }
     } else {
-      const backendPath = path.join(projectPath, config.backend.folderName || 'backend');
+      const backendPath = path.join(basePath, config.backend.folderName || 'backend');
       await installBackend(backendPath, config.backend);
     }
   }
+  
+  // Generate Docker Compose files for databases and hosting
+  if (config.hosting === 'docker' || config.databases.length > 0) {
+    await generateDockerCompose(projectPath, config);
+  }
+}
+
+async function generateDockerCompose(projectPath: string, config: ProjectStructure): Promise<void> {
+  try {
+    const { generateDockerCompose } = await import('../installers/database/json-docker-generator.js');
+    
+    // Generate docker-compose.yml for databases
+    if (config.databases.length > 0) {
+      const composePath = path.join(projectPath, 'docker-compose.yml');
+      // Extract database names from DatabaseSetup array
+      const databaseNames = config.databases.map(db => db.type);
+      await generateDockerCompose(databaseNames, composePath);
+      console.log('✅ Docker Compose file generated for databases');
+    }
+    
+    // Generate docker-compose.override.yml for hosting if needed
+    if (config.hosting === 'docker') {
+      const overridePath = path.join(projectPath, 'docker-compose.override.yml');
+      await generateHostingCompose(overridePath);
+      console.log('✅ Docker Compose override file generated for hosting');
+    }
+  } catch (error) {
+    console.error('❌ Failed to generate Docker Compose files:', error);
+  }
+}
+
+async function generateHostingCompose(overridePath: string): Promise<void> {
+  // Since we can't easily access the private jsonToYaml function, let's create a simple YAML manually
+  const yaml = `version: '3.8'
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - './nginx.conf:/etc/nginx/nginx.conf'
+    depends_on: []
+    restart: unless-stopped
+`;
+  
+  const fs = await import('fs/promises');
+  await fs.writeFile(overridePath, yaml, 'utf-8');
 }
 
 async function installBackend(targetPath: string, backend: BackendSetup): Promise<void> {

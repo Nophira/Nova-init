@@ -1,0 +1,1 @@
+ordner werden bei turborepo nicht in apps verschoben und DB und docker hosting werden nicht erstellt
