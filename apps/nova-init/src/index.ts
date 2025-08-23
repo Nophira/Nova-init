@@ -2,8 +2,9 @@
 
 import consola from 'consola';
 import { Command } from 'commander';
-import { runInteractiveSetup } from './main/setup.interactive.js';
-import { runCommandLineSetup } from './main/setup.commandline.js';
+import { setupPrompt } from './main/setup.prompt.js';
+import { setupCommandLine } from './main/setup.commandline.js';
+import { TechstackManager } from './core/TechstackManager.js';
 
 const program = new Command();
 
@@ -17,7 +18,7 @@ program
   .description('Interactive setup mode')
   .action(async () => {
     try {
-      await runInteractiveSetup();
+      await setupPrompt();
     } catch (error) {
       consola.error('❌ Interactive setup failed:', error);
       process.exit(1);
@@ -44,7 +45,7 @@ program
   .option('--backend-folder <folder>', 'Backend folder name')
   .action(async (options) => {
     try {
-      await runCommandLineSetup(options);
+      await setupCommandLine(options);
     } catch (error) {
       consola.error('❌ Command line setup failed:', error);
       process.exit(1);
@@ -53,7 +54,7 @@ program
 
 // Wenn keine Argumente übergeben werden, starte den interaktiven Modus
 if (process.argv.length === 2) {
-  runInteractiveSetup().catch((error) => {
+  setupPrompt().catch((error) => {
     consola.error('❌ Interactive setup failed:', error);
     process.exit(1);
   });

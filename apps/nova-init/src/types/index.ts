@@ -199,97 +199,44 @@ export interface DockerDatabaseConfig {
 }
 
 /**
- * Health Check Konfiguration für Docker-Container
+ * Health-Check für Docker-Container
  */
 export interface HealthCheck {
   test: string[];
-  interval: string;
-  timeout: string;
-  retries: number;
-  startPeriod: string;
+  interval?: string;
+  timeout?: string;
+  retries?: number;
+  startPeriod?: string;
 }
 
 // ============================================================================
-// MICROSERVICES CONFIGURATION
+// COMMAND LINE OPTIONS
 // ============================================================================
 
 /**
- * Microservice-Konfiguration
- */
-export interface MicroserviceConfig {
-  name: string;
-  language: Language;
-  framework: BackendFramework;
-  packageManager: PackageManager;
-  database?: DatabaseType;
-  port?: number;
-  folderName?: string;
-}
-
-// ============================================================================
-// COMMAND LINE ARGUMENTS
-// ============================================================================
-
-/**
- * Parsed Command Line Arguments
- */
-export interface ParsedArgs {
-  [key: string]: string | boolean | number;
-}
-
-/**
- * Add Command Options
- */
-export interface AddCommandOptions {
-  framework?: string;
-  lang?: Language;
-  vite?: boolean;
-  folder?: string;
-  database?: DatabaseType;
-  port?: number;
-  containerName?: string;
-  networkName?: string;
-  volumeName?: string;
-  username?: string;
-  password?: string;
-  tool?: MonorepoTool;
-  techstack?: string;
-  microservices?: boolean;
-  help?: boolean;
-  h?: boolean;
-}
-
-/**
- * Setup Command Options
+ * Command-Line Optionen für das Setup
  */
 export interface SetupCommandOptions {
-  'project-name'?: string;
-  projectName?: string; // camelCase version for commander
-  'setup-type'?: SetupType;
-  setupType?: SetupType; // camelCase version for commander
+  // CLI-Optionen (commander.js übergibt camelCase)
+  projectName?: string;
+  setupType?: SetupType;
   monorepo?: MonorepoTool;
-  'monorepo-package-manager'?: PackageManager;
-  monorepoPackageManager?: PackageManager; // camelCase version for commander
+  monorepoPackageManager?: PackageManager;
   frontend?: FrontendFramework;
-  'frontend-language'?: Language;
-  frontendLanguage?: Language; // camelCase version for commander
-  'frontend-folder'?: string;
-  frontendFolder?: string; // camelCase version for commander
-  'frontend-package-manager'?: PackageManager;
-  frontendPackageManager?: PackageManager; // camelCase version for commander
+  frontendLanguage?: Language;
+  frontendFolder?: string;
+  frontendPackageManager?: PackageManager;
   backend?: BackendFramework;
-  'backend-language'?: Language;
-  backendLanguage?: Language; // camelCase version for commander
-  'backend-folder'?: string;
-  backendFolder?: string; // camelCase version for commander
-  'backend-package-manager'?: PackageManager;
-  backendPackageManager?: PackageManager; // camelCase version for commander
+  backendLanguage?: Language;
+  backendFolder?: string;
+  backendPackageManager?: PackageManager;
+  
+  // Gemeinsame Optionen
   microservices?: boolean;
   databases?: string; // String für comma-separated values von commander.js
   hosting?: HostingOption;
   git?: boolean;
-  'package-manager'?: PackageManager;
-  packageManager?: PackageManager; // camelCase version for commander
+  packageManager?: PackageManager;
   techstack?: string;
   help?: boolean;
 }
@@ -380,72 +327,74 @@ export type RequiredFrontendSetup = Required<Pick<FrontendSetup, 'language' | 'f
  */
 export type RequiredBackendSetup = Required<Pick<BackendSetup, 'language' | 'framework' | 'packageManager'>>;
 
-// ============================================================================
-// RESULT TYPES
-// ============================================================================
-
 /**
- * Ergebnis des Setup-Prozesses
+ * Erforderliche Datenbank-Eigenschaften
  */
-export interface SetupResult {
-  success: boolean;
-  projectPath: string;
-  createdFiles: string[];
-  errors: string[];
-  warnings: string[];
-  nextSteps: string[];
-}
-
-/**
- * Ergebnis des Add-Commands
- */
-export interface AddCommandResult {
-  success: boolean;
-  addedType: string;
-  createdFiles: string[];
-  errors: string[];
-  warnings: string[];
-  nextSteps: string[];
-}
+export type RequiredDatabaseSetup = Required<Pick<DatabaseSetup, 'type' | 'name'>>;
 
 // ============================================================================
 // VALIDATION TYPES
 // ============================================================================
 
 /**
- * Validierungsregeln für verschiedene Felder
- */
-export interface ValidationRule {
-  field: string;
-  required: boolean;
-  type: 'string' | 'number' | 'boolean' | 'array';
-  minLength?: number;
-  maxLength?: number;
-  minValue?: number;
-  maxValue?: number;
-  pattern?: RegExp;
-  allowedValues?: string[];
-}
-
-/**
  * Validierungsergebnis
  */
 export interface ValidationResult {
   isValid: boolean;
-  errors: ValidationError[];
+  errors: string[];
+  warnings: string[];
 }
 
 /**
- * Validierungsfehler
+ * Konfigurationsvalidierung
  */
-export interface ValidationError {
-  field: string;
-  message: string;
-  code: string;
+export interface ConfigValidation {
+  projectStructure: ValidationResult;
+  frameworks: ValidationResult;
+  databases: ValidationResult;
+  monorepo: ValidationResult;
 }
 
 // ============================================================================
-// EXPORT CONSTANTS
+// ERROR TYPES
 // ============================================================================
 
-export * from './constants.js';
+/**
+ * Nova-Init spezifische Fehler
+ */
+export class NovaInitError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public details?: Record<string, any>
+  ) {
+    super(message);
+    this.name = 'NovaInitError';
+  }
+}
+
+/**
+ * Framework-Installationsfehler
+ */
+export class FrameworkInstallationError extends NovaInitError {
+  constructor(
+    framework: string,
+    details?: Record<string, any>
+  ) {
+    super(`Failed to install framework: ${framework}`, 'FRAMEWORK_INSTALLATION_FAILED', details);
+    this.name = 'FrameworkInstallationError';
+  }
+}
+
+/**
+ * Datenbank-Setup-Fehler
+ */
+export class DatabaseSetupError extends NovaInitError {
+  constructor(
+    database: string,
+    details?: Record<string, any>
+  ) {
+    super(`Failed to setup database: ${database}`, 'DATABASE_SETUP_FAILED', details);
+    this.name = 'DatabaseSetupError';
+  }
+}

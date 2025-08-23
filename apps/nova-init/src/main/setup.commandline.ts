@@ -2,19 +2,17 @@ import { ProjectManager } from '../core/ProjectManager.js';
 import { TechstackManager } from '../core/TechstackManager.js';
 import type { ProjectStructure, SetupCommandOptions, DatabaseType } from '../types/index.js';
 
-export async function runCommandLineSetup(options: SetupCommandOptions): Promise<void> {
+export async function setupCommandLine(options: SetupCommandOptions): Promise<void> {
   try {
     console.log('🚀 Erstelle Projekt mit Command-Line Parametern...');
     console.log('📋 Empfangene Optionen:', JSON.stringify(options, null, 2));
     
-    // Validierung der erforderlichen Parameter
-    if (!options['project-name'] && !options.projectName) {
-      console.log('❌ Projektname fehlt. Verfügbare Optionen:', Object.keys(options));
-      throw new Error('Projektname ist erforderlich (-n oder --project-name)');
+    // Validiere erforderliche Optionen
+    if (!options.projectName) {
+      throw new Error('Project name is required. Use --project-name <name>');
     }
-    
-    // Projektname aus den Optionen extrahieren
-    const projectName = options['project-name'] || options.projectName;
+
+    const projectName = options.projectName;
     
     let projectConfig: ProjectStructure;
     
@@ -38,28 +36,28 @@ export async function runCommandLineSetup(options: SetupCommandOptions): Promise
       // Standardwerte setzen
       projectConfig = {
         projectName: projectName!,
-        setupType: (options['setup-type'] as any) || 'custom',
+        setupType: options.setupType || 'custom',
         monorepo: (options.monorepo as any) || 'none',
         packageManagers: {
-          monorepo: options['monorepo-package-manager'] as any,
-          frontend: options['frontend-package-manager'] as any || options['package-manager'] as any || 'npm',
-          backend: options['backend-package-manager'] as any || options['package-manager'] as any || 'npm',
+          monorepo: options.monorepoPackageManager,
+          frontend: options.frontendPackageManager || options.packageManager || 'npm',
+          backend: options.backendPackageManager || options.packageManager || 'npm',
         },
         frontend: options.frontend ? {
-          language: (options['frontend-language'] as any) || 'typescript',
+          language: options.frontendLanguage || 'typescript',
           framework: options.frontend as any,
-          folderName: options['frontend-folder'] || 'frontend',
-          packageManager: options['frontend-package-manager'] as any || options['package-manager'] as any || 'npm',
+          folderName: options.frontendFolder || 'frontend',
+          packageManager: options.frontendPackageManager || options.packageManager || 'npm',
         } : undefined,
         backend: options.backend ? {
-          language: (options['backend-language'] as any) || 'typescript',
+          language: options.backendLanguage || 'typescript',
           framework: options.backend as any,
           useMicroservices: Boolean(options.microservices),
           microserviceNames: typeof options.microservices === 'string' 
             ? (options.microservices as string).split(',').map((s: string) => s.trim()).filter(Boolean)
             : undefined,
-          folderName: options['backend-folder'] || 'backend',
-          packageManager: options['backend-package-manager'] as any || options['package-manager'] as any || 'npm',
+          folderName: options.backendFolder || 'backend',
+          packageManager: options.backendPackageManager || options.packageManager || 'npm',
         } : undefined,
         databases: selectedDatabases,
         hosting: 'none', // Hosting entfernt wie in aufgaben.txt

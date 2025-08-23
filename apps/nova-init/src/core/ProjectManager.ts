@@ -3,8 +3,8 @@ import fs from 'fs-extra';
 import { MonorepoManager } from './MonorepoManager.js';
 import { FrameworkManager } from './FrameworkManager.js';
 import { DatabaseManager } from './DatabaseManager.js';
-import { GitManager } from './GitManager.js';
-import { PackageManager } from './PackageManager.js';
+import { GitManager } from './GitManager.js'; 
+import { PackageManager } from './PackageManager.js'; 
 import type { ProjectStructure } from '../types/index.js';
 
 export class ProjectManager {
