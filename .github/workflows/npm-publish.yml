@@ -6,7 +6,7 @@ on:
       - main
       - master
     paths:
-      - "apps/nova-init/**"
+      - "apps/nova-init/dist/**"
       
 
 jobs:

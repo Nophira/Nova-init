@@ -1,273 +1,195 @@
-# Nova-Init 🚀
+# 🚀 Nova-Init
 
-**Modern Project Setup Tool** - Create full-stack applications with ease!
+**A modern CLI tool for scaffolding your next project**
 
-## ✨ Features
+Nova-Init is a powerful command-line tool that helps you create complete full-stack projects with various frameworks, databases, and monorepo tools.
 
-- 🎯 **Interactive Setup** - Guided project creation with prompts
-- 🚀 **Predefined Tech Stacks** - MERN, MEAN, MEVN and more
-- 🎨 **Frontend Frameworks** - React, Vue, Angular, Svelte, and more
-- 🛠 **Backend Frameworks** - Express, NestJS, Fastify
-- 🗄 **Database Support** - MongoDB, PostgreSQL, MySQL, Redis, and more
-- 📦 **Monorepo Support** - Lerna, Nx, Turborepo
-- 🐳 **Docker Integration** - Containerized databases and hosting
-- 🔧 **Package Manager Support** - npm, pnpm, bun
-- 📝 **Git Integration** - Automatic repository setup
-- ⚡ **Fast & Modern** - Built with TypeScript and modern tooling
-- 🔄 **Microservices Support** - Build scalable backend architectures
+## ✨ **Features**
 
-## 🚀 Quick Start
+### 🎯 **Predefined Tech Stacks**
+- **MERN** - MongoDB, Express.js, React, Node.js
+- **MEAN** - MongoDB, Express.js, Angular, Node.js  
+- **MEVN** - MongoDB, Express.js, Vue.js, Node.js
+- **JAM** - JavaScript, Astro, MongoDB
+- **FULLSTACK_TS** - Next.js, NestJS, PostgreSQL, TypeScript
+- **MICROSERVICES** - Microservices architecture
 
-### Installation
+### 🛠 **Supported Frameworks**
 
-```bash
-npm install -g nova-init
-# or
-pnpm add -g nova-init
-# or
-bun add -g nova-init
-```
-
-### Create a New Project
-
-```bash
-# Interactive setup
-nova-init setup
-
-# With predefined tech stack
-nova-init setup --setup-type predefined
-
-# Custom setup with options
-nova-init setup --project-name my-app --frontend react --backend express
-```
-
-### Add Components to Existing Project
-
-```bash
-# Add frontend
-nova-init add frontend --framework react --lang ts
-
-# Add backend
-nova-init add backend --framework express --lang js
-
-# Add database
-nova-init add database --database mongodb
-
-# Add monorepo
-nova-init add monorepo --tool turborepo
-```
-
-## 📋 Setup Process
-
-The `nova-init setup` command guides you through:
-
-1. **Project Name** - Choose your project name (lowercase, numbers, hyphens only)
-2. **Setup Type** - Custom or predefined tech stack
-3. **Monorepo** - Lerna, Nx, Turborepo, or none
-4. **Frontend** - Language (JavaScript/TypeScript), framework, folder name, package manager
-5. **Backend** - Language (JavaScript/TypeScript), framework, microservices support, folder name, package manager
-6. **Databases** - Multiple databases with Docker configuration (ports, container names, networks, volumes)
-7. **Hosting** - Docker containerization with custom ports for frontend and backend (Docker only)
-8. **Git** - Initialize repository with first commit and .gitignore
-9. **Dependencies** - Install all packages automatically with chosen package managers
-
-## 🎯 Predefined Tech Stacks
-
-- **MERN** - MongoDB, Express, React, Node.js
-- **MEAN** - MongoDB, Express, Angular, Node.js
-- **MEVN** - MongoDB, Express, Vue.js, Node.js
-- **MERN_TS** - MERN with TypeScript
-- **MEAN_TS** - MEAN with TypeScript
-- **MEVN_TS** - MEVN with TypeScript
-- **FULL_STACK_TS** - Next.js, NestJS, PostgreSQL, Turborepo
-- **MINIMAL_TS** - Express, React, TypeScript
-
-## 🎨 Supported Frontend Frameworks
-
-- **React** - JavaScript library for building UIs
-- **Next.js** - React framework with SSR and SSG
-- **Vue.js** - Progressive JavaScript framework
-- **Nuxt.js** - Vue framework with SSR and SSG
+#### **Frontend:**
+- **React** (with Vite) - JavaScript library for building UIs
+- **Next.js** - React framework for production
+- **Vue.js** (with Vite) - Progressive JavaScript framework
 - **Svelte** - Cybernetically enhanced web apps
-- **Angular** - Platform for building applications
+- **Angular** - Platform for building mobile and desktop applications
+- **Nuxt.js** - Intuitive Vue framework
 - **Astro** - Build faster websites with less JavaScript
-- **Remix** - Full stack web framework
-- **Solid** - Declarative JavaScript UI library
-- **Qwik** - Instant-loading web apps
-- **Preact** - Fast 3kB alternative to React
-- **Lit** - Simple and fast web components
+- **Remix** - Full-stack web framework
+- **Solid.js** - Declarative JavaScript library
+- **Qwik** - The HTML-first framework
+- **Preact** - Fast 3kB React alternative
+- **Lit** - Simple. Fast. Web Components
 
-## 🛠 Supported Backend Frameworks
-
-- **Express** - Fast, unopinionated web framework
+#### **Backend:**
+- **Express.js** - Fast, unopinionated, minimalist web framework
 - **NestJS** - Progressive Node.js framework
 - **Fastify** - Fast and low overhead web framework
 
-## 🗄 Supported Databases
-
-- **MongoDB** - NoSQL document database
-- **PostgreSQL** - Object-relational database
-- **MySQL** - Relational database
+### 🗄 **Databases**
+- **PostgreSQL** - Advanced open source relational database
+- **MySQL** - World's most popular open source database
+- **MongoDB** - The database for modern applications
 - **Redis** - In-memory data structure store
-- **Neo4j** - Graph database
+- **MariaDB** - Open source relational database
+- **Neo4j** - The graph database platform
 - **Cassandra** - Distributed NoSQL database
-- **CouchDB** - Document-oriented NoSQL database
-- **MariaDB** - MySQL-compatible database
+- **CouchDB** - The database that embraces the web
 - **CockroachDB** - Distributed SQL database
-- **EdgeDB** - Next-generation relational database
-- **SurrealDB** - Multi-model database
+- **EdgeDB** - Next generation database
+- **SurrealDB** - Ultimate cloud database
 - **YugabyteDB** - Distributed SQL database
 
-## 📦 Package Manager Support
-
-- **npm** - Node Package Manager (Standard)
+### 📦 **Package Managers**
+- **npm** - Node Package Manager (default)
 - **pnpm** - Fast, disk space efficient package manager
 - **bun** - All-in-one JavaScript runtime & package manager
 
-### Monorepo Package Manager Compatibility
+### 🏗 **Monorepo Tools**
+- **Lerna** - Tool for managing JavaScript projects with multiple packages
+- **Nx** - Smart, fast and extensible build system
+- **Turborepo** - High-performance build system
 
-- **Lerna**: npm, pnpm
-- **Nx**: npm, pnpm
-- **Turborepo**: npm, pnpm, bun
+## 🚀 **Quick Start**
 
-## 🐳 Docker Integration
-
-Nova-Init automatically creates:
-- **Database containers** with custom ports and configurations
-- **Application containers** for frontend and backend
-- **Docker Compose files** for easy orchestration
-- **Custom networks and volumes** for data persistence
-
-## 🔧 Command Reference
-
-### Setup Command
-
+### **Installation**
 ```bash
-nova-init setup [options]
+# Global installation
+npm install -g create-nova-init
 
-Options:
-  --project-name <name>         - Set project name
-  --setup-type <type>           - Setup type: custom | predefined
-  --monorepo <tool>             - Monorepo tool: none | lerna | nx | turborepo
-  --monorepo-package-manager <pm> - Package manager for monorepo: npm | pnpm | bun
-  --frontend <framework>        - Frontend framework
-  --frontend-language <lang>    - Frontend language: javascript | typescript
-  --frontend-folder <name>      - Frontend folder name
-  --frontend-package-manager <pm> - Frontend package manager: npm | pnpm | bun
-  --backend <framework>         - Backend framework
-  --backend-language <lang>     - Backend language: javascript | typescript
-  --backend-folder <name>       - Backend folder name
-  --backend-package-manager <pm> - Backend package manager: npm | pnpm | bun
-  --microservices               - Use microservices architecture
-  --databases <list>            - Comma-separated list of databases
-  --hosting <option>            - Hosting option: docker
-  --git                         - Initialize Git repository
-  --package-manager <pm>        - Default package manager: npm | pnpm | bun
-  --techstack <name>            - Predefined tech stack name
+# Or with npx (recommended)
+npx create-nova-init
 ```
 
-### Add Command
+### **Usage**
 
+#### **1. Interactive Mode**
 ```bash
-nova-init add <type> [options]
-
-Types:
-  frontend    - Add frontend framework
-  backend     - Add backend framework
-  database    - Add database
-  monorepo    - Add monorepo tool
-  techstack   - Add predefined tech stack
-
-Options:
-  --framework <name>            - Framework name
-  --lang <language>             - Language: javascript | typescript
-  --folder <name>               - Folder name
-  --package-manager <pm>        - Package manager: npm | pnpm | bun
-  --database <type>             - Database type
-  --port <number>               - Custom port
-  --containerName <name>        - Container name
-  --networkName <name>          - Network name
-  --volumeName <name>           - Volume name
-  --username <name>             - Database username (for SQL databases)
-  --password <password>         - Database password (for SQL databases)
-  --tool <monorepo>             - Monorepo tool: lerna | nx | turborepo
+npx create-nova-init
+# Or
+npx create-nova-init setup
 ```
 
-## 📁 Project Structure
-
-```
-my-project/
-├── frontend/                   # Frontend application
-├── backend/                    # Backend application (or services/)
-├── services/                   # Microservices (if using microservices)
-├── db/                        # Database configurations
-├── docker/                    # Docker compose files
-├── .env.example              # Environment variables template
-├── nova-init.json            # Project configuration
-├── .gitignore                # Git ignore file
-└── README.md                 # Project documentation
-```
-
-## 🚀 Examples
-
-### Create a Full-Stack TypeScript App
-
+#### **2. Command-Line Mode**
 ```bash
-nova-init setup --setup-type predefined
-# Choose FULL_STACK_TS
+# Simple project
+npx create-nova-init setup-cli -n my-project
+
+# With predefined tech stack
+npx create-nova-init setup-cli -n my-app --techstack MERN -g
+
+# Full configuration
+npx create-nova-init setup-cli \
+  -n fullstack-app \
+  --techstack FULLSTACK_TS \
+  --monorepo turborepo \
+  --frontend-package-manager pnpm \
+  --backend-package-manager bun \
+  -g
 ```
 
-### Create a Custom MERN Stack
+## 📋 **Command-Line Options**
 
+### **Basic Options**
 ```bash
-nova-init setup \
-  --project-name my-mern-app \
-  --frontend react \
-  --backend express \
-  --databases mongodb \
-  --git
+-n, --project-name <name>        # Project name (required)
+-t, --setup-type <type>          # Setup type: custom or predefined
+-g, --git                        # Initialize git repository
 ```
 
-### Add Frontend to Existing Project
-
+### **Framework Options**
 ```bash
-nova-init add frontend \
-  --framework react \
-  --lang typescript \
-  --package-manager pnpm
+-f, --frontend <framework>       # Frontend framework
+-b, --backend <framework>        # Backend framework
+--frontend-folder <folder>       # Frontend folder name
+--backend-folder <folder>        # Backend folder name
 ```
 
-### Add Backend to Existing Project
-
+### **Package Managers**
 ```bash
-nova-init add backend \
-  --framework express \
-  --lang javascript \
-  --package-manager npm
+-p, --package-manager <pm>       # Global package manager: npm, pnpm, bun
+--frontend-package-manager <pm>  # Frontend package manager
+--backend-package-manager <pm>   # Backend package manager
+--monorepo-package-manager <pm>  # Monorepo package manager
 ```
 
-### Add a Database to Existing Project
-
+### **Databases & Monorepo**
 ```bash
-nova-init add database \
-  --database postgres \
-  --port 5433 \
-  --username admin \
-  --password secret123
+-d, --databases <dbs>            # Comma-separated list of databases
+-m, --monorepo <tool>            # Monorepo tool: none, lerna, nx, turborepo
+--microservices                  # Enable microservices architecture
 ```
 
-### Add Monorepo to Existing Project
-
+### **Tech Stacks**
 ```bash
-nova-init add monorepo \
-  --tool turborepo \
-  --package-manager pnpm
+--techstack <stack>              # Predefined tech stack:
+                                 # MERN, MEAN, MEVN, JAM, FULLSTACK_TS
 ```
 
 
-## 📄 License
+### **Available Databases**
+- **SQL:** PostgreSQL, MySQL, MariaDB, CockroachDB, EdgeDB, YugabyteDB
+- **NoSQL:** MongoDB, Cassandra, CouchDB, SurrealDB
+- **Graph:** Neo4j
+- **Key-Value:** Redis
 
-MIT License - see [LICENSE](LICENSE) file for details.
+
+
+## 🎯 **Examples**
+
+### **MERN Stack**
+```bash
+npx create-nova-init setup-cli -n mern-app --techstack MERN -g
+```
+**Creates:**
+- React frontend with TypeScript
+- Express.js backend
+- MongoDB with Docker
+- Git repository
+
+### **Full-Stack TypeScript**
+```bash
+npx create-nova-init setup-cli \
+  -n fullstack-app \
+  --techstack FULLSTACK_TS \
+  --monorepo turborepo \
+  --frontend-package-manager pnpm \
+  --backend-package-manager bun \
+  -g
+```
+**Creates:**
+- Next.js frontend
+- NestJS backend
+- PostgreSQL database
+- Turborepo monorepo
+- Separate package managers
+
+### **Microservices**
+```bash
+npx create-nova-init setup-cli \
+  -n microservices-app \
+  --backend nestjs \
+  --microservices \
+  --databases "postgres,redis,mongodb" \
+  -g
+```
+
+
+## 📄 **License**
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+
+**Built with ❤️ for the developer community**
 
 
 
