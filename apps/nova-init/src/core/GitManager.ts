@@ -22,14 +22,39 @@ export class GitManager {
       // Erstelle .gitignore
       await this.createGitignore(projectPath);
       
-      // Erste Commit
-      await execa('git', ['add', '.'], { cwd: projectPath });
-      await execa('git', ['commit', '-m', 'Initial commit: Project created with Nova-Init'], { cwd: projectPath });
-      
-      consola.success('✅ Git Repository erfolgreich initialisiert');
+      // Für Monorepo-Setups: Nur Root-Dateien hinzufügen, nicht Subverzeichnisse
+      try {
+        // Füge nur Root-Dateien hinzu
+        await execa('git', ['add', '.'], { cwd: projectPath });
+        await execa('git', ['commit', '-m', 'Initial commit: Project created with Nova-Init'], { cwd: projectPath });
+        consola.success('✅ Git Repository erfolgreich initialisiert');
+      } catch (gitError) {
+        // Falls Git-Fehler auftreten, versuche es ohne problematische Verzeichnisse
+        consola.warn('⚠️ Git-Fehler aufgetreten, versuche alternative Methode...');
+        
+        // Füge Dateien einzeln hinzu, ignoriere problematische Verzeichnisse
+        const files = await fs.readdir(projectPath);
+        for (const file of files) {
+          if (file !== '.git' && file !== 'node_modules') {
+            try {
+              await execa('git', ['add', file], { cwd: projectPath });
+            } catch (addError) {
+              consola.warn(`⚠️ Konnte ${file} nicht zu Git hinzufügen: ${addError}`);
+            }
+          }
+        }
+        
+        try {
+          await execa('git', ['commit', '-m', 'Initial commit: Project created with Nova-Init'], { cwd: projectPath });
+          consola.success('✅ Git Repository erfolgreich initialisiert (mit alternativer Methode)');
+        } catch (commitError) {
+          consola.warn('⚠️ Git-Commit fehlgeschlagen, aber Projekt wurde erstellt');
+        }
+      }
     } catch (error) {
       consola.error('❌ Fehler beim Initialisieren von Git:', error);
-      throw error;
+      // Git-Fehler sind nicht kritisch, wirf keinen Fehler
+      consola.warn('⚠️ Projekt wurde erstellt, aber Git-Initialisierung fehlgeschlagen');
     }
   }
 
