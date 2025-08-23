@@ -264,22 +264,32 @@ export interface AddCommandOptions {
  */
 export interface SetupCommandOptions {
   'project-name'?: string;
+  projectName?: string; // camelCase version for commander
   'setup-type'?: SetupType;
+  setupType?: SetupType; // camelCase version for commander
   monorepo?: MonorepoTool;
   'monorepo-package-manager'?: PackageManager;
+  monorepoPackageManager?: PackageManager; // camelCase version for commander
   frontend?: FrontendFramework;
   'frontend-language'?: Language;
+  frontendLanguage?: Language; // camelCase version for commander
   'frontend-folder'?: string;
+  frontendFolder?: string; // camelCase version for commander
   'frontend-package-manager'?: PackageManager;
+  frontendPackageManager?: PackageManager; // camelCase version for commander
   backend?: BackendFramework;
   'backend-language'?: Language;
+  backendLanguage?: Language; // camelCase version for commander
   'backend-folder'?: string;
+  backendFolder?: string; // camelCase version for commander
   'backend-package-manager'?: PackageManager;
+  backendPackageManager?: PackageManager; // camelCase version for commander
   microservices?: boolean;
-  databases?: DatabaseType[];
+  databases?: string; // String für comma-separated values von commander.js
   hosting?: HostingOption;
   git?: boolean;
   'package-manager'?: PackageManager;
+  packageManager?: PackageManager; // camelCase version for commander
   techstack?: string;
   help?: boolean;
 }

@@ -6,7 +6,7 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["node"],
     "outDir": "dist",
-    "rootDir": ".",
+    "rootDir": "src",
     "baseUrl": "./src",
     "paths": {
       "@cli/*": ["cli/*"],
