@@ -13,7 +13,8 @@ export async function installAngular(
 
     const templateFlag = language === 'typescript' ? '--routing --style css' : '--routing --style css --skip-git';
 
-    execSync(`npx @angular/cli@latest new ${projectName} ${templateFlag}`, {
+    // Use "frontend" as the project name to avoid nested directories
+    execSync(`npx @angular/cli@latest new frontend ${templateFlag}`, {
       cwd: targetPath,
       stdio: 'inherit',
       shell: '/bin/bash'

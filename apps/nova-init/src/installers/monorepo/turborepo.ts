@@ -29,16 +29,7 @@ export async function installTurborepo(projectPath: string, packageManager: Pack
       }
     });
     
-    // Remove default packages
-    defaultPackages.forEach(pkgPath => {
-      const fullPath = path.join(projectPath, pkgPath);
-      try {
-        rmSync(fullPath, { recursive: true, force: true });
-        consola.info(`🗑️ Removed ${pkgPath}`);
-      } catch (error) {
-        consola.warn(`⚠️ Could not remove ${pkgPath}:`, error);
-      }
-    });
+
     
     // Create clean apps directory
     const appsDir = path.join(projectPath, 'apps');
