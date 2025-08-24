@@ -28,12 +28,6 @@ export async function setupPrompt(): Promise<void> {
       process.exit(1);
     }
 
-    // Ask about microservices first
-    const useMicroservices = await confirm({
-      message: 'Do you want to use a microservices architecture?',
-      initialValue: false
-    }) as boolean;
-
     // Setup type selection
     const setupType = await select({
       message: 'Which setup type do you want to use?',
@@ -46,9 +40,9 @@ export async function setupPrompt(): Promise<void> {
     let projectConfig: ProjectStructure;
 
     if (setupType === 'predefined') {
-      projectConfig = await promptPredefinedSetup(projectName, useMicroservices);
+      projectConfig = await promptPredefinedSetup(projectName);
     } else if (setupType === 'custom') {
-      projectConfig = await promptCustomSetup(projectName, useMicroservices);
+      projectConfig = await promptCustomSetup(projectName);
     } else {
       consola.error('Invalid setup type');
       process.exit(1);
@@ -93,7 +87,7 @@ Tip: Use 'npx create-nova-init info' to display project information`);
   }
 }
 
-async function promptPredefinedSetup(projectName: string, useMicroservices: boolean): Promise<ProjectStructure> {
+async function promptPredefinedSetup(projectName: string): Promise<ProjectStructure> {
   const techStack = await select({
     message: 'Which predefined tech stack do you want to use?',
     options: [
@@ -113,25 +107,16 @@ async function promptPredefinedSetup(projectName: string, useMicroservices: bool
 
   // Import TechstackManager and create project
   const { TechstackManager } = await import('../core/TechstackManager.js');
-  const baseConfig = TechstackManager.createProjectFromTechStack(techStack, projectName);
-  
-  // Override microservices setting if user chose it
-  if (useMicroservices && baseConfig.backend) {
-    baseConfig.backend.useMicroservices = true;
-    baseConfig.backend.microserviceNames = ['api', 'auth', 'user'];
-    (baseConfig.backend as any).microservicePorts = [5000, 5001, 5002];
-  }
-  
-  return baseConfig;
+  return TechstackManager.createProjectFromTechStack(techStack, projectName);
 }
 
-async function promptCustomSetup(projectName: string, useMicroservices: boolean): Promise<ProjectStructure> {
+async function promptCustomSetup(projectName: string): Promise<ProjectStructure> {
   // Monorepo tool selection
   const monorepo = await select({
     message: 'Do you want to use a monorepo?',
     options: [
       { value: 'none', label: 'No, simple project' },
-      { value: 'turborepo', label: 'Turborepo (recommended)' },
+      { value: 'turborepo', label: 'Turborepo' },
       { value: 'nx', label: 'Nx' },
       { value: 'lerna', label: 'Lerna' }
     ]
@@ -164,7 +149,7 @@ async function promptCustomSetup(projectName: string, useMicroservices: boolean)
 
   let backend: any = undefined;
   if (hasBackend) {
-    backend = await promptBackendSetup(packageManager, useMicroservices);
+    backend = await promptBackendSetup(packageManager);
   }
 
   // Database selection
@@ -230,7 +215,7 @@ async function promptFrontendSetup(packageManager: string) {
   const frontendPackageManager = await select({
     message: 'Which package manager for the frontend?',
     options: [
-      { value: packageManager, label: `Use ${packageManager} (main package manager)` },
+      { value: packageManager, label: `Use ${packageManager} (monorepo package manager)` },
       { value: 'npm', label: 'npm' },
       { value: 'pnpm', label: 'pnpm' },
       { value: 'bun', label: 'Bun' }
@@ -245,7 +230,7 @@ async function promptFrontendSetup(packageManager: string) {
   };
 }
 
-async function promptBackendSetup(packageManager: string, useMicroservices: boolean) {
+async function promptBackendSetup(packageManager: string) {
   const framework = await select({
     message: 'Which backend framework do you want to use?',
     options: [
@@ -272,12 +257,18 @@ async function promptBackendSetup(packageManager: string, useMicroservices: bool
   const backendPackageManager = await select({
     message: 'Which package manager for the backend?',
     options: [
-      { value: packageManager, label: `Use ${packageManager} (main package manager)` },
+      { value: packageManager, label: `Use ${packageManager} (monorepo package manager)` },
       { value: 'npm', label: 'npm' },
       { value: 'pnpm', label: 'pnpm' },
       { value: 'bun', label: 'Bun' }
     ]
   }) as string;
+
+  // Ask about microservices after backend details
+  const useMicroservices = await confirm({
+    message: 'Do you want to use a microservices architecture?',
+    initialValue: false
+  }) as boolean;
 
   let microserviceNames: string[] = [];
   let microservicePorts: number[] = [];
