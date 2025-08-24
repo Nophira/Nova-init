@@ -1,90 +1,101 @@
 import { consola } from 'consola';
 import { intro, outro, text, select, confirm, multiselect, spinner } from '@clack/prompts';
 import { ProjectManager } from '../core/ProjectManager.js';
+import { NovaInitWriter } from '../utils/nova-init-writer.js';
 import type { ProjectStructure } from '../types/index.js';
 
 export async function setupPrompt(): Promise<void> {
   try {
-    // Einführung
-    intro('🚀 Willkommen bei Nova-Init!');
-    consola.info('Lass uns dein Projekt Schritt für Schritt aufsetzen.\n');
+    // Introduction
+    intro('Welcome to Nova-Init!');
+    consola.info('Let\'s set up your project step by step.\n');
 
-    // Projektname abfragen
+    // Project name
     const projectName = await text({
-      message: 'Wie soll dein Projekt heißen?',
-      placeholder: 'mein-awesome-projekt',
+      message: 'What should your project be called?',
+      placeholder: 'my-awesome-project',
       validate: (value) => {
-        if (!value) return 'Projektname ist erforderlich';
+        if (!value) return 'Project name is required';
         if (!/^[a-z0-9-]+$/.test(value)) {
-          return 'Projektname darf nur Kleinbuchstaben, Zahlen und Bindestriche enthalten';
+          return 'Project name can only contain lowercase letters, numbers and hyphens';
         }
         return undefined;
       }
     }) as string;
 
     if (!projectName) {
-      consola.error('❌ Projektname ist erforderlich');
+      consola.error('Project name is required');
       process.exit(1);
     }
 
-    // Setup-Typ wählen
+    // Ask about microservices first
+    const useMicroservices = await confirm({
+      message: 'Do you want to use a microservices architecture?',
+      initialValue: false
+    }) as boolean;
+
+    // Setup type selection
     const setupType = await select({
-      message: 'Welchen Setup-Typ möchtest du verwenden?',
+      message: 'Which setup type do you want to use?',
       options: [
-        { value: 'predefined', label: '🏗️  Vordefinierter Tech Stack (MERN, MEAN, etc.)' },
-        { value: 'custom', label: '⚙️  Custom Setup (alles selbst konfigurieren)' }
+        { value: 'predefined', label: 'Predefined Tech Stack (MERN, MEAN, etc.)' },
+        { value: 'custom', label: 'Custom Setup (configure everything yourself)' }
       ]
     }) as string | symbol;
 
     let projectConfig: ProjectStructure;
 
     if (setupType === 'predefined') {
-      projectConfig = await promptPredefinedSetup(projectName);
+      projectConfig = await promptPredefinedSetup(projectName, useMicroservices);
     } else if (setupType === 'custom') {
-      projectConfig = await promptCustomSetup(projectName);
+      projectConfig = await promptCustomSetup(projectName, useMicroservices);
     } else {
-      consola.error('❌ Ungültiger Setup-Typ');
+      consola.error('Invalid setup type');
       process.exit(1);
     }
 
-    // Bestätigung anzeigen
+    // Confirmation
     const confirmed = await confirm({
-      message: `Möchtest du das Projekt "${projectName}" mit dieser Konfiguration erstellen?`
+      message: `Do you want to create the project "${projectName}" with this configuration?`
     }) as boolean;
 
     if (!confirmed) {
-      outro('❌ Setup abgebrochen');
+      outro('Setup cancelled');
       process.exit(0);
     }
 
-    // Projekt erstellen
+    // Create project
     const s = spinner();
-    s.start('🚀 Erstelle dein Projekt...');
+    s.start('Creating your project...');
 
     const projectManager = new ProjectManager();
     await projectManager.createProject(projectConfig);
 
-    s.stop('✅ Projekt erfolgreich erstellt!');
+    s.stop('Project created successfully!');
 
-    // Erfolgsmeldung
-    outro(`🎉 Projekt "${projectName}" wurde erfolgreich erstellt!
+    // Create nova-init.json
+    const writer = new NovaInitWriter(projectConfig.projectName);
+    await writer.writeConfig(projectConfig);
 
-📁 Projektordner: ${projectName}
-🚀 Nächste Schritte:
+    // Success message
+    outro(`Project "${projectName}" was created successfully!
+
+Project folder: ${projectName}
+Next steps:
    1. cd ${projectName}
-   2. npm run dev (oder entsprechender Befehl)
+   2. npm run dev (or appropriate command)
 
-💡 Tipp: Verwende 'npx create-nova-init info' um Projektinformationen anzuzeigen`);
+Tip: Use 'npx create-nova-init info' to display project information`);
 
   } catch (error) {
-    consola.error('❌ Interaktiver Setup fehlgeschlagen:', error);
+    consola.error('Interactive setup failed:', error);
     throw error;
   }
 }
 
-async function promptPredefinedSetup(projectName: string): Promise<ProjectStructure> {
+async function promptPredefinedSetup(projectName: string, useMicroservices: boolean): Promise<ProjectStructure> {
   const techStack = await select({
-    message: 'Welchen vordefinierten Tech Stack möchtest du verwenden?',
+    message: 'Which predefined tech stack do you want to use?',
     options: [
       { value: 'MERN', label: 'MERN Stack (MongoDB + Express + React + Node.js)' },
       { value: 'MERN_TS', label: 'MERN Stack + TypeScript' },
@@ -97,40 +108,48 @@ async function promptPredefinedSetup(projectName: string): Promise<ProjectStruct
   }) as string;
 
   if (!techStack) {
-    throw new Error('Tech Stack ist erforderlich');
+    throw new Error('Tech Stack is required');
   }
 
-  // TechstackManager importieren und Projekt erstellen
+  // Import TechstackManager and create project
   const { TechstackManager } = await import('../core/TechstackManager.js');
-  return TechstackManager.createProjectFromTechStack(techStack, projectName);
+  const baseConfig = TechstackManager.createProjectFromTechStack(techStack, projectName);
+  
+  // Override microservices setting if user chose it
+  if (useMicroservices && baseConfig.backend) {
+    baseConfig.backend.useMicroservices = true;
+    baseConfig.backend.microserviceNames = ['api', 'auth', 'user'];
+    (baseConfig.backend as any).microservicePorts = [5000, 5001, 5002];
+  }
+  
+  return baseConfig;
 }
 
-async function promptCustomSetup(projectName: string): Promise<ProjectStructure> {
-  // Monorepo-Tool wählen
+async function promptCustomSetup(projectName: string, useMicroservices: boolean): Promise<ProjectStructure> {
+  // Monorepo tool selection
   const monorepo = await select({
-    message: 'Möchtest du ein Monorepo verwenden?',
+    message: 'Do you want to use a monorepo?',
     options: [
-      { value: 'none', label: '❌ Nein, einfaches Projekt' },
-      { value: 'turborepo', label: '🚀 Turborepo (empfohlen)' },
-      { value: 'nx', label: '⚡ Nx' },
-      { value: 'lerna', label: '📦 Lerna' }
+      { value: 'none', label: 'No, simple project' },
+      { value: 'turborepo', label: 'Turborepo (recommended)' },
+      { value: 'nx', label: 'Nx' },
+      { value: 'lerna', label: 'Lerna' }
     ]
   }) as string;
 
-  // Package Manager wählen
+  // Package manager selection
   const packageManager = await select({
-    message: 'Welchen Package Manager möchtest du verwenden?',
+    message: 'Which package manager do you want to use?',
     options: [
-      { value: 'npm', label: '📦 npm' },
-      { value: 'pnpm', label: '🚀 pnpm (schneller, platzsparender)' },
-      { value: 'bun', label: '⚡ Bun (ultra-schnell)' },
-      { value: 'yarn', label: '🧶 Yarn' }
+      { value: 'npm', label: 'npm' },
+      { value: 'pnpm', label: 'pnpm (faster, space-saving)' },
+      { value: 'bun', label: 'Bun (ultra-fast)' }
     ]
   }) as string;
 
-  // Frontend konfigurieren
+  // Frontend configuration
   const hasFrontend = await confirm({
-    message: 'Möchtest du ein Frontend hinzufügen?'
+    message: 'Do you want to add a frontend?'
   }) as boolean;
 
   let frontend: any = undefined;
@@ -138,41 +157,29 @@ async function promptCustomSetup(projectName: string): Promise<ProjectStructure>
     frontend = await promptFrontendSetup(packageManager);
   }
 
-  // Backend konfigurieren
+  // Backend configuration
   const hasBackend = await confirm({
-    message: 'Möchtest du ein Backend hinzufügen?'
+    message: 'Do you want to add a backend?'
   }) as boolean;
 
   let backend: any = undefined;
   if (hasBackend) {
-    backend = await promptBackendSetup(packageManager);
+    backend = await promptBackendSetup(packageManager, useMicroservices);
   }
 
-  // Datenbanken wählen
+  // Database selection
   const databases = await promptDatabases();
 
-  // Git initialisieren
+  // Git initialization
   const initializeGit = await confirm({
-    message: 'Soll ein Git-Repository initialisiert werden?',
+    message: 'Should a Git repository be initialized?',
     initialValue: true
   }) as boolean;
-
-  // Hosting wählen
-  const hosting = await select({
-    message: 'Welches Hosting möchtest du verwenden?',
-    options: [
-      { value: 'none', label: '❌ Kein Hosting' },
-      { value: 'vercel', label: '▲ Vercel (Frontend)' },
-      { value: 'netlify', label: '🌐 Netlify (Frontend)' },
-      { value: 'railway', label: '🚂 Railway (Fullstack)' },
-      { value: 'heroku', label: '🦸 Heroku (Fullstack)' }
-    ]
-  }) as string;
 
   return {
     projectName,
     setupType: 'custom',
-    monorepo: monorepo as any, // Type casting für MonorepoTool
+    monorepo: monorepo as any, // Type casting for MonorepoTool
     packageManagers: {
       monorepo: monorepo !== 'none' ? packageManager as any : undefined,
       frontend: frontend?.packageManager || packageManager as any,
@@ -181,7 +188,7 @@ async function promptCustomSetup(projectName: string): Promise<ProjectStructure>
     frontend,
     backend,
     databases,
-    hosting: hosting as any, // Type casting für HostingOption
+    hosting: 'none',
     initializeGit,
     techStack: undefined,
   };
@@ -189,45 +196,44 @@ async function promptCustomSetup(projectName: string): Promise<ProjectStructure>
 
 async function promptFrontendSetup(packageManager: string) {
   const framework = await select({
-    message: 'Welches Frontend-Framework möchtest du verwenden?',
+    message: 'Which frontend framework do you want to use?',
     options: [
-      { value: 'react', label: '⚛️  React' },
-      { value: 'vue', label: '💚 Vue.js' },
-      { value: 'angular', label: '🅰️  Angular' },
-      { value: 'svelte', label: '🎯 Svelte' },
-      { value: 'nextjs', label: '⚡ Next.js (React + SSR)' },
-      { value: 'nuxtjs', label: '🟢 Nuxt.js (Vue + SSR)' },
-      { value: 'astro', label: '🚀 Astro (Multi-Framework)' },
-      { value: 'qwik', label: '⚡ Qwik (Resumable)' },
-      { value: 'solid', label: '🧱 Solid.js' },
-      { value: 'preact', label: '⚡ Preact (React-kompatibel)' },
-      { value: 'lit', label: '💡 Lit (Web Components)' },
-      { value: 'remix', label: '🔄 Remix (React + Fullstack)' }
+      { value: 'react', label: 'React' },
+      { value: 'vue', label: 'Vue.js' },
+      { value: 'angular', label: 'Angular' },
+      { value: 'svelte', label: 'Svelte' },
+      { value: 'nextjs', label: 'Next.js (React + SSR)' },
+      { value: 'nuxtjs', label: 'Nuxt.js (Vue + SSR)' },
+      { value: 'astro', label: 'Astro (Multi-Framework)' },
+      { value: 'qwik', label: 'Qwik (Resumable)' },
+      { value: 'solid', label: 'Solid.js' },
+      { value: 'preact', label: 'Preact (React-compatible)' },
+      { value: 'lit', label: 'Lit (Web Components)' },
+      { value: 'remix', label: 'Remix (React + Fullstack)' }
     ]
   }) as string;
 
   const language = await select({
-    message: 'Welche Programmiersprache möchtest du verwenden?',
+    message: 'Which programming language do you want to use?',
     options: [
-      { value: 'typescript', label: '🔷 TypeScript (empfohlen)' },
-      { value: 'javascript', label: '🟡 JavaScript' }
+      { value: 'typescript', label: 'TypeScript (recommended)' },
+      { value: 'javascript', label: 'JavaScript' }
     ]
   }) as string;
 
   const folderName = await text({
-    message: 'Wie soll der Frontend-Ordner heißen?',
+    message: 'What should the frontend folder be called?',
     placeholder: 'frontend',
     initialValue: 'frontend'
   }) as string;
 
   const frontendPackageManager = await select({
-    message: 'Welchen Package Manager für das Frontend?',
+    message: 'Which package manager for the frontend?',
     options: [
-      { value: packageManager, label: `Verwende ${packageManager} (Haupt-Package-Manager)` },
-      { value: 'npm', label: '📦 npm' },
-      { value: 'pnpm', label: '🚀 pnpm' },
-      { value: 'bun', label: '⚡ Bun' },
-      { value: 'yarn', label: '🧶 Yarn' }
+      { value: packageManager, label: `Use ${packageManager} (main package manager)` },
+      { value: 'npm', label: 'npm' },
+      { value: 'pnpm', label: 'pnpm' },
+      { value: 'bun', label: 'Bun' }
     ]
   }) as string;
 
@@ -239,45 +245,53 @@ async function promptFrontendSetup(packageManager: string) {
   };
 }
 
-async function promptBackendSetup(packageManager: string) {
+async function promptBackendSetup(packageManager: string, useMicroservices: boolean) {
   const framework = await select({
-    message: 'Welches Backend-Framework möchtest du verwenden?',
+    message: 'Which backend framework do you want to use?',
     options: [
-      { value: 'express', label: '🚀 Express.js (Node.js)' },
-      { value: 'fastify', label: '⚡ Fastify (Node.js, schneller)' },
-      { value: 'nestjs', label: '🪺 NestJS (Node.js, strukturiert)' }
+      { value: 'express', label: 'Express.js (Node.js)' },
+      { value: 'fastify', label: 'Fastify (Node.js, faster)' },
+      { value: 'nestjs', label: 'NestJS (Node.js, structured)' }
     ]
   }) as string;
 
   const language = await select({
-    message: 'Welche Programmiersprache möchtest du verwenden?',
+    message: 'Which programming language do you want to use?',
     options: [
-      { value: 'typescript', label: '🔷 TypeScript (empfohlen)' },
-      { value: 'javascript', label: '🟡 JavaScript' }
+      { value: 'typescript', label: 'TypeScript (recommended)' },
+      { value: 'javascript', label: 'JavaScript' }
     ]
   }) as string;
 
-  const useMicroservices = await confirm({
-    message: 'Möchtest du eine Microservices-Architektur verwenden?',
-    initialValue: false
-  }) as boolean;
-
   const folderName = await text({
-    message: 'Wie soll der Backend-Ordner heißen?',
+    message: 'What should the backend folder be called?',
     placeholder: 'backend',
     initialValue: 'backend'
   }) as string;
 
   const backendPackageManager = await select({
-    message: 'Welchen Package Manager für das Backend?',
+    message: 'Which package manager for the backend?',
     options: [
-      { value: packageManager, label: `Verwende ${packageManager} (Haupt-Package-Manager)` },
-      { value: 'npm', label: '📦 npm' },
-      { value: 'pnpm', label: '🚀 pnpm' },
-      { value: 'bun', label: '⚡ Bun' },
-      { value: 'yarn', label: '🧶 Yarn' }
+      { value: packageManager, label: `Use ${packageManager} (main package manager)` },
+      { value: 'npm', label: 'npm' },
+      { value: 'pnpm', label: 'pnpm' },
+      { value: 'bun', label: 'Bun' }
     ]
   }) as string;
+
+  let microserviceNames: string[] = [];
+  let microservicePorts: number[] = [];
+
+  if (useMicroservices) {
+    const servicesInput = await text({
+      message: 'Enter microservice names separated by commas (e.g., api,auth,user)',
+      placeholder: 'api,auth,user',
+      initialValue: 'api,auth,user'
+    }) as string;
+
+    microserviceNames = servicesInput.split(',').map(s => s.trim()).filter(s => s);
+    microservicePorts = microserviceNames.map((_, index) => 5000 + index);
+  }
 
   return {
     language,
@@ -285,24 +299,26 @@ async function promptBackendSetup(packageManager: string) {
     useMicroservices,
     folderName: folderName || 'backend',
     packageManager: backendPackageManager,
-  };
+    microserviceNames,
+    microservicePorts: microservicePorts as any, // Type casting for microservicePorts
+  } as any; // Type casting for BackendSetup
 }
 
 async function promptDatabases() {
   const databaseTypes = await multiselect({
-    message: 'Welche Datenbanken möchtest du verwenden? (Leertaste für Auswahl, Enter für Bestätigung)',
+    message: 'Which databases do you want to use? (Space to select, Enter to confirm)',
     options: [
-      { value: 'postgresql', label: '🐘 PostgreSQL (SQL)' },
-      { value: 'mysql', label: '🐬 MySQL (SQL)' },
-      { value: 'mongodb', label: '🍃 MongoDB (NoSQL)' },
-      { value: 'redis', label: '🔴 Redis (Cache/Key-Value)' },
-      { value: 'neo4j', label: '🟢 Neo4j (Graph)' },
-      { value: 'cassandra', label: '📊 Cassandra (NoSQL)' },
-      { value: 'couchdb', label: '🛋️  CouchDB (NoSQL)' },
-      { value: 'mariadb', label: '🐬 MariaDB (SQL)' },
-      { value: 'edgedb', label: '⚡ EdgeDB (Modern SQL)' },
-      { value: 'yugabytedb', label: '🦎 YugabyteDB (Distributed SQL)' },
-      { value: 'surrealdb', label: '🌊 SurrealDB (Multi-Model)' }
+      { value: 'postgresql', label: 'PostgreSQL (SQL)' },
+      { value: 'mysql', label: 'MySQL (SQL)' },
+      { value: 'mongodb', label: 'MongoDB (NoSQL)' },
+      { value: 'redis', label: 'Redis (Cache/Key-Value)' },
+      { value: 'neo4j', label: 'Neo4j (Graph)' },
+      { value: 'cassandra', label: 'Cassandra (NoSQL)' },
+      { value: 'couchdb', label: 'CouchDB (NoSQL)' },
+      { value: 'mariadb', label: 'MariaDB (SQL)' },
+      { value: 'edgedb', label: 'EdgeDB (Modern SQL)' },
+      { value: 'yugabytedb', label: 'YugabyteDB (Distributed SQL)' },
+      { value: 'surrealdb', label: 'SurrealDB (Multi-Model)' }
     ],
     required: false
   }) as string[];
@@ -312,9 +328,9 @@ async function promptDatabases() {
   }
 
   return databaseTypes.map(type => ({
-    name: type, // Name hinzufügen für DatabaseSetup
-    type: type as any, // Type casting für DatabaseType
-    useDocker: true, // Standardmäßig Docker verwenden
+    name: type, // Add name for DatabaseSetup
+    type: type as any, // Type casting for DatabaseType
+    useDocker: true, // Use Docker by default
     connectionString: undefined
   }));
 }
