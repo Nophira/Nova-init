@@ -21,8 +21,26 @@ export class TechstackManager {
       packageManager: 'npm',
       monorepo: 'none'
     },
+    MERN_TS: {
+      name: 'MERN Stack (TypeScript)',
+      description: 'MongoDB, Express, React, Node.js - Full-stack TypeScript',
+      frontend: 'react',
+      backend: 'express',
+      databases: ['mongodb'],
+      packageManager: 'npm',
+      monorepo: 'none'
+    },
     MEAN: {
       name: 'MEAN Stack',
+      description: 'MongoDB, Express, Angular, Node.js - Full-stack TypeScript',
+      frontend: 'angular',
+      backend: 'express',
+      databases: ['mongodb'],
+      packageManager: 'npm',
+      monorepo: 'none'
+    },
+    MEAN_TS: {
+      name: 'MEAN Stack (TypeScript)',
       description: 'MongoDB, Express, Angular, Node.js - Full-stack TypeScript',
       frontend: 'angular',
       backend: 'express',
@@ -39,10 +57,10 @@ export class TechstackManager {
       packageManager: 'npm',
       monorepo: 'none'
     },
-    JAM: {
-      name: 'JAMstack',
-      description: 'JavaScript, APIs, Markup - Modern web architecture',
-      frontend: 'astro',
+    MEVN_TS: {
+      name: 'MEVN Stack (TypeScript)',
+      description: 'MongoDB, Express, Vue, Node.js - Full-stack TypeScript',
+      frontend: 'vue',
       backend: 'express',
       databases: ['mongodb'],
       packageManager: 'npm',
@@ -56,15 +74,6 @@ export class TechstackManager {
       databases: ['postgres'],
       packageManager: 'pnpm',
       monorepo: 'turborepo'
-    },
-    MICROSERVICES: {
-      name: 'Microservices Architecture',
-      description: 'Multiple backend services with React frontend',
-      frontend: 'react',
-      backend: 'express',
-      databases: ['postgres', 'redis'],
-      packageManager: 'pnpm',
-      monorepo: 'nx'
     }
   };
 
@@ -82,6 +91,10 @@ export class TechstackManager {
       throw new Error(`Unknown tech stack: ${techStackName}`);
     }
 
+    // Determine if this is a TypeScript tech stack
+    const isTypeScript = techStackName.includes('_TS') || techStackName === 'FULLSTACK_TS';
+    const language = isTypeScript ? 'typescript' : 'javascript';
+
     return {
       projectName,
       setupType: 'predefined',
@@ -92,16 +105,16 @@ export class TechstackManager {
         backend: techStack.packageManager,
       },
       frontend: {
-        language: 'typescript',
+        language,
         framework: techStack.frontend,
         folderName: 'frontend',
         packageManager: techStack.packageManager,
       },
       backend: {
-        language: 'typescript',
+        language,
         framework: techStack.backend,
-        useMicroservices: techStack.name === 'Microservices Architecture',
-        microserviceNames: techStack.name === 'Microservices Architecture' ? ['auth', 'users', 'products'] : undefined,
+        useMicroservices: false, // Removed microservices support
+        microserviceNames: undefined,
         folderName: 'backend',
         packageManager: techStack.packageManager,
       },

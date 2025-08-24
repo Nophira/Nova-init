@@ -7,12 +7,13 @@ Nova-Init is a powerful command-line tool that helps you create complete full-st
 ## ✨ **Features**
 
 ### 🎯 **Predefined Tech Stacks**
-- **MERN** - MongoDB, Express.js, React, Node.js
-- **MEAN** - MongoDB, Express.js, Angular, Node.js  
-- **MEVN** - MongoDB, Express.js, Vue.js, Node.js
-- **JAM** - JavaScript, Astro, MongoDB
+- **MERN** - MongoDB, Express.js, React, Node.js (JavaScript)
+- **MERN_TS** - MongoDB, Express.js, React, Node.js (TypeScript)
+- **MEAN** - MongoDB, Express.js, Angular, Node.js (TypeScript)
+- **MEAN_TS** - MongoDB, Express.js, Angular, Node.js (TypeScript)
+- **MEVN** - MongoDB, Express.js, Vue.js, Node.js (JavaScript)
+- **MEVN_TS** - MongoDB, Express.js, Vue.js, Node.js (TypeScript)
 - **FULLSTACK_TS** - Next.js, NestJS, PostgreSQL, TypeScript
-- **MICROSERVICES** - Microservices architecture
 
 ### 🛠 **Supported Frameworks**
 
@@ -76,7 +77,7 @@ npx create-nova-init
 ```bash
 npx create-nova-init
 # Or
-npx create-nova-init setup
+npx create-nova-init
 ```
 
 #### **2. Command-Line Mode**
@@ -97,90 +98,89 @@ npx create-nova-init setup-cli \
   -g
 ```
 
-## 📋 **Command-Line Options**
 
-### **Basic Options**
+
+## 📋 **Command Reference**
+
+### **Available Commands**
+
+- **`setup-cli`** - Command-line setup mode
+- **`config`** - Manage nova-init.json configuration
+- **`info`** - Show project information
+- **`help`** - Show detailed help
+
+### **setup-cli Command Options**
+
+#### **Required Options**
+- `-n, --project-name <name>` - Project name (required)
+- `-t, --setup-type <type>` - Setup type: custom or predefined (default: custom)
+
+#### **Basic Options**
+- `-g, --git` - Initialize git repository
+
+#### **Framework Options**
+- `-f, --frontend <framework>` - Frontend framework
+- `-b, --backend <framework>` - Backend framework
+- `--frontend-folder <folder>` - Frontend folder name
+- `--backend-folder <folder>` - Backend folder name
+
+
+#### **Package Manager Options**
+- `-p, --package-manager <pm>` - Global package manager: npm, pnpm, bun (default: npm)
+- `--frontend-package-manager <pm>` - Frontend package manager
+- `--backend-package-manager <pm>` - Backend package manager
+- `--monorepo-package-manager <pm>` - Monorepo package manager
+
+#### **Database & Monorepo Options**
+- `-d, --databases <dbs>` - Comma-separated list of databases
+- `-m, --monorepo <tool>` - Monorepo tool: none, lerna, nx, turborepo (default: none)
+
+#### **Tech Stack Options**
+- `--techstack <stack>` - Predefined tech stack: MERN, MERN_TS, MEAN, MEAN_TS, MEVN, MEVN_TS, FULLSTACK_TS
+
+### **config Command Options**
+- `-p, --path <path>` - Project path (default: current directory)
+- `--show` - Show current configuration
+- `--validate` - Validate configuration
+- `--backup` - Create backup of configuration
+- `--restore <backup-path>` - Restore configuration from backup
+
+### **info Command Options**
+- `-p, --path <path>` - Project path (default: current directory)
+
+### **help Command Options**
+- `-c, --command <name>` - Show help for specific command
+
+## 📚 **Available Options & Values**
+
+### **Frontend Frameworks**
 ```bash
--n, --project-name <name>        # Project name (required)
--t, --setup-type <type>          # Setup type: custom or predefined
--g, --git                        # Initialize git repository
+react, nextjs, vue, svelte, angular, nuxtjs, astro, remix, solid, qwik, preact, lit
 ```
 
-### **Framework Options**
+### **Backend Frameworks**
 ```bash
--f, --frontend <framework>       # Frontend framework
--b, --backend <framework>        # Backend framework
---frontend-folder <folder>       # Frontend folder name
---backend-folder <folder>        # Backend folder name
+express, nestjs, fastify
+```
+
+### **Databases**
+```bash
+mongodb, postgres, mysql, redis, neo4j, cassandra, couchdb, mariadb, cockroachdb, edgedb, surrealdb, yugabytedb
 ```
 
 ### **Package Managers**
 ```bash
--p, --package-manager <pm>       # Global package manager: npm, pnpm, bun
---frontend-package-manager <pm>  # Frontend package manager
---backend-package-manager <pm>   # Backend package manager
---monorepo-package-manager <pm>  # Monorepo package manager
+npm, pnpm, bun
 ```
 
-### **Databases & Monorepo**
+### **Monorepo Tools**
 ```bash
--d, --databases <dbs>            # Comma-separated list of databases
--m, --monorepo <tool>            # Monorepo tool: none, lerna, nx, turborepo
---microservices                  # Enable microservices architecture
+none, lerna, nx, turborepo
 ```
 
 ### **Tech Stacks**
 ```bash
---techstack <stack>              # Predefined tech stack:
-                                 # MERN, MEAN, MEVN, JAM, FULLSTACK_TS
-```
-
-
-### **Available Databases**
-- **SQL:** PostgreSQL, MySQL, MariaDB, CockroachDB, EdgeDB, YugabyteDB
-- **NoSQL:** MongoDB, Cassandra, CouchDB, SurrealDB
-- **Graph:** Neo4j
-- **Key-Value:** Redis
-
-
-
-## 🎯 **Examples**
-
-### **MERN Stack**
-```bash
-npx create-nova-init setup-cli -n mern-app --techstack MERN -g
-```
-**Creates:**
-- React frontend with TypeScript
-- Express.js backend
-- MongoDB with Docker
-- Git repository
-
-### **Full-Stack TypeScript**
-```bash
-npx create-nova-init setup-cli \
-  -n fullstack-app \
-  --techstack FULLSTACK_TS \
-  --monorepo turborepo \
-  --frontend-package-manager pnpm \
-  --backend-package-manager bun \
-  -g
-```
-**Creates:**
-- Next.js frontend
-- NestJS backend
-- PostgreSQL database
-- Turborepo monorepo
-- Separate package managers
-
-### **Microservices**
-```bash
-npx create-nova-init setup-cli \
-  -n microservices-app \
-  --backend nestjs \
-  --microservices \
-  --databases "postgres,redis,mongodb" \
-  -g
+MERN, MERN_TS, MEAN, MEAN_TS, MEVN, MEVN_TS, FULLSTACK_TS
 ```
 
 
@@ -188,6 +188,7 @@ npx create-nova-init setup-cli \
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+---
 
 **Built with ❤️ for the developer community**
 

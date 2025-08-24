@@ -5,6 +5,7 @@ import { FrameworkManager } from './FrameworkManager.js';
 import { DatabaseManager } from './DatabaseManager.js';
 import { GitManager } from './GitManager.js'; 
 import { PackageManager } from './PackageManager.js'; 
+import { NovaInitWriter } from '../utils/nova-init-writer.js';
 import type { ProjectStructure } from '../types/index.js';
 
 export class ProjectManager {
@@ -120,11 +121,7 @@ export class ProjectManager {
       console.log(`  📁 Datenbank-Ordner: ${dbPath}`);
     }
     
-    // Gemeinsame Ordner
-    const commonDirs = ['docs', 'scripts', 'tests'];
-    for (const dir of commonDirs) {
-      await fs.ensureDir(path.join(projectPath, dir));
-    }
+
   }
 
   private async installFrameworks(projectPath: string, config: ProjectStructure): Promise<void> {
@@ -178,8 +175,8 @@ export class ProjectManager {
     await fs.writeFile(path.join(projectPath, '.env.example'), envExample);
     
     // nova-init.json
-    const novaInitConfig = this.generateNovaInitConfig(config);
-    await fs.writeJson(path.join(projectPath, 'nova-init.json'), novaInitConfig, { spaces: 2 });
+    const writer = new NovaInitWriter(projectPath);
+    await writer.writeConfig(config);
     
     // README.md
     const readme = this.generateReadme(config);
@@ -347,9 +344,7 @@ npm run test
       structure += '- `DB/` - Datenbank-Konfiguration\n';
     }
     
-    structure += '- `docs/` - Dokumentation\n';
-    structure += '- `scripts/` - Hilfsskripte\n';
-    structure += '- `tests/` - Tests\n';
+
     
     return structure;
   }

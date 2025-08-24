@@ -18,8 +18,7 @@ export class DatabaseManager {
         await this.createDatabaseConfig(dbPath, db);
       }
       
-      // Datenbank-Skripte erstellen
-      await this.createDatabaseScripts(projectPath, databases);
+
       
       console.log('  ✅ Datenbanken erfolgreich eingerichtet');
       
@@ -261,54 +260,5 @@ module.exports = {
     };
   }
 
-  async createDatabaseScripts(projectPath: string, databases: DatabaseSetup[]): Promise<void> {
-    try {
-      const scriptsPath = path.join(projectPath, 'scripts');
-      await fs.ensureDir(scriptsPath);
-      
-      // Start-Skript für Datenbanken
-      const startScript = this.generateStartScript(databases);
-      await fs.writeFile(path.join(scriptsPath, 'start-dbs.sh'), startScript, 'utf-8');
-      await fs.chmod(path.join(scriptsPath, 'start-dbs.sh'), 0o755);
-      
-      // Stop-Skript für Datenbanken
-      const stopScript = this.generateStopScript(databases);
-      await fs.writeFile(path.join(scriptsPath, 'stop-dbs.sh'), stopScript, 'utf-8');
-      await fs.chmod(path.join(scriptsPath, 'stop-dbs.sh'), 0o755);
-      
-      console.log('  📝 Datenbank-Skripte erstellt');
-      
-    } catch (error) {
-      console.error('  ❌ Fehler beim Erstellen der Datenbank-Skripte:', error);
-    }
-  }
 
-  private generateStartScript(databases: DatabaseSetup[]): string {
-    return `#!/bin/bash
-# Starte alle Datenbanken
-echo "🚀 Starte Datenbanken..."
-
-cd DB
-docker-compose up -d
-
-echo "✅ Alle Datenbanken gestartet!"
-echo ""
-echo "Verfügbare Datenbanken:"
-${databases.map(db => `echo "  - ${db.type}: localhost:${db.port}"`).join('\n')}
-echo ""
-echo "Datenbanken stoppen: ./scripts/stop-dbs.sh"
-`;
-  }
-
-  private generateStopScript(databases: DatabaseSetup[]): string {
-    return `#!/bin/bash
-# Stoppe alle Datenbanken
-echo "🛑 Stoppe Datenbanken..."
-
-cd DB
-docker-compose down
-
-echo "✅ Alle Datenbanken gestoppt!"
-`;
-  }
 }

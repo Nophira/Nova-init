@@ -283,9 +283,6 @@ export class MonorepoManager {
       'apps',
       'packages',
       'tools',
-      'docs',
-      'scripts',
-      'tests',
     ];
     
     for (const dir of directories) {
@@ -302,9 +299,6 @@ Dies ist ein Monorepo, das mit Nova-Init erstellt wurde.
 - \`apps/\` - Anwendungen
 - \`packages/\` - Gemeinsame Pakete
 - \`tools/\` - Entwicklungstools
-- \`docs/\` - Dokumentation
-- \`scripts/\` - Hilfsskripte
-- \`tests/\` - Tests
 
 ## Entwicklung
 
