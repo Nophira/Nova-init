@@ -53,8 +53,8 @@ export async function setupCommandLine(options: SetupCommandOptions): Promise<vo
           language: options.backendLanguage || 'typescript',
           framework: options.backend as any,
           useMicroservices: Boolean(options.microservices),
-          microserviceNames: typeof options.microservices === 'string' 
-            ? (options.microservices as string).split(',').map((s: string) => s.trim()).filter(Boolean)
+          microserviceNames: Boolean(options.microservices) 
+            ? ['user', 'worker', 'payment', 'gateway']
             : undefined,
           folderName: options.backendFolder || 'backend',
           packageManager: options.backendPackageManager || options.packageManager || 'npm',

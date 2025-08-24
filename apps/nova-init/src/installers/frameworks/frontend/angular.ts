@@ -13,7 +13,7 @@ export async function installAngular(
 
     const templateFlag = language === 'typescript' ? '--routing --style css' : '--routing --style css --skip-git';
 
-    execSync(`npx @angular/cli@latest new . ${templateFlag}`, {
+    execSync(`npx @angular/cli@latest new ${projectName} ${templateFlag}`, {
       cwd: targetPath,
       stdio: 'inherit',
       shell: '/bin/bash'
