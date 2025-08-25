@@ -15,7 +15,7 @@ export async function installVue(
 
     // Use npx create-vue with proper template selection
     // create-vue expects the template as a positional argument, not as a flag
-    const template = language === 'typescript' ? 'vue-ts' : 'vue';
+    const template = language === 'typescript' ? 'vue-tsc' : '';
     
     execSync(`npm create-vue@latest . ${template}`, {
       cwd: targetPath,
