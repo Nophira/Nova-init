@@ -36,7 +36,7 @@ export const FRONTEND_FRAMEWORKS: Record<FrontendFramework, {
     defaultPort: 3000,
     recommendedLanguage: 'typescript',
     features: ['jsx', 'hooks', 'context', 'suspense'],
-    installCommand: 'npm create vite@latest . -- --template react-ts',
+    installCommand: 'npm create vite@latest . --template react-ts',
     packageName: 'react'
   },
   nextjs: {
@@ -56,7 +56,7 @@ export const FRONTEND_FRAMEWORKS: Record<FrontendFramework, {
     defaultPort: 3000,
     recommendedLanguage: 'typescript',
     features: ['composition-api', 'single-file-components', 'reactivity'],
-    installCommand: 'npm create vue@latest . -- --template vue-ts',
+    installCommand: 'npm create vue@latest . --template vue-ts',
     packageName: 'vue'
   },
   svelte: {
@@ -66,7 +66,7 @@ export const FRONTEND_FRAMEWORKS: Record<FrontendFramework, {
     defaultPort: 3000,
     recommendedLanguage: 'typescript',
     features: ['compiler', 'reactive', 'scoped-styles'],
-    installCommand: 'npm create svelte@latest . -- --template svelte-ts',
+    installCommand: 'npm create svelte@latest . --template svelte-ts',
     packageName: 'svelte'
   },
   angular: {

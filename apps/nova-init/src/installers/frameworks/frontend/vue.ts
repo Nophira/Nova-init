@@ -13,9 +13,10 @@ export async function installVue(
   try {
     consola.info(`Installing Vue (${language}) in "${targetPath}"...`);
 
-    const templateFlag = language === 'typescript' ? '-- --template vue-ts' : '-- --template vue';
-
-    execSync(`npm create vue@latest . ${templateFlag}`, {
+    // Use npx create-vue with proper template selection and non-interactive flags
+    const templateFlag = language === 'typescript' ? '--template vue-ts' : '--template vue';
+    
+    execSync(`npx create-vue@latest . ${templateFlag} --yes --overwrite`, {
       cwd: targetPath,
       stdio: 'inherit'
     });

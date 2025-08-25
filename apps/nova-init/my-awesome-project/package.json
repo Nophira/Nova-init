@@ -1,5 +1,5 @@
 {
-  "name": "test-projekt",
+  "name": "my-awesome-project",
   "private": true,
   "scripts": {
     "build": "turbo run build",

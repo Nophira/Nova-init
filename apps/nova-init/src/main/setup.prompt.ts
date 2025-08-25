@@ -11,11 +11,11 @@ export async function setupPrompt(): Promise<void> {
     consola.info('Let\'s set up your project step by step.\n');
 
     // Project name
-    const projectName = await text({
+    const projectNameInput = await text({
       message: 'What should your project be called?',
       placeholder: 'my-awesome-project',
       validate: (value) => {
-        if (!value) return 'Project name is required';
+        if (!value) return undefined; // Allow empty input to use placeholder
         if (!/^[a-z0-9-]+$/.test(value)) {
           return 'Project name can only contain lowercase letters, numbers and hyphens';
         }
@@ -23,10 +23,8 @@ export async function setupPrompt(): Promise<void> {
       }
     }) as string;
 
-    if (!projectName) {
-      consola.error('Project name is required');
-      process.exit(1);
-    }
+    // Use placeholder if no name is provided
+    const projectName = projectNameInput || 'my-awesome-project';
 
     // Setup type selection
     const setupType = await select({

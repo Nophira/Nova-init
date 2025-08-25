@@ -21,7 +21,7 @@ export async function installReact(
     if (useVite) {
       consola.info(`Installing React (${language}) with Vite in "${targetPath}"...`);
 
-      const templateFlag = language === 'typescript' ? '-- --template react-ts' : '-- --template react';
+      const templateFlag = language === 'typescript' ? '--template react-ts' : '--template react';
     
       execSync(`npm create vite@latest . ${templateFlag}`, {
         cwd: targetPath,

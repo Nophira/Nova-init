@@ -13,7 +13,7 @@ export async function installSvelte(
   try {
     consola.info(`Installing Svelte (${language}) in "${targetPath}"...`);
 
-    const templateFlag = language === 'typescript' ? '-- --template svelte-ts' : '-- --template svelte';
+    const templateFlag = language === 'typescript' ? '--template svelte-ts' : '--template svelte';
 
     execSync(`npm create svelte@latest . ${templateFlag}`, {
       cwd: targetPath,
