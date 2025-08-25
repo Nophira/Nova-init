@@ -56,7 +56,7 @@ export const FRONTEND_FRAMEWORKS: Record<FrontendFramework, {
     defaultPort: 3000,
     recommendedLanguage: 'typescript',
     features: ['composition-api', 'single-file-components', 'reactivity'],
-    installCommand: 'npm create vue@latest . --template vue-ts',
+    installCommand: 'npx create-vue@latest . --template vue-ts',
     packageName: 'vue'
   },
   svelte: {
