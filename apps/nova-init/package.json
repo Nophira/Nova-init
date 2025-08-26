@@ -7,7 +7,7 @@
   "main": "dist/index.js",
   "type": "module",
   "bin": {
-    "create-nova-init": "./dist/src/index.js"
+    "create-nova-init": "./dist/index.js"
   },
   "files": [
     "dist"

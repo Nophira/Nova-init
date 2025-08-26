@@ -10,16 +10,16 @@ export async function installFastify(
   packageManager: PackageManager = 'npm'
 ) {
   try {
-    consola.info(`Installing Fastify (${language}) in "${targetPath}"...`);
+    consola.info(`🛠 Installing Fastify (${language}) in "${targetPath}"...`);
 
     // Ensure target directory exists
     if (!existsSync(targetPath)) {
       mkdirSync(targetPath, { recursive: true });
-      consola.info(`Created directory: ${targetPath}`);
+      consola.info(`📁 Created directory: ${targetPath}`);
     }
 
     const exec = (cmd: string) =>
-      execSync(cmd, { cwd: targetPath, stdio: 'inherit' }); 
+      execSync(cmd, { cwd: targetPath, stdio: 'inherit', shell: '/bin/bash' }); 
 
     // Install Fastify
     if (packageManager === 'pnpm') {
@@ -65,8 +65,7 @@ export async function installFastify(
         JSON.stringify(tsConfig, null, 2)
       );
 
-      // Create src directory (cross-platform)
-      mkdirSync(path.join(targetPath, 'src'), { recursive: true });
+      execSync('mkdir -p src', { cwd: targetPath, shell: '/bin/bash' });
       const mainContent = `import Fastify from 'fastify';
 
 const fastify = Fastify({
@@ -107,8 +106,7 @@ start();
     } else {
       consola.info('Installing JavaScript version...');
 
-      // Create src directory (cross-platform)
-      mkdirSync(path.join(targetPath, 'src'), { recursive: true });
+      execSync('mkdir -p src', { cwd: targetPath, shell: '/bin/bash' });
       const mainContent = `import Fastify from 'fastify';
 
 const fastify = Fastify({
@@ -157,9 +155,9 @@ NODE_ENV=development
       envContent
     );
     
-    consola.success(`Fastify (${language}) installed successfully with ${packageManager}`);
+    consola.success(`✅ Fastify (${language}) installed successfully with ${packageManager}`);
   } catch (error) {
-    consola.error(`Failed to install Fastify:`, error);
+    consola.error(`❌ Failed to install Fastify:`, error);
     throw error;
   }
 }

@@ -2,7 +2,10 @@ import fs from 'fs-extra';
 import * as path from 'path';
 import type { ProjectStructure } from '../types/index.js';
 
-
+/**
+ * Nova-Init Configuration Writer
+ * Handles writing and managing nova-init.json configuration files
+ */
 export class NovaInitWriter {
   private projectPath: string;
 
@@ -10,7 +13,9 @@ export class NovaInitWriter {
     this.projectPath = projectPath;
   }
 
-  
+  /**
+   * Write nova-init.json configuration file
+   */
   async writeConfig(config: ProjectStructure): Promise<void> {
     try {
       const configData = this.generateConfigData(config);
@@ -26,7 +31,9 @@ export class NovaInitWriter {
     }
   }
 
- 
+  /**
+   * Read existing nova-init.json configuration
+   */
   async readConfig(): Promise<ProjectStructure | null> {
     try {
       const filePath = path.join(this.projectPath, 'nova-init.json');
@@ -43,7 +50,9 @@ export class NovaInitWriter {
     }
   }
 
- 
+  /**
+   * Update existing nova-init.json configuration
+   */
   async updateConfig(updates: Partial<ProjectStructure>): Promise<void> {
     try {
       const existingConfig = await this.readConfig();
@@ -61,7 +70,9 @@ export class NovaInitWriter {
     }
   }
 
- 
+  /**
+   * Validate configuration data
+   */
   private validateConfig(config: any): ProjectStructure {
     // Basic validation
     if (!config.projectName || typeof config.projectName !== 'string') {
@@ -79,7 +90,9 @@ export class NovaInitWriter {
     return config as ProjectStructure;
   }
 
- 
+  /**
+   * Generate configuration data
+   */
   private generateConfigData(config: ProjectStructure): any {
     return {
       projectName: config.projectName,
@@ -94,18 +107,24 @@ export class NovaInitWriter {
     };
   }
 
- 
+  /**
+   * Check if nova-init.json exists
+   */
   async configExists(): Promise<boolean> {
     const filePath = path.join(this.projectPath, 'nova-init.json');
     return await fs.pathExists(filePath);
   }
 
-  
+  /**
+   * Get configuration file path
+   */
   getConfigPath(): string {
     return path.join(this.projectPath, 'nova-init.json');
   }
 
- 
+  /**
+   * Backup existing configuration
+   */
   async backupConfig(): Promise<string | null> {
     try {
       const configPath = this.getConfigPath();
@@ -124,7 +143,9 @@ export class NovaInitWriter {
     }
   }
 
-  
+  /**
+   * Restore configuration from backup
+   */
   async restoreConfig(backupPath: string): Promise<void> {
     try {
       const configPath = this.getConfigPath();
@@ -138,14 +159,14 @@ export class NovaInitWriter {
   }
 }
 
-
+// Legacy function for backward compatibility
 export async function writeNovaInitJson(config: any): Promise<void> {
   console.warn('⚠️  writeNovaInitJson is deprecated. Use NovaInitWriter class instead.');
   
   const rootFolder = config.paths?.root || config.projectPath || '.';
   const writer = new NovaInitWriter(rootFolder);
   
- 
+  // Convert legacy config format to ProjectStructure
   const projectConfig: ProjectStructure = {
     projectName: config.projectName || 'unknown',
     setupType: config.setupType || 'custom',

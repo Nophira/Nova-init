@@ -1,6 +1,4 @@
 import { execSync } from 'child_process';
-import { existsSync, unlinkSync } from 'fs';
-import path from 'path';
 import consola from 'consola';
 import type { Language, PackageManager } from '../../../types/index.js';
 
@@ -11,25 +9,23 @@ export async function installAstro(
   packageManager: PackageManager = 'npm'
 ) {
   try {
-    consola.info(`Installing Astro (${language}) in "${targetPath}"...`);
+    consola.info(`⚛️ Installing Astro (${language}) in "${targetPath}"...`);
 
     const templateFlag = language === 'typescript' ? '--template minimal --typescript strict' : '--template minimal';
 
     execSync(`npm create astro@latest . ${templateFlag}`, {
       cwd: targetPath,
-      stdio: 'inherit'
+      stdio: 'inherit',
+      shell: '/bin/bash'
     });
     
     // Install dependencies with specified package manager
     if (packageManager !== 'npm') {
-      consola.info(`Installing dependencies with ${packageManager}...`);
+      consola.info(`📦 Installing dependencies with ${packageManager}...`);
       
-      // Remove package-lock.json if exists (cross-platform)
+      // Remove package-lock.json if exists
       try {
-        const packageLockPath = path.join(targetPath, 'package-lock.json');
-        if (existsSync(packageLockPath)) {
-          unlinkSync(packageLockPath);
-        }
+        execSync('rm -f package-lock.json', { cwd: targetPath, stdio: 'ignore', shell: '/bin/bash' });
       } catch (error) {
         // Ignore error if file doesn't exist
       }
@@ -37,17 +33,17 @@ export async function installAstro(
       // Install with specified package manager
       switch (packageManager) {
         case 'pnpm':
-          execSync('pnpm install', { cwd: targetPath, stdio: 'inherit' });
+          execSync('pnpm install', { cwd: targetPath, stdio: 'inherit', shell: '/bin/bash' });
           break;
         case 'bun':
-          execSync('bun install', { cwd: targetPath, stdio: 'inherit' });
+          execSync('bun install', { cwd: targetPath, stdio: 'inherit', shell: '/bin/bash' });
           break;
       }
     }
     
-    consola.success(`Astro (${language}) installed successfully with ${packageManager}`);
+    consola.success(`✅ Astro (${language}) installed successfully with ${packageManager}`);
   } catch (error) {
-    consola.error(`Failed to install Astro:`, error);
+    consola.error(`❌ Failed to install Astro:`, error);
     throw error;
   }
 }

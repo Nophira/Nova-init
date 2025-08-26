@@ -1,0 +1,1 @@
+die programmier sprache fragen befor framework und vite frage hinzufügen und die commands für framework install fertig machen

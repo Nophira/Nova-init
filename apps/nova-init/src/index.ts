@@ -14,16 +14,15 @@ program
   .name('create-nova-init')
   .description('A modern CLI tool for scaffolding your next project')
   .version('2.0.0');
-  
 
-
+// Central help command
 program
   .command('help')
   .description('Show detailed help for all commands')
   .option('-c, --command <name>', 'Show help for specific command')
   .action((options) => {
     if (options.command) {
-      
+      // Show help for specific command
       const command = program.commands.find(cmd => cmd.name() === options.command);
       if (command) {
         command.help();
@@ -37,7 +36,7 @@ program
         });
       }
     } else {
-      
+      // Show general help
       console.log('🚀 Nova-Init CLI - A modern CLI tool for scaffolding your next project\n');
       
       console.log('📋 Available Commands:');
@@ -48,7 +47,7 @@ program
       console.log('  help        Show this help message\n');
       
       console.log('💡 Quick Start:');
-      console.log('  npx create-nova-init                          # Interactive mode');
+      console.log('  npx create-nova-init setup                    # Interactive mode');
       console.log('  npx create-nova-init setup-cli -n my-project  # Command-line mode');
       console.log('  npx create-nova-init help --command setup-cli # Detailed command help\n');
       
@@ -89,7 +88,7 @@ program
     }
   });
 
-
+// Configuration management commands
 program
   .command('config')
   .description('Manage nova-init.json configuration')
@@ -181,7 +180,7 @@ program
         console.log(`🎯 Tech Stack: ${config.techStack}`);
       }
       
-     
+      // Note: createdAt is added by the NovaInitWriter, not part of ProjectStructure
       console.log(`📅 Configuration file: ${writer.getConfigPath()}`);
     } catch (error) {
       consola.error('Failed to show project info:', error);
@@ -189,14 +188,14 @@ program
     }
   });
 
-  
+// Check if any commands were provided
 if (process.argv.length === 2) {
-  
+  // No commands provided, start interactive mode
   setupPrompt().catch((error) => {
     consola.error('Interactive setup failed:', error);
     process.exit(1);
   });
 } else {
-  
+  // Commands provided, parse them normally
   program.parse();
 }
