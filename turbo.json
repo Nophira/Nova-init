@@ -6,13 +6,10 @@
 			"dependsOn": ["^build"],
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
 			"env": ["PROD"],
-			"outputs": [".next/**", "!.next/cache/**", "dist/**", ".open-next/**"]
+			"outputs": [".next/**", "!.next/cache/**", "dist/**"]
 		},
     "lint": {
       "dependsOn": ["^lint"]
-    },
-    "check-types": {
-      "dependsOn": ["^check-types"]
     },
    "dev": {
 			"cache": false,
