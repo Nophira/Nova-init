@@ -5,7 +5,15 @@
 import { consola } from 'consola';
 import { intro, outro, text, select, confirm, multiselect, spinner } from '@clack/prompts';
 import { ProjectManager } from '../core/ProjectManager.js';
-import { NovaInitWriter } from '../utils/nova-init-writer.js';
+import { NovaInitWriter } from '../core/nova-init-writer.js';
+import { 
+  getFrameworkConfig, 
+  getBackendConfig, 
+  isLanguageSupported, 
+  isViteSupported,
+  FRONTEND_CONFIGS,
+  BACKEND_CONFIGS 
+} from '../core/FrameworkConfig.js';
 import type { ProjectStructure, DatabaseSetup, FrontendSetup, BackendSetup, PackageManager, MonorepoTool } from '../types/index.js';
 
 /**
@@ -110,25 +118,39 @@ async function promptCustomSetup(projectName: string): Promise<ProjectStructure>
     ]
   });
 
-  const packageManager = await select({
-    message: 'Which package manager do you want to use?',
-    options: [
-      { value: 'npm', label: 'npm' },
-      { value: 'pnpm', label: 'pnpm (faster, space-saving)' },
-      { value: 'bun', label: 'Bun (ultra-fast)' }
-    ]
-  });
+  let packageManager: PackageManager = 'npm';
+  
+  // Only ask for package manager if using a monorepo
+  if (monorepo !== 'none') {
+    packageManager = await select({
+      message: 'Which package manager do you want to use for the monorepo?',
+      options: [
+        { value: 'npm', label: 'npm' },
+        { value: 'pnpm', label: 'pnpm (faster, space-saving)' },
+        { value: 'bun', label: 'Bun (ultra-fast)' }
+      ]
+    }) as PackageManager;
+  } else {
+    packageManager = await select({
+      message: 'Which package manager do you want to use?',
+      options: [
+        { value: 'npm', label: 'npm' },
+        { value: 'pnpm', label: 'pnpm (faster, space-saving)' },
+        { value: 'bun', label: 'Bun (ultra-fast)' }
+      ]
+    }) as PackageManager;
+  }
 
   const hasFrontend = await confirm({ message: 'Do you want to add a frontend?' });
   let frontend: FrontendSetup | undefined = undefined;
   if (hasFrontend) {
-    frontend = await promptFrontendSetup(packageManager as PackageManager);
+    frontend = await promptFrontendSetup(packageManager as PackageManager, (monorepo as MonorepoTool));
   }
 
   const hasBackend = await confirm({ message: 'Do you want to add a backend?' });
   let backend: BackendSetup | undefined = undefined;
   if (hasBackend) {
-    backend = await promptBackendSetup(packageManager as PackageManager);
+    backend = await promptBackendSetup(packageManager as PackageManager, (monorepo as MonorepoTool));
   }
 
   const databases = await promptDatabases();
@@ -156,7 +178,7 @@ async function promptCustomSetup(projectName: string): Promise<ProjectStructure>
   };
 }
 
-async function promptFrontendSetup(packageManager: PackageManager): Promise<FrontendSetup> {
+async function promptFrontendSetup(packageManager: PackageManager, monorepo: MonorepoTool): Promise<FrontendSetup> {
   const language = await select({
     message: 'Which programming language do you want to use?',
     options: [
@@ -170,6 +192,18 @@ async function promptFrontendSetup(packageManager: PackageManager): Promise<Fron
     options: getSupportedFrontendFrameworkOptions(language as string)
   });
 
+  // Ask for Vite if React is selected
+  let buildTool: 'vite' | undefined = undefined;
+  if (framework === 'react') {
+    const useVite = await confirm({
+      message: 'Do you want to use Vite instead of Create React App?',
+      initialValue: true
+    });
+    if (useVite) {
+      buildTool = 'vite';
+    }
+  }
+
   const folderName = await text({
     message: 'What should the frontend folder be called?',
     placeholder: 'frontend',
@@ -179,7 +213,7 @@ async function promptFrontendSetup(packageManager: PackageManager): Promise<Fron
   const frontendPackageManager = await select({
     message: 'Which package manager for the frontend?',
     options: [
-      { value: packageManager, label: `Use ${packageManager} (monorepo package manager)` },
+      { value: packageManager, label: monorepo !== 'none' ? `Use ${packageManager} (monorepo package manager)` : `Use ${packageManager} (global default)` },
       { value: 'npm', label: 'npm' },
       { value: 'pnpm', label: 'pnpm' },
       { value: 'bun', label: 'Bun' }
@@ -191,10 +225,11 @@ async function promptFrontendSetup(packageManager: PackageManager): Promise<Fron
     framework: framework as any,
     folderName: (folderName as string) || 'frontend',
     packageManager: frontendPackageManager as PackageManager,
+    buildTool,
   };
 }
 
-async function promptBackendSetup(packageManager: PackageManager): Promise<BackendSetup> {
+async function promptBackendSetup(packageManager: PackageManager, monorepo: MonorepoTool): Promise<BackendSetup> {
   const language = await select({
     message: 'Which programming language do you want to use?',
     options: [
@@ -217,7 +252,7 @@ async function promptBackendSetup(packageManager: PackageManager): Promise<Backe
   const backendPackageManager = await select({
     message: 'Which package manager for the backend?',
     options: [
-      { value: packageManager, label: `Use ${packageManager} (monorepo package manager)` },
+      { value: packageManager, label: monorepo !== 'none' ? `Use ${packageManager} (monorepo package manager)` : `Use ${packageManager} (global default)` },
       { value: 'npm', label: 'npm' },
       { value: 'pnpm', label: 'pnpm' },
       { value: 'bun', label: 'Bun' }
@@ -256,6 +291,7 @@ async function promptDatabases(): Promise<DatabaseSetup[]> {
   const databaseTypes = await multiselect({
     message: 'Which databases do you want to use? (Space to select, Enter to confirm)',
     options: [
+      { value: 'none', label: 'None' },
       { value: 'postgresql', label: 'PostgreSQL (SQL)' },
       { value: 'mysql', label: 'MySQL (SQL)' },
       { value: 'mongodb', label: 'MongoDB (NoSQL)' },
@@ -271,11 +307,15 @@ async function promptDatabases(): Promise<DatabaseSetup[]> {
     required: false
   });
 
-  if (!databaseTypes || (databaseTypes as string[]).length === 0) {
+  const selected = (databaseTypes as string[] | null) || [];
+  if (selected.includes('none')) {
+    return [];
+  }
+  if (selected.length === 0) {
     return [];
   }
 
-  return (databaseTypes as string[]).map((type) => ({
+  return selected.map((type) => ({
     name: type,
     type: type as any,
     useDocker: true as any,
@@ -284,39 +324,23 @@ async function promptDatabases(): Promise<DatabaseSetup[]> {
 }
 
 function getSupportedFrontendFrameworkOptions(language: string) {
-  // Alle untenstehenden Frameworks unterstützen TypeScript; für JavaScript sind bis auf Angular alle üblich.
-  // Wir filtern NestJS-Äquivalente hier nicht; diese Funktion ist nur für Frontend.
-  const all = [
-    { value: 'react', label: 'React' },
-    { value: 'vue', label: 'Vue.js' },
-    { value: 'angular', label: 'Angular (TypeScript-first)' },
-    { value: 'svelte', label: 'Svelte' },
-    { value: 'nextjs', label: 'Next.js (React + SSR)' },
-    { value: 'nuxtjs', label: 'Nuxt.js (Vue + SSR)' },
-    { value: 'astro', label: 'Astro (Multi-Framework)' },
-    { value: 'qwik', label: 'Qwik (Resumable)' },
-    { value: 'solid', label: 'Solid.js' },
-    { value: 'preact', label: 'Preact (React-compatible)' },
-    { value: 'lit', label: 'Lit (Web Components)' },
-    { value: 'remix', label: 'Remix (React + Fullstack)' }
-  ];
+  const frameworks = Object.entries(FRONTEND_CONFIGS)
+    .filter(([_, config]) => config.supportedLanguages.includes(language as any))
+    .map(([key, config]) => ({
+      value: key,
+      label: `${config.name}${config.supportsVite ? ' (Vite supported)' : ''}${config.supportedLanguages.length === 1 ? ' (TS-only)' : ''}`
+    }));
 
-  if (language === 'javascript') {
-    // Angular ist TS-first; wir blenden es bei JS aus, um Misskonfiguration zu vermeiden.
-    return all.filter(o => o.value !== 'angular');
-  }
-  return all;
+  return frameworks;
 }
 
 function getSupportedBackendFrameworkOptions(language: string) {
-  const all = [
-    { value: 'express', label: 'Express.js (Node.js)' },
-    { value: 'fastify', label: 'Fastify (Node.js, faster)' },
-    { value: 'nestjs', label: 'NestJS (TypeScript-first)' }
-  ];
-  if (language === 'javascript') {
-    // NestJS ist TS-first; bei JavaScript ausblenden.
-    return all.filter(o => o.value !== 'nestjs');
-  }
-  return all;
+  const frameworks = Object.entries(BACKEND_CONFIGS)
+    .filter(([_, config]) => config.supportedLanguages.includes(language as any))
+    .map(([key, config]) => ({
+      value: key,
+      label: `${config.name}${config.supportedLanguages.length === 1 ? ' (TS-only)' : ''}`
+    }));
+
+  return frameworks;
 }

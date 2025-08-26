@@ -1,8 +1,30 @@
-import { execSync } from 'child_process';
 import consola from 'consola';
 import { writeFileSync, readFileSync, mkdirSync, existsSync } from 'fs';
 import * as path from 'path';
 import type { Language, PackageManager } from '../../../types/index.js';
+import { PackageManagerUtils } from '../../../core/PackageManagerUtils.js';
+
+// Fastify framework configuration
+const FASTIFY_CONFIG = {
+  name: 'Fastify',
+  supportedLanguages: ['javascript', 'typescript'] as Language[],
+  supportedPackageManagers: ['npm', 'pnpm', 'bun'] as PackageManager[],
+  supportsVite: false,
+  defaultLanguage: 'typescript' as Language,
+  defaultPort: 3000,
+  dependencies: {
+    common: ['fastify'],
+  },
+  devDependencies: {
+    typescript: ['typescript', '@types/node', 'ts-node-dev'],
+    javascript: [],
+  },
+  scripts: {
+    dev: 'node src/index.js',
+    build: 'tsc',
+    start: 'node dist/index.js',
+  },
+};
 
 export async function installFastify(
   targetPath: string, 
@@ -10,39 +32,40 @@ export async function installFastify(
   packageManager: PackageManager = 'npm'
 ) {
   try {
-    consola.info(`🛠 Installing Fastify (${language}) in "${targetPath}"...`);
+    // Validate language support
+    if (!FASTIFY_CONFIG.supportedLanguages.includes(language)) {
+      throw new Error(`Fastify does not support language: ${language}. Supported: ${FASTIFY_CONFIG.supportedLanguages.join(', ')}`);
+    }
+    
+    // Validate package manager support
+    if (!FASTIFY_CONFIG.supportedPackageManagers.includes(packageManager)) {
+      throw new Error(`Fastify does not support package manager: ${packageManager}. Supported: ${FASTIFY_CONFIG.supportedPackageManagers.join(', ')}`);
+    }
+    
+    consola.info(`📦 Installing Fastify (${language}) in "${targetPath}"...`);
 
     // Ensure target directory exists
     if (!existsSync(targetPath)) {
       mkdirSync(targetPath, { recursive: true });
-      consola.info(`📁 Created directory: ${targetPath}`);
+      consola.info(`Created directory: ${targetPath}`);
     }
 
-    const exec = (cmd: string) =>
-      execSync(cmd, { cwd: targetPath, stdio: 'inherit', shell: '/bin/bash' }); 
-
-    // Install Fastify
-    if (packageManager === 'pnpm') {
-      exec('pnpm init');
-      exec('pnpm add fastify');
-    } else if (packageManager === 'bun') {
-      exec('bun init');
-      exec('bun add fastify');
-    } else {
-      exec('npm init -y');
-      exec('npm install fastify');
-    }
-
+    // Initialize project with package manager
+    PackageManagerUtils.initProject(packageManager, targetPath);
+    
+    // Install main dependencies
+    const mainDependencies = FASTIFY_CONFIG.dependencies.common;
+    PackageManagerUtils.installDependencies(packageManager, mainDependencies, targetPath, false);
+    
     if (language === 'typescript') {
-      consola.info('Installing TypeScript dependencies...');
-      if (packageManager === 'pnpm') {
-        exec('pnpm add -D typescript @types/node ts-node-dev');
-      } else if (packageManager === 'bun') {
-        exec('bun add -d typescript @types/node ts-node-dev');
-      } else {
-        exec('npm install -D typescript @types/node ts-node-dev');
-      }
-      exec('npx tsc --init');
+      consola.info('⚙️ Setting up TypeScript configuration...');
+      
+      // Install TypeScript dev dependencies
+      const tsDevDependencies = FASTIFY_CONFIG.devDependencies.typescript;
+      PackageManagerUtils.installDependencies(packageManager, tsDevDependencies, targetPath, true);
+      
+      // Initialize TypeScript configuration
+      PackageManagerUtils.execCommand('npx tsc --init', targetPath);
 
       const tsConfig = {
         compilerOptions: {
@@ -65,95 +88,107 @@ export async function installFastify(
         JSON.stringify(tsConfig, null, 2)
       );
 
-      execSync('mkdir -p src', { cwd: targetPath, shell: '/bin/bash' });
+      // Create src directory and main file
+      mkdirSync(path.join(targetPath, 'src'), { recursive: true });
       const mainContent = `import Fastify from 'fastify';
 
 const fastify = Fastify({
   logger: true
 });
 
+const PORT = process.env.PORT || ${FASTIFY_CONFIG.defaultPort};
+
 // Declare a route
 fastify.get('/', async (request, reply) => {
-  return { hello: 'world' };
+  return { message: 'Hello from Fastify with TypeScript!' };
 });
 
 // Run the server!
 const start = async () => {
   try {
-    await fastify.listen({ port: 3000 });
+    await fastify.listen({ port: PORT });
+    fastify.log.info(\`Server running on port \${PORT}\`);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
   }
 };
+
 start();
 `;
-      writeFileSync(
-        path.join(targetPath, 'src/index.ts'),
-        mainContent
-      );
-
-      const packageJsonPath = path.join(targetPath, 'package.json');
-      const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
-      packageJson.scripts = {
-        ...packageJson.scripts,
-        "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-        "build": "tsc",
-        "start": "node dist/index.js"
-      };
-      writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+      writeFileSync(path.join(targetPath, 'src/index.ts'), mainContent);
 
     } else {
-      consola.info('Installing JavaScript version...');
+      consola.info('⚙️ Setting up JavaScript configuration...');
 
-      execSync('mkdir -p src', { cwd: targetPath, shell: '/bin/bash' });
+      // Create src directory and main file
+      mkdirSync(path.join(targetPath, 'src'), { recursive: true });
       const mainContent = `import Fastify from 'fastify';
 
 const fastify = Fastify({
   logger: true
 });
 
+const PORT = process.env.PORT || ${FASTIFY_CONFIG.defaultPort};
+
 // Declare a route
 fastify.get('/', async (request, reply) => {
-  return { hello: 'world' };
+  return { message: 'Hello from Fastify with JavaScript!' };
 });
 
 // Run the server!
 const start = async () => {
   try {
-    await fastify.listen({ port: 3000 });
+    await fastify.listen({ port: PORT });
+    console.log(\`Server running on port \${PORT}\`);
   } catch (err) {
-    fastify.log.error(err);
+    console.error(err);
     process.exit(1);
   }
 };
+
 start();
 `;
-      writeFileSync(
-        path.join(targetPath, 'src/index.js'),
-        mainContent
-      );
-
-      const packageJsonPath = path.join(targetPath, 'package.json');
-      const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
-      packageJson.type = 'module';
-      packageJson.scripts = {
-        ...packageJson.scripts,
-        "dev": "node src/index.js",
-        "start": "node src/index.js"
-      };
-      writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+      writeFileSync(path.join(targetPath, 'src/index.js'), mainContent);
     }
+    
+    // Update package.json with configured scripts
+    const packageJsonPath = path.join(targetPath, 'package.json');
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+    
+    // Add module type for JavaScript
+    if (language === 'javascript') {
+      packageJson.type = 'module';
+    }
+    
+    // Use configuration scripts with appropriate file extension
+    const fileExt = language === 'typescript' ? 'ts' : 'js';
+    packageJson.scripts = {
+      ...packageJson.scripts,
+      dev: language === 'typescript' ? 
+        'ts-node-dev --respawn --transpile-only src/index.ts' : 
+        FASTIFY_CONFIG.scripts.dev.replace('index.js', `src/index.${fileExt}`),
+      build: language === 'typescript' ? FASTIFY_CONFIG.scripts.build : undefined,
+      start: language === 'typescript' ? 
+        FASTIFY_CONFIG.scripts.start : 
+        FASTIFY_CONFIG.scripts.start.replace('dist/index.js', `src/index.${fileExt}`)
+    };
+    
+    // Remove undefined scripts
+    Object.keys(packageJson.scripts).forEach(key => {
+      if (packageJson.scripts[key] === undefined) {
+        delete packageJson.scripts[key];
+      }
+    });
+    
+    writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
+    // Create environment file
     const envContent = `# Server Configuration
-PORT=3000
+PORT=${FASTIFY_CONFIG.defaultPort}
 NODE_ENV=development
 `;
-
-    writeFileSync(
-      path.join(targetPath, '.env.example'),
-      envContent
-    );
+    writeFileSync(path.join(targetPath, '.env.example'), envContent);
     
     consola.success(`✅ Fastify (${language}) installed successfully with ${packageManager}`);
   } catch (error) {
@@ -161,3 +196,6 @@ NODE_ENV=development
     throw error;
   }
 }
+
+// Export configuration for external access if needed
+export const getFastifyConfig = () => FASTIFY_CONFIG;

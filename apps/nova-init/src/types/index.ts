@@ -226,6 +226,7 @@ export interface SetupCommandOptions {
   frontendLanguage?: Language;
   frontendFolder?: string;
   frontendPackageManager?: PackageManager;
+  vite?: boolean; // Use Vite for React projects
   backend?: BackendFramework;
   backendLanguage?: Language;
   backendFolder?: string;

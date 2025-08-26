@@ -5,7 +5,7 @@ import { FrameworkManager } from './FrameworkManager.js';
 import { DatabaseManager } from './DatabaseManager.js';
 import { GitManager } from './GitManager.js'; 
 import { PackageManager } from './PackageManager.js'; 
-import { NovaInitWriter } from '../utils/nova-init-writer.js';
+import { NovaInitWriter } from './nova-init-writer.js';
 import type { ProjectStructure } from '../types/index.js';
 
 export class ProjectManager {
@@ -25,12 +25,12 @@ export class ProjectManager {
 
   async createProject(config: ProjectStructure): Promise<void> {
     try {
-      console.log(`🏗️  Erstelle Projekt: ${config.projectName}`);
+      console.log(`🏗️  Creating project: ${config.projectName}`);
       
-      // 1. Projektordner erstellen
+      // 1. Create project directory
       const projectPath = await this.createProjectDirectory(config.projectName);
       
-      // 2. Monorepo einrichten (falls gewählt)
+      // 2. Setup monorepo (if selected)
       if (config.monorepo !== 'none') {
         await this.monorepoManager.setupMonorepo(
           projectPath, 
@@ -39,32 +39,32 @@ export class ProjectManager {
         );
       }
       
-      // 3. Projektstruktur erstellen
+      // 3. Create project structure
       await this.createProjectStructure(projectPath, config);
       
-      // 4. Frameworks installieren
+      // 4. Install frameworks
       await this.installFrameworks(projectPath, config);
       
-      // 5. Datenbanken einrichten
+      // 5. Setup databases
       if (config.databases.length > 0) {
         await this.databaseManager.setupDatabases(projectPath, config.databases);
       }
       
-      // 6. Konfigurationsdateien erstellen
+      // 6. Create configuration files
       await this.createConfigFiles(projectPath, config);
       
-      // 7. Git initialisieren (falls gewählt)
+      // 7. Initialize Git (if selected)
       if (config.initializeGit) {
         await this.gitManager.initializeGit(projectPath);
       }
       
-      // 8. Dependencies installieren
+      // 8. Install dependencies
       await this.installDependencies(projectPath, config);
       
-      console.log('✅ Projekt erfolgreich erstellt!');
+      console.log('✅ Project created successfully!');
       
     } catch (error) {
-      console.error('❌ Fehler beim Erstellen des Projekts:', error);
+      console.error('❌ Failed to create project:', error);
       throw error;
     }
   }
@@ -73,31 +73,31 @@ export class ProjectManager {
     const projectPath = path.resolve(process.cwd(), projectName);
     
     if (await fs.pathExists(projectPath)) {
-      throw new Error(`Projektordner "${projectName}" existiert bereits!`);
+      throw new Error(`Project directory "${projectName}" already exists!`);
     }
     
     await fs.ensureDir(projectPath);
-    console.log(`📁 Projektordner erstellt: ${projectPath}`);
+    console.log(`📁 Project directory created: ${projectPath}`);
     
     return projectPath;
   }
 
   private async createProjectStructure(projectPath: string, config: ProjectStructure): Promise<void> {
-    console.log('📁 Erstelle Projektstruktur...');
+    console.log('📁 Creating project structure...');
     
     const basePath = config.monorepo !== 'none' ? path.join(projectPath, 'apps') : projectPath;
     
-    // Frontend-Ordner
+    // Frontend folder
     if (config.frontend) {
       const frontendPath = path.join(basePath, config.frontend.folderName || 'frontend');
       await fs.ensureDir(frontendPath);
-      console.log(`  📁 Frontend-Ordner: ${frontendPath}`);
+      console.log(`  📁 Frontend folder: ${frontendPath}`);
     }
     
-    // Backend-Ordner
+    // Backend folder
     if (config.backend) {
       if (config.backend.useMicroservices && config.backend.microserviceNames) {
-        // Microservices-Architektur
+        // Microservices architecture
         const servicesPath = path.join(basePath, 'services');
         await fs.ensureDir(servicesPath);
         
@@ -107,29 +107,29 @@ export class ProjectManager {
           console.log(`  📁 Microservice: ${servicePath}`);
         }
       } else {
-        // Einzelner Backend-Ordner
+        // Single backend folder
         const backendPath = path.join(basePath, config.backend.folderName || 'backend');
         await fs.ensureDir(backendPath);
-        console.log(`  📁 Backend-Ordner: ${backendPath}`);
+        console.log(`  📁 Backend folder: ${backendPath}`);
       }
     }
     
-    // DB-Ordner für Datenbanken
+    // Database folder
     if (config.databases.length > 0) {
       const dbPath = path.join(projectPath, 'DB');
       await fs.ensureDir(dbPath);
-      console.log(`  📁 Datenbank-Ordner: ${dbPath}`);
+      console.log(`  📁 Database folder: ${dbPath}`);
     }
     
 
   }
 
   private async installFrameworks(projectPath: string, config: ProjectStructure): Promise<void> {
-    console.log('🔧 Installiere Frameworks...');
+    console.log('🔧 Installing frameworks...');
     
     const basePath = config.monorepo !== 'none' ? path.join(projectPath, 'apps') : projectPath;
     
-    // Frontend installieren
+    // Install frontend
     if (config.frontend) {
       const frontendPath = path.join(basePath, config.frontend.folderName || 'frontend');
       await this.frameworkManager.installFrontend(
@@ -139,10 +139,10 @@ export class ProjectManager {
       );
     }
     
-    // Backend installieren
+    // Install backend
     if (config.backend) {
       if (config.backend.useMicroservices && config.backend.microserviceNames) {
-        // Microservices installieren
+        // Install microservices
         for (const serviceName of config.backend.microserviceNames) {
           const servicePath = path.join(basePath, 'services', serviceName);
           await this.frameworkManager.installBackend(
@@ -152,7 +152,7 @@ export class ProjectManager {
           );
         }
       } else {
-        // Einzelnen Backend installieren
+        // Install single backend
         const backendPath = path.join(basePath, config.backend.folderName || 'backend');
         await this.frameworkManager.installBackend(
           backendPath, 
@@ -164,9 +164,9 @@ export class ProjectManager {
   }
 
   private async createConfigFiles(projectPath: string, config: ProjectStructure): Promise<void> {
-    console.log('📝 Erstelle Konfigurationsdateien...');
+    console.log('📝 Creating configuration files...');
     
-    // package.json für das Hauptprojekt
+    // package.json for main project
     const packageJson = this.generatePackageJson(config);
     await fs.writeJson(path.join(projectPath, 'package.json'), packageJson, { spaces: 2 });
     
@@ -188,12 +188,12 @@ export class ProjectManager {
   }
 
   private async installDependencies(projectPath: string, config: ProjectStructure): Promise<void> {
-    console.log('📦 Installiere Dependencies...');
+    console.log('📦 Installing dependencies...');
     
-    // Hauptprojekt-Dependencies installieren
+    // Install main project dependencies
     await this.packageManager.installDependencies(projectPath, config.packageManagers.monorepo || 'npm');
     
-    // Framework-spezifische Dependencies installieren
+    // Install framework-specific dependencies
     if (config.frontend) {
       const frontendPath = path.join(projectPath, config.monorepo !== 'none' ? 'apps' : '', config.frontend.folderName || 'frontend');
       await this.packageManager.installDependencies(frontendPath, config.frontend.packageManager);

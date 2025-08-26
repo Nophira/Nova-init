@@ -1,1 +1,3 @@
-die programmier sprache fragen befor framework und vite frage hinzufügen und die commands für framework install fertig machen
+can you then make all the installation logic from the frameworks in the installers file for each framework and adapt the rest of the code base to it. that everything works fine  
+
+and create a docs about the programm like in a real software company

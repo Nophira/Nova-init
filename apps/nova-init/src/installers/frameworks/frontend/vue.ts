@@ -1,6 +1,30 @@
-import { execSync } from 'child_process';
+import { mkdirSync, existsSync } from 'fs';
 import consola from 'consola';
 import type { Language, PackageManager } from '../../../types/index.js';
+import { PackageManagerUtils } from '../../../core/PackageManagerUtils.js';
+
+// Vue framework configuration
+const VUE_CONFIG = {
+  name: 'Vue.js',
+  supportedLanguages: ['javascript', 'typescript'] as Language[],
+  supportedPackageManagers: ['npm', 'pnpm', 'bun'] as PackageManager[],
+  supportsVite: true,
+  defaultLanguage: 'typescript' as Language,
+  defaultPort: 3000,
+  installCommand: {
+    default: 'npm create vue@latest',
+  },
+  createCommands: {
+    typescript: 'npm create vue@latest . -- --typescript --jsx --router --pinia --vitest --eslint --prettier',
+    javascript: 'npm create vue@latest . -- --jsx --router --pinia --vitest --eslint --prettier',
+  },
+  scripts: {
+    dev: 'vite',
+    build: 'vite build',
+    start: 'vite preview',
+    preview: 'vite preview',
+  },
+};
 
 export async function installVue(
   targetPath: string, 
@@ -9,41 +33,39 @@ export async function installVue(
   packageManager: PackageManager = 'npm'
 ) {
   try {
-    consola.info(`⚛️ Installing Vue (${language}) in "${targetPath}"...`);
-
-    const templateFlag = language === 'typescript' ? '-- --template vue-ts' : '-- --template vue';
-
-    execSync(`npm create vue@latest . ${templateFlag}`, {
-      cwd: targetPath,
-      stdio: 'inherit',
-      shell: '/bin/bash'
-    });
-    
-    // Install dependencies with specified package manager
-    if (packageManager !== 'npm') {
-      consola.info(`📦 Installing dependencies with ${packageManager}...`);
-      
-      // Remove package-lock.json if exists
-      try {
-        execSync('rm -f package-lock.json', { cwd: targetPath, stdio: 'ignore', shell: '/bin/bash' });
-      } catch (error) {
-        // Ignore error if file doesn't exist
-      }
-      
-      // Install with specified package manager
-      switch (packageManager) {
-        case 'pnpm':
-          execSync('pnpm install', { cwd: targetPath, stdio: 'inherit', shell: '/bin/bash' });
-          break;
-        case 'bun':
-          execSync('bun install', { cwd: targetPath, stdio: 'inherit', shell: '/bin/bash' });
-          break;
-      }
+    // Validate language support
+    if (!VUE_CONFIG.supportedLanguages.includes(language)) {
+      throw new Error(`Vue does not support language: ${language}. Supported: ${VUE_CONFIG.supportedLanguages.join(', ')}`);
     }
     
-    consola.success(`✅ Vue (${language}) installed successfully with ${packageManager}`);
+    // Validate package manager support
+    if (!VUE_CONFIG.supportedPackageManagers.includes(packageManager)) {
+      throw new Error(`Vue does not support package manager: ${packageManager}. Supported: ${VUE_CONFIG.supportedPackageManagers.join(', ')}`);
+    }
+    
+    consola.info(`📦 Installing Vue.js (${language}) in "${targetPath}"...`);
+
+    // Ensure target directory exists
+    if (!existsSync(targetPath)) {
+      mkdirSync(targetPath, { recursive: true });
+      consola.info(`Created directory: ${targetPath}`);
+    }
+    
+    // Use Vue create command with appropriate options
+    const command = VUE_CONFIG.createCommands[language];
+    PackageManagerUtils.execCommand(command, targetPath);
+    
+    // Switch to target package manager if different from npm
+    if (packageManager !== 'npm') {
+      PackageManagerUtils.switchAndInstallDependencies(packageManager, targetPath);
+    }
+    
+    consola.success(`✅ Vue.js (${language}) installed successfully with ${packageManager}`);
   } catch (error) {
-    consola.error(`❌ Failed to install Vue:`, error);
+    consola.error(`❌ Failed to install Vue.js:`, error);
     throw error;
   }
 }
+
+// Export configuration for external access if needed
+export const getVueConfig = () => VUE_CONFIG;

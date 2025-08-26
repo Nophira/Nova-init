@@ -4,10 +4,10 @@ import type { ProjectStructure, SetupCommandOptions, DatabaseType } from '../typ
 
 export async function setupCommandLine(options: SetupCommandOptions): Promise<void> {
   try {
-    console.log('🚀 Erstelle Projekt mit Command-Line Parametern...');
-    console.log('📋 Empfangene Optionen:', JSON.stringify(options, null, 2));
+    console.log('🚀 Creating project with command-line parameters...');
+    console.log('📋 Received options:', JSON.stringify(options, null, 2));
     
-    // Validiere erforderliche Optionen
+    // Validate required options
     if (!options.projectName) {
       throw new Error('Project name is required. Use --project-name <name>');
     }
@@ -16,13 +16,13 @@ export async function setupCommandLine(options: SetupCommandOptions): Promise<vo
     
     let projectConfig: ProjectStructure;
     
-    // Prüfe ob ein Techstack verwendet werden soll
+    // Check if a tech stack should be used
     if (options.techstack) {
-      console.log(`🎯 Verwende vordefinierten Techstack: ${options.techstack}`);
+      console.log(`🎯 Using predefined tech stack: ${options.techstack}`);
       projectConfig = TechstackManager.createProjectFromTechStack(options.techstack, projectName!);
     } else {
       // Custom Setup
-      // Datenbanken aus den Optionen extrahieren
+      // Extract databases from options
       const selectedDatabases = options.databases ? 
         (options.databases as string).split(',').map(db => ({
           type: db.trim() as DatabaseType,
@@ -33,7 +33,7 @@ export async function setupCommandLine(options: SetupCommandOptions): Promise<vo
           volumeName: `${db.trim()}_data`,
         })) : [];
       
-      // Standardwerte setzen
+      // Set default values
       projectConfig = {
         projectName: projectName!,
         setupType: options.setupType || 'custom',
@@ -48,6 +48,7 @@ export async function setupCommandLine(options: SetupCommandOptions): Promise<vo
           framework: options.frontend as any,
           folderName: options.frontendFolder || 'frontend',
           packageManager: options.frontendPackageManager || options.packageManager || 'npm',
+          buildTool: (options.frontend === 'react' && options.vite !== false) ? 'vite' : undefined,
         } : undefined,
         backend: options.backend ? {
           language: options.backendLanguage || 'typescript',
@@ -60,24 +61,24 @@ export async function setupCommandLine(options: SetupCommandOptions): Promise<vo
           packageManager: options.backendPackageManager || options.packageManager || 'npm',
         } : undefined,
         databases: selectedDatabases,
-        hosting: 'none', // Hosting entfernt wie in aufgaben.txt
+        hosting: 'none', // Hosting removed as mentioned in aufgaben.txt
         initializeGit: Boolean(options.git),
         techStack: options.techstack,
       };
     }
     
-    // Projekt mit ProjectManager erstellen
+    // Create project with ProjectManager
     const projectManager = new ProjectManager();
     await projectManager.createProject(projectConfig);
     
-    console.log('\n✅ Projekt erfolgreich erstellt!');
-    console.log(`📁 Projektordner: ${projectName}`);
-    console.log('\nNächste Schritte:');
+    console.log('\n✅ Project created successfully!');
+    console.log(`📁 Project folder: ${projectName}`);
+    console.log('\nNext steps:');
     console.log(`1. cd ${projectName}`);
-    console.log('2. npm run dev (oder entsprechender Befehl)');
+    console.log('2. npm run dev (or appropriate command)');
     
   } catch (error) {
-    console.error('❌ Command-Line Setup fehlgeschlagen:', error);
+    console.error('❌ Command-line setup failed:', error);
     throw error;
   }
 }

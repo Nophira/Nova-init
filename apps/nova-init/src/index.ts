@@ -5,7 +5,7 @@ import { Command } from 'commander';
 import { setupPrompt } from './main/setup.prompt.js';
 import { setupCommandLine } from './main/setup.commandline.js';
 import { TechstackManager } from './core/TechstackManager.js';
-import { NovaInitWriter } from './utils/nova-init-writer.js';
+import { NovaInitWriter } from './core/nova-init-writer.js';
 import * as path from 'path';
 
 const program = new Command();
@@ -76,6 +76,7 @@ program
   .option('--monorepo-package-manager <pm>', 'Monorepo package manager')
   .option('--frontend-folder <folder>', 'Frontend folder name')
   .option('--backend-folder <folder>', 'Backend folder name')
+  .option('--vite', 'Use Vite for React projects (default: true)')
   .option('--microservices', 'Enable microservices architecture')
   .option('--techstack <stack>', 'Predefined tech stack: MERN, MERN_TS, MEAN, MEAN_TS, MEVN, MEVN_TS, FULLSTACK_TS')
   .option('-g, --git', 'Initialize git repository')
