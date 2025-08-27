@@ -27,7 +27,7 @@ export async function installSolid(
       try {
         execSync('rm -f package-lock.json', { cwd: targetPath, stdio: 'ignore', shell: '/bin/bash' });
       } catch (error) {
-        // Ignore error if file doesn't exist
+ 
       }
       
       // Install with specified package manager
