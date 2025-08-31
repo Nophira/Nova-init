@@ -3,8 +3,8 @@ import fs from 'fs-extra';
 import { MonorepoManager } from './MonorepoManager.js';
 import { FrameworkManager } from './FrameworkManager.js';
 import { DatabaseManager } from './DatabaseManager.js';
-import { GitManager } from './GitManager.js'; 
-import { PackageManager } from './PackageManager.js'; 
+import { GitManager } from './GitManager.js';
+import { PackageManagerUtils } from './PackageManagerUtils.js';
 import { NovaInitWriter } from './nova-init-writer.js';
 import type { ProjectStructure } from '../types/index.js';
 
@@ -13,56 +13,52 @@ export class ProjectManager {
   private frameworkManager: FrameworkManager;
   private databaseManager: DatabaseManager;
   private gitManager: GitManager;
-  private packageManager: PackageManager;
 
   constructor() {
     this.monorepoManager = new MonorepoManager();
     this.frameworkManager = new FrameworkManager();
     this.databaseManager = new DatabaseManager();
     this.gitManager = new GitManager();
-    this.packageManager = new PackageManager();
   }
 
   async createProject(config: ProjectStructure): Promise<void> {
     try {
       console.log(`🏗️  Creating project: ${config.projectName}`);
-      
-      // 1. Create project directory
+
+     
       const projectPath = await this.createProjectDirectory(config.projectName);
-      
-      // 2. Setup monorepo (if selected)
+
+
       if (config.monorepo !== 'none') {
         await this.monorepoManager.setupMonorepo(
-          projectPath, 
-          config.monorepo, 
+          projectPath,
+          config.monorepo,
           config.packageManagers.monorepo!
         );
       }
-      
-      // 3. Create project structure
+
       await this.createProjectStructure(projectPath, config);
-      
-      // 4. Install frameworks
+
+
       await this.installFrameworks(projectPath, config);
-      
-      // 5. Setup databases
+
       if (config.databases.length > 0) {
         await this.databaseManager.setupDatabases(projectPath, config.databases);
       }
-      
-      // 6. Create configuration files
+
+ 
       await this.createConfigFiles(projectPath, config);
-      
-      // 7. Initialize Git (if selected)
+
+ 
       if (config.initializeGit) {
         await this.gitManager.initializeGit(projectPath);
       }
-      
-      // 8. Install dependencies
+
+   
       await this.installDependencies(projectPath, config);
-      
+
       console.log('✅ Project created successfully!');
-      
+
     } catch (error) {
       console.error('❌ Failed to create project:', error);
       throw error;
@@ -71,92 +67,92 @@ export class ProjectManager {
 
   private async createProjectDirectory(projectName: string): Promise<string> {
     const projectPath = path.resolve(process.cwd(), projectName);
-    
+
     if (await fs.pathExists(projectPath)) {
       throw new Error(`Project directory "${projectName}" already exists!`);
     }
-    
+
     await fs.ensureDir(projectPath);
     console.log(`📁 Project directory created: ${projectPath}`);
-    
+
     return projectPath;
   }
 
   private async createProjectStructure(projectPath: string, config: ProjectStructure): Promise<void> {
     console.log('📁 Creating project structure...');
-    
+
     const basePath = config.monorepo !== 'none' ? path.join(projectPath, 'apps') : projectPath;
-    
-    // Frontend folder
+
+
     if (config.frontend) {
       const frontendPath = path.join(basePath, config.frontend.folderName || 'frontend');
       await fs.ensureDir(frontendPath);
       console.log(`  📁 Frontend folder: ${frontendPath}`);
     }
-    
-    // Backend folder
+
+
     if (config.backend) {
       if (config.backend.useMicroservices && config.backend.microserviceNames) {
-        // Microservices architecture
+ 
         const servicesPath = path.join(basePath, 'services');
         await fs.ensureDir(servicesPath);
-        
+
         for (const serviceName of config.backend.microserviceNames) {
           const servicePath = path.join(servicesPath, serviceName);
           await fs.ensureDir(servicePath);
           console.log(`  📁 Microservice: ${servicePath}`);
         }
       } else {
-        // Single backend folder
+      
         const backendPath = path.join(basePath, config.backend.folderName || 'backend');
         await fs.ensureDir(backendPath);
         console.log(`  📁 Backend folder: ${backendPath}`);
       }
     }
-    
-    // Database folder
+
+ 
     if (config.databases.length > 0) {
       const dbPath = path.join(projectPath, 'DB');
       await fs.ensureDir(dbPath);
       console.log(`  📁 Database folder: ${dbPath}`);
     }
-    
+
 
   }
 
   private async installFrameworks(projectPath: string, config: ProjectStructure): Promise<void> {
     console.log('🔧 Installing frameworks...');
-    
+
     const basePath = config.monorepo !== 'none' ? path.join(projectPath, 'apps') : projectPath;
-    
-    // Install frontend
+
+ 
     if (config.frontend) {
       const frontendPath = path.join(basePath, config.frontend.folderName || 'frontend');
       await this.frameworkManager.installFrontend(
-        frontendPath, 
-        config.frontend, 
+        frontendPath,
+        config.frontend,
         config.projectName
       );
     }
-    
-    // Install backend
+
+   
     if (config.backend) {
       if (config.backend.useMicroservices && config.backend.microserviceNames) {
-        // Install microservices
+    
         for (const serviceName of config.backend.microserviceNames) {
           const servicePath = path.join(basePath, 'services', serviceName);
           await this.frameworkManager.installBackend(
-            servicePath, 
-            config.backend, 
+            servicePath,
+            config.backend,
             serviceName
           );
         }
       } else {
-        // Install single backend
+
         const backendPath = path.join(basePath, config.backend.folderName || 'backend');
         await this.frameworkManager.installBackend(
-          backendPath, 
-          config.backend, 
+          backendPath,
+          config.backend,
           config.projectName
         );
       }
@@ -165,49 +161,57 @@ export class ProjectManager {
 
   private async createConfigFiles(projectPath: string, config: ProjectStructure): Promise<void> {
     console.log('📝 Creating configuration files...');
-    
-    // package.json for main project
+
+   
     const packageJson = this.generatePackageJson(config);
     await fs.writeJson(path.join(projectPath, 'package.json'), packageJson, { spaces: 2 });
+
     
-    // .env.example
     const envExample = this.generateEnvExample(config);
     await fs.writeFile(path.join(projectPath, '.env.example'), envExample);
-    
-    // nova-init.json
+
+ 
     const writer = new NovaInitWriter(projectPath);
     await writer.writeConfig(config);
-    
-    // README.md
-    const readme = this.generateReadme(config);
-    await fs.writeFile(path.join(projectPath, 'README.md'), readme);
-    
-    // .gitignore
+
+ 
+    fs.writeFile(path.join(projectPath, 'README.md'), 'Here can you make your documentation', (err) => {
+  if (err) {
+    console.error('An error occurred:', err);
+  } 
+});
+
+  
     const gitignore = this.generateGitignore(config);
     await fs.writeFile(path.join(projectPath, '.gitignore'), gitignore);
   }
 
   private async installDependencies(projectPath: string, config: ProjectStructure): Promise<void> {
     console.log('📦 Installing dependencies...');
+
+    const packageManagerUtils = new PackageManagerUtils(config.packageManagers.monorepo || 'npm');
+
     
-    // Install main project dependencies
-    await this.packageManager.installDependencies(projectPath, config.packageManagers.monorepo || 'npm');
-    
-    // Install framework-specific dependencies
+    packageManagerUtils.switchAndInstallDependencies(projectPath);
+
+   
     if (config.frontend) {
       const frontendPath = path.join(projectPath, config.monorepo !== 'none' ? 'apps' : '', config.frontend.folderName || 'frontend');
-      await this.packageManager.installDependencies(frontendPath, config.frontend.packageManager);
+      const frontendPackageManagerUtils = new PackageManagerUtils(config.frontend.packageManager);
+      frontendPackageManagerUtils.switchAndInstallDependencies(frontendPath);
     }
-    
+
     if (config.backend) {
       if (config.backend.useMicroservices && config.backend.microserviceNames) {
         for (const serviceName of config.backend.microserviceNames) {
           const servicePath = path.join(projectPath, config.monorepo !== 'none' ? 'apps/services' : 'services', serviceName);
-          await this.packageManager.installDependencies(servicePath, config.backend.packageManager);
+          const backendPackageManagerUtils = new PackageManagerUtils(config.backend.packageManager);
+          backendPackageManagerUtils.switchAndInstallDependencies(servicePath);
         }
       } else {
         const backendPath = path.join(projectPath, config.monorepo !== 'none' ? 'apps' : '', config.backend.folderName || 'backend');
-        await this.packageManager.installDependencies(backendPath, config.backend.packageManager);
+        const backendPackageManagerUtils = new PackageManagerUtils(config.backend.packageManager);
+        backendPackageManagerUtils.switchAndInstallDependencies(backendPath);
       }
     }
   }
@@ -257,58 +261,11 @@ PORT=3000
     return env;
   }
 
-  private generateNovaInitConfig(config: ProjectStructure): any {
-    return {
-      projectName: config.projectName,
-      setupType: config.setupType,
-      monorepo: config.monorepo,
-      packageManagers: config.packageManagers,
-      frontend: config.frontend,
-      backend: config.backend,
-      databases: config.databases,
-      hosting: config.hosting,
-      createdAt: new Date().toISOString(),
-    };
-  }
-
-  private generateReadme(config: ProjectStructure): string {
-    return `# ${config.projectName}
-
-Dieses Projekt wurde mit [Nova-Init](https://github.com/Nophira/Nova-init) erstellt.
-
-## Projektstruktur
-
-${this.generateProjectStructureText(config)}
-
-## Installation
-
-\`\`\`bash
-npm install
-\`\`\`
-
-## Entwicklung
-
-\`\`\`bash
-npm run dev
-\`\`\`
-
-## Build
-
-\`\`\`bash
-npm run build
-\`\`\`
-
-## Tests
-
-\`\`\`bash
-npm run test
-\`\`\`
-`;
-  }
+  
 
   private generateProjectStructureText(config: ProjectStructure): string {
     let structure = '';
-    
+
     if (config.monorepo !== 'none') {
       structure += '- `apps/` - Anwendungen\n';
       if (config.frontend) {
@@ -339,13 +296,13 @@ npm run test
         }
       }
     }
-    
+
     if (config.databases.length > 0) {
       structure += '- `DB/` - Datenbank-Konfiguration\n';
     }
-    
 
-    
+
+
     return structure;
   }
 

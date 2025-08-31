@@ -4,10 +4,10 @@
   "author": "Nophira",
   "description": "A modern CLI tool for scaffolding your next project – choose from a variety of frameworks and customizable addons to tailor your architecture.",
   "license": "MIT",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "type": "module",
   "bin": {
-    "create-nova-init": "./dist/index.js"
+    "create-nova-init": "./dist/src/index.js"
   },
   "files": [
     "dist"
@@ -35,7 +35,7 @@
   "scripts": {
     "dev": "node --loader ts-node/esm src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/src/index.js"
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
@@ -50,6 +50,7 @@
     "prompts": "^2.4.2"
   },
   "devDependencies": {
+    "@nrwl/workspace": "^19.8.4",
     "@types/express": "^5.0.3",
     "@types/node": "^22.18.0",
     "eslint": "^9.32.0",

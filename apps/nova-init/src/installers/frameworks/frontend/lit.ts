@@ -1,49 +1,56 @@
-import { execSync } from 'child_process';
+import { mkdirSync, existsSync } from 'fs';
 import consola from 'consola';
 import type { Language, PackageManager } from '../../../types/index.js';
+import { PackageManagerUtils } from '../../../core/PackageManagerUtils.js';
+
+
+const LIT_CONFIG = {
+  name: 'Lit',
+  supportedLanguages: ['typescript', 'javascript'] as Language[],
+  supportedPackageManagers: ['npm', 'pnpm', 'bun'] as PackageManager[], 
+  supportsVite: true, 
+  defaultLanguage: 'typescript' as Language,
+  defaultPort: 3000,
+  createCommands: {
+    typescript: 'create vite@latest . -- --template lit-ts', 
+    javascript: 'create vite@latest . -- --template lit', 
+  },
+};
 
 export async function installLit(
-  targetPath: string, 
-  projectName: string, 
-  language: Language = 'typescript', 
+  targetPath: string,
+  projectName: string,
+  language: Language = 'typescript',
   packageManager: PackageManager = 'npm'
-) {
+): Promise<void> {
   try {
-    consola.info(`⚛️ Installing Lit (${language}) in "${targetPath}"...`);
-
-    const templateFlag = language === 'typescript' ? '--template lit-ts' : '--template lit';
-
-    execSync(`npm create @lit/lit@latest . ${templateFlag}`, {
-      cwd: targetPath,
-      stdio: 'inherit',
-      shell: '/bin/bash'
-    });
-    
-    // Install dependencies with specified package manager
-    if (packageManager !== 'npm') {
-      consola.info(`📦 Installing dependencies with ${packageManager}...`);
-      
-      // Remove package-lock.json if exists
-      try {
-        execSync('rm -f package-lock.json', { cwd: targetPath, stdio: 'ignore', shell: '/bin/bash' });
-      } catch (error) {
-        // Ignore error if file doesn't exist
-      }
-      
-      // Install with specified package manager
-      switch (packageManager) {
-        case 'pnpm':
-          execSync('pnpm install', { cwd: targetPath, stdio: 'inherit', shell: '/bin/bash' });
-          break;
-        case 'bun':
-          execSync('bun install', { cwd: targetPath, stdio: 'inherit', shell: '/bin/bash' });
-          break;
-      }
+ 
+    if (!LIT_CONFIG.supportedLanguages.includes(language)) {
+      throw new Error(`Lit does not support language: ${language}. Supported: ${LIT_CONFIG.supportedLanguages.join(', ')}`);
     }
-    
+
+
+    if (!LIT_CONFIG.supportedPackageManagers.includes(packageManager)) {
+      throw new Error(`Lit does not support package manager: ${packageManager}. Supported: ${LIT_CONFIG.supportedPackageManagers.join(', ')}`);
+    }
+
+    consola.info(`📦 Installing Lit (${language}) in "${targetPath}"...`);
+
+    if (!existsSync(targetPath)) {
+      mkdirSync(targetPath, { recursive: true });
+      consola.info(`Created directory: ${targetPath}`);
+    }
+
+    const packageManagerUtils = new PackageManagerUtils(packageManager);
+
+    const command = LIT_CONFIG.createCommands[language];
+    await packageManagerUtils.executeCommand(targetPath, command.split(' ')[0], command.split(' ').slice(1));
+
     consola.success(`✅ Lit (${language}) installed successfully with ${packageManager}`);
   } catch (error) {
     consola.error(`❌ Failed to install Lit:`, error);
     throw error;
   }
 }
+
+export const getLitConfig = () => LIT_CONFIG;

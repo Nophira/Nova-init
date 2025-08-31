@@ -3,11 +3,11 @@ import consola from 'consola';
 import type { Language, PackageManager } from '../../../types/index.js';
 import { PackageManagerUtils } from '../../../core/PackageManagerUtils.js';
 
-// Angular framework configuration
+
 const ANGULAR_CONFIG = {
   name: 'Angular',
-  supportedLanguages: ['typescript'] as Language[], // Angular is TypeScript-first
-  supportedPackageManagers: ['npm', 'pnpm'] as PackageManager[], // Bun support is limited for Angular
+  supportedLanguages: ['typescript'] as Language[],
+  supportedPackageManagers: ['npm', 'pnpm', 'bun'] as PackageManager[],
   supportsVite: false,
   defaultLanguage: 'typescript' as Language,
   defaultPort: 4200,
@@ -15,53 +15,48 @@ const ANGULAR_CONFIG = {
     default: 'npx @angular/cli@latest new',
   },
   createCommands: {
-    typescript: 'npx @angular/cli@latest new . --routing --style css --package-manager npm --skip-git',
-    javascript: 'npx @angular/cli@latest new . --routing --style css --package-manager npm --skip-git', // Angular is TS-first
-  },
-  scripts: {
-    dev: 'ng serve',
-    build: 'ng build',
-    start: 'ng serve',
+    typescript: 'npx @angular/cli@latest new . ',
   },
 };
 
 export async function installAngular(
-  targetPath: string, 
-  projectName: string, 
-  language: Language = 'typescript', 
+  targetPath: string,
+  projectName: string,
+  language: Language = 'typescript',
   packageManager: PackageManager = 'npm'
-) {
+): Promise<void> {
   try {
-    // Validate language support (Angular is TypeScript-first)
-    if (!ANGULAR_CONFIG.supportedLanguages.includes(language)) {
-      throw new Error(`Angular does not support language: ${language}. Angular is TypeScript-first. Supported: ${ANGULAR_CONFIG.supportedLanguages.join(', ')}`);
-    }
     
-    // Validate package manager support
+    if (!ANGULAR_CONFIG.supportedLanguages.includes(language)) {
+      throw new Error(`Angular does not support language: ${language}. Angular ist TypeScript-first. Supported: ${ANGULAR_CONFIG.supportedLanguages.join(', ')}`);
+    }
+
+
     if (!ANGULAR_CONFIG.supportedPackageManagers.includes(packageManager)) {
       throw new Error(`Angular does not support package manager: ${packageManager}. Supported: ${ANGULAR_CONFIG.supportedPackageManagers.join(', ')}`);
     }
-    
+
     consola.info(`📦 Installing Angular (${language}) in "${targetPath}"...`);
 
-    // Ensure target directory exists
+  
     if (!existsSync(targetPath)) {
       mkdirSync(targetPath, { recursive: true });
       consola.info(`Created directory: ${targetPath}`);
     }
+
+    const packageManagerUtils = new PackageManagerUtils(packageManager);
+
+
+    const baseCommand = ANGULAR_CONFIG.createCommands['typescript'];
+
+   
+    const command = `${baseCommand} --package-manager ${packageManager}`;
     
-    // Use Angular CLI create command
-    const command = ANGULAR_CONFIG.createCommands[language].replace(
-      '--package-manager npm', 
-      `--package-manager ${packageManager}`
-    );
-    PackageManagerUtils.execCommand(command, targetPath);
+
+    const [mainCommand, ...args] = command.split(' ');
     
-    // Switch to target package manager if different from npm
-    if (packageManager !== 'npm') {
-      PackageManagerUtils.switchAndInstallDependencies(packageManager, targetPath);
-    }
-    
+    await packageManagerUtils.executeCommand(targetPath, mainCommand, args);
+
     consola.success(`✅ Angular (${language}) installed successfully with ${packageManager}`);
   } catch (error) {
     consola.error(`❌ Failed to install Angular:`, error);

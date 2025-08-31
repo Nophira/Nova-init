@@ -6,41 +6,34 @@ import { PackageManagerUtils } from '../../../core/PackageManagerUtils.js';
 // NestJS framework configuration
 const NESTJS_CONFIG = {
   name: 'NestJS',
-  supportedLanguages: ['typescript'] as Language[], // NestJS is TypeScript-first
-  supportedPackageManagers: ['npm', 'pnpm'] as PackageManager[], // Bun support is limited for NestJS
-  supportsVite: false,
+  supportedLanguages: ['typescript'] as Language[], // NestJS ist TypeScript-first
+  supportedPackageManagers: ['npm', 'pnpm', 'bun'] as PackageManager[], // Yarn entfernt
   defaultLanguage: 'typescript' as Language,
   defaultPort: 3000,
   installCommand: {
-    default: 'npx @nestjs/cli@latest new',
+    default: 'npm i -g @nestjs/cli',
   },
   createCommands: {
-    typescript: 'npx @nestjs/cli@latest new . --package-manager npm --skip-git',
-    javascript: 'npx @nestjs/cli@latest new . --package-manager npm --skip-git', // NestJS is TS-first
-  },
-  scripts: {
-    dev: 'npm run start:dev',
-    build: 'npm run build',
-    start: 'npm run start:prod',
+    typescript: 'nest new .',
   },
 };
 
 export async function installNestJS(
-  targetPath: string, 
-  language: Language = 'typescript', 
+  targetPath: string,
+  language: Language = 'typescript',
   packageManager: PackageManager = 'npm'
-) {
+): Promise<void> {
   try {
-    // Validate language support (NestJS is TypeScript-first)
+    // Validate language support (NestJS ist TypeScript-first)
     if (!NESTJS_CONFIG.supportedLanguages.includes(language)) {
-      throw new Error(`NestJS does not support language: ${language}. NestJS is TypeScript-first. Supported: ${NESTJS_CONFIG.supportedLanguages.join(', ')}`);
+      throw new Error(`NestJS does not support language: ${language}. NestJS ist TypeScript-first.`);
     }
-    
+
     // Validate package manager support
     if (!NESTJS_CONFIG.supportedPackageManagers.includes(packageManager)) {
       throw new Error(`NestJS does not support package manager: ${packageManager}. Supported: ${NESTJS_CONFIG.supportedPackageManagers.join(', ')}`);
     }
-    
+
     consola.info(`📦 Installing NestJS (${language}) in "${targetPath}"...`);
 
     // Ensure target directory exists
@@ -48,19 +41,12 @@ export async function installNestJS(
       mkdirSync(targetPath, { recursive: true });
       consola.info(`Created directory: ${targetPath}`);
     }
-    
-    // Use NestJS CLI create command with appropriate package manager
-    const command = NESTJS_CONFIG.createCommands[language].replace(
-      '--package-manager npm',
-      `--package-manager ${packageManager}`
-    );
-    PackageManagerUtils.execCommand(command, targetPath);
-    
-    // Switch to target package manager if different from npm
-    if (packageManager !== 'npm') {
-      PackageManagerUtils.switchAndInstallDependencies(packageManager, targetPath);
-    }
-    
+
+    const packageManagerUtils = new PackageManagerUtils(packageManager);
+
+    // Install NestJS app
+    await packageManagerUtils.executeCommand(targetPath, 'npm', ['init', 'nestjs-app', '.', '-p', packageManager]);
+
     consola.success(`✅ NestJS (${language}) installed successfully with ${packageManager}`);
   } catch (error) {
     consola.error(`❌ Failed to install NestJS:`, error);
@@ -68,5 +54,4 @@ export async function installNestJS(
   }
 }
 
-// Export configuration for external access if needed
 export const getNestJSConfig = () => NESTJS_CONFIG;

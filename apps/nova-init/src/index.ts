@@ -7,6 +7,7 @@ import { setupCommandLine } from './main/setup.commandline.js';
 import { TechstackManager } from './core/TechstackManager.js';
 import { NovaInitWriter } from './core/nova-init-writer.js';
 import * as path from 'path';
+import { createHelpCommand } from './main/help.js';
 
 const program = new Command();
 
@@ -15,53 +16,18 @@ program
   .description('A modern CLI tool for scaffolding your next project')
   .version('2.0.0');
 
-// Central help command
-program
-  .command('help')
-  .description('Show detailed help for all commands')
-  .option('-c, --command <name>', 'Show help for specific command')
-  .action((options) => {
-    if (options.command) {
-      // Show help for specific command
-      const command = program.commands.find(cmd => cmd.name() === options.command);
-      if (command) {
-        command.help();
-      } else {
-        console.log(`❌ Command '${options.command}' not found`);
-        console.log('Available commands:');
-        program.commands.forEach(cmd => {
-          if (cmd.name() !== 'help') {
-            console.log(`  ${cmd.name()} - ${cmd.description()}`);
-          }
-        });
-      }
-    } else {
-      // Show general help
-      console.log('🚀 Nova-Init CLI - A modern CLI tool for scaffolding your next project\n');
-      
-      console.log('📋 Available Commands:');
-      console.log('  setup       Interactive setup mode');
-      console.log('  setup-cli   Command-line setup mode');
-      console.log('  config      Manage nova-init.json configuration');
-      console.log('  info        Show project information');
-      console.log('  help        Show this help message\n');
-      
-      console.log('💡 Quick Start:');
-      console.log('  npx create-nova-init setup                    # Interactive mode');
-      console.log('  npx create-nova-init setup-cli -n my-project  # Command-line mode');
-      console.log('  npx create-nova-init help --command setup-cli # Detailed command help\n');
-      
-      console.log('🔧 Configuration Management:');
-      console.log('  npx create-nova-init config --show            # Show current config');
-      console.log('  npx create-nova-init config --backup          # Create backup');
-      console.log('  npx create-nova-init info                     # Show project info\n');
-      
-      console.log('📚 For more information, visit: https://github.com/Nophira/Nova-init');
-    }
-  });
+
+program.addCommand(createHelpCommand());
 
 
-program
+function addHelpOption(command: Command) {
+  command.addHelpText('after', `
+  Examples:
+    create-nova-init ${command.name()} --help
+`);
+}
+
+const setupCliCommand = program
   .command('setup-cli')
   .description('Command-line setup mode')
   .option('-n, --project-name <name>', 'Project name (required)')
@@ -89,8 +55,10 @@ program
     }
   });
 
-// Configuration management commands
-program
+addHelpOption(setupCliCommand);
+
+
+const configCommand = program
   .command('config')
   .description('Manage nova-init.json configuration')
   .option('-p, --path <path>', 'Project path', '.')
@@ -141,7 +109,9 @@ program
     }
   });
 
-program
+addHelpOption(configCommand);
+
+const infoCommand = program
   .command('info')
   .description('Show project information')
   .option('-p, --path <path>', 'Project path', '.')
@@ -149,7 +119,7 @@ program
     try {
       const projectPath = path.resolve(options.path);
       const writer = new NovaInitWriter(projectPath);
-      
+
       const config = await writer.readConfig();
       if (!config) {
         console.log('❌ No nova-init.json found in this directory');
@@ -161,27 +131,27 @@ program
       console.log(`🔧 Setup Type: ${config.setupType}`);
       console.log(`🏗️  Monorepo: ${config.monorepo}`);
       console.log(`📦 Package Managers:`, config.packageManagers);
-      
+
       if (config.frontend) {
         console.log(`🎨 Frontend: ${config.frontend.framework} (${config.frontend.language})`);
       }
-      
+
       if (config.backend) {
         console.log(`⚙️  Backend: ${config.backend.framework} (${config.backend.language})`);
         if (config.backend.useMicroservices) {
           console.log(`🔗 Microservices: ${config.backend.microserviceNames?.join(', ')}`);
         }
       }
-      
+
       if (config.databases.length > 0) {
         console.log(`🗄️  Databases: ${config.databases.map(db => db.type).join(', ')}`);
       }
-      
+
       if (config.techStack) {
         console.log(`🎯 Tech Stack: ${config.techStack}`);
       }
-      
-      // Note: createdAt is added by the NovaInitWriter, not part of ProjectStructure
+
+   
       console.log(`📅 Configuration file: ${writer.getConfigPath()}`);
     } catch (error) {
       consola.error('Failed to show project info:', error);
@@ -189,14 +159,16 @@ program
     }
   });
 
-// Check if any commands were provided
+addHelpOption(infoCommand);
+
+
 if (process.argv.length === 2) {
-  // No commands provided, start interactive mode
+ 
   setupPrompt().catch((error) => {
     consola.error('Interactive setup failed:', error);
     process.exit(1);
   });
 } else {
-  // Commands provided, parse them normally
+ 
   program.parse();
 }

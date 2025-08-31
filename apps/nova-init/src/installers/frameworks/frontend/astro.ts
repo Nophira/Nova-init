@@ -1,49 +1,56 @@
-import { execSync } from 'child_process';
+import { mkdirSync, existsSync } from 'fs';
 import consola from 'consola';
 import type { Language, PackageManager } from '../../../types/index.js';
+import { PackageManagerUtils } from '../../../core/PackageManagerUtils.js';
+
+
+const ASTRO_CONFIG = {
+  name: 'Astro',
+  supportedLanguages: ['typescript'] as Language[],
+  supportedPackageManagers: ['npm', 'pnpm'] as PackageManager[], 
+  supportsVite: false,
+  defaultLanguage: 'typescript' as Language,
+  defaultPort: 3000,
+  createCommands: {
+    typescript: 'create astro@latest . --template basic', 
+  },
+};
 
 export async function installAstro(
-  targetPath: string, 
-  projectName: string, 
-  language: Language = 'typescript', 
+  targetPath: string,
+  projectName: string,
+  language: Language = 'typescript',
   packageManager: PackageManager = 'npm'
-) {
+): Promise<void> {
   try {
-    consola.info(`⚛️ Installing Astro (${language}) in "${targetPath}"...`);
-
-    const templateFlag = language === 'typescript' ? '--template minimal --typescript strict' : '--template minimal';
-
-    execSync(`npm create astro@latest . ${templateFlag}`, {
-      cwd: targetPath,
-      stdio: 'inherit',
-      shell: '/bin/bash'
-    });
-    
-    // Install dependencies with specified package manager
-    if (packageManager !== 'npm') {
-      consola.info(`📦 Installing dependencies with ${packageManager}...`);
-      
-      // Remove package-lock.json if exists
-      try {
-        execSync('rm -f package-lock.json', { cwd: targetPath, stdio: 'ignore', shell: '/bin/bash' });
-      } catch (error) {
-        // Ignore error if file doesn't exist
-      }
-      
-      // Install with specified package manager
-      switch (packageManager) {
-        case 'pnpm':
-          execSync('pnpm install', { cwd: targetPath, stdio: 'inherit', shell: '/bin/bash' });
-          break;
-        case 'bun':
-          execSync('bun install', { cwd: targetPath, stdio: 'inherit', shell: '/bin/bash' });
-          break;
-      }
+  
+    if (!ASTRO_CONFIG.supportedLanguages.includes(language)) {
+      throw new Error(`Astro does not support language: ${language}. Supported: ${ASTRO_CONFIG.supportedLanguages.join(', ')}`);
     }
-    
+
+
+    if (!ASTRO_CONFIG.supportedPackageManagers.includes(packageManager)) {
+      throw new Error(`Astro does not support package manager: ${packageManager}. Supported: ${ASTRO_CONFIG.supportedPackageManagers.join(', ')}`);
+    }
+
+    consola.info(`📦 Installing Astro (${language}) in "${targetPath}"...`);
+
+  
+    if (!existsSync(targetPath)) {
+      mkdirSync(targetPath, { recursive: true });
+      consola.info(`Created directory: ${targetPath}`);
+    }
+
+    const packageManagerUtils = new PackageManagerUtils(packageManager);
+
+    const command = ASTRO_CONFIG.createCommands['typescript'];
+    await packageManagerUtils.executeCommand(targetPath, command.split(' ')[0], command.split(' ').slice(1));
+
     consola.success(`✅ Astro (${language}) installed successfully with ${packageManager}`);
   } catch (error) {
     consola.error(`❌ Failed to install Astro:`, error);
     throw error;
   }
 }
+
+export const getAstroConfig = () => ASTRO_CONFIG;

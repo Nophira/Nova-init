@@ -6,15 +6,12 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["node"],
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
     "baseUrl": "./src",
     "paths": {
-      "@cli/*": ["cli/*"],
-      "@commands/*": ["commands/*"],
-      "@flows/*": ["flows/*"],
+      "@core/*": ["core/*"],
       "@installers/*": ["installers/*"],
-      "@prompts/*": ["prompts/*"],
-      "@utils/*": ["utils/*"],
+      "@main/*": ["main/*"],
       "@types/*": ["types/*"]
     },
     "strict": true,
@@ -31,8 +28,7 @@
   },
   "include": [
     "src",
-    "src/types/global.d.ts",
-    "src/types/global-types.ts"
+    "src/types/index.ts",
   ],
   "exclude": ["dist", "node_modules"]
 }

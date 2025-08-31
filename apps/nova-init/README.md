@@ -4,6 +4,16 @@
 
 Nova-Init is a powerful command-line tool that helps you create complete full-stack projects with various frameworks, databases, and monorepo tools.
 
+## **How too start**
+npx create-nova-init
+
+bunx create-nova-init
+
+pnpm dlx create-nova-init
+---
+
+
+
 ## ✨ **Features**
 
 ### 🎯 **Predefined Tech Stacks**
@@ -25,7 +35,7 @@ Nova-Init is a powerful command-line tool that helps you create complete full-st
 - **Angular** - Platform for building mobile and desktop applications
 - **Nuxt.js** - Intuitive Vue framework
 - **Astro** - Build faster websites with less JavaScript
-- **Remix** - Full-stack web framework
+- **Remix** - Full-stack web framework (currently under maintenance)
 - **Solid.js** - Declarative JavaScript library
 - **Qwik** - The HTML-first framework
 - **Preact** - Fast 3kB React alternative
@@ -60,129 +70,12 @@ Nova-Init is a powerful command-line tool that helps you create complete full-st
 - **Nx** - Smart, fast and extensible build system
 - **Turborepo** - High-performance build system
 
-## 🚀 **Quick Start**
-
-### **Installation**
-```bash
-# Global installation
-npm install -g create-nova-init
-
-# Or with npx (recommended)
-npx create-nova-init
-```
-
-### **Usage**
-
-#### **1. Interactive Mode**
-```bash
-npx create-nova-init
-# Or
-npx create-nova-init
-```
-
-#### **2. Command-Line Mode**
-```bash
-# Simple project
-npx create-nova-init setup-cli -n my-project
-
-# With predefined tech stack
-npx create-nova-init setup-cli -n my-app --techstack MERN -g
-
-# Full configuration
-npx create-nova-init setup-cli \
-  -n fullstack-app \
-  --techstack FULLSTACK_TS \
-  --monorepo turborepo \
-  --frontend-package-manager pnpm \
-  --backend-package-manager bun \
-  -g
-```
-
-
-
-## 📋 **Command Reference**
-
 ### **Available Commands**
 
 - **`setup-cli`** - Command-line setup mode
 - **`config`** - Manage nova-init.json configuration
 - **`info`** - Show project information
 - **`help`** - Show detailed help
-
-### **setup-cli Command Options**
-
-#### **Required Options**
-- `-n, --project-name <name>` - Project name (required)
-- `-t, --setup-type <type>` - Setup type: custom or predefined (default: custom)
-
-#### **Basic Options**
-- `-g, --git` - Initialize git repository
-
-#### **Framework Options**
-- `-f, --frontend <framework>` - Frontend framework
-- `-b, --backend <framework>` - Backend framework
-- `--frontend-folder <folder>` - Frontend folder name
-- `--backend-folder <folder>` - Backend folder name
-
-
-#### **Package Manager Options**
-- `-p, --package-manager <pm>` - Global package manager: npm, pnpm, bun (default: npm)
-- `--frontend-package-manager <pm>` - Frontend package manager
-- `--backend-package-manager <pm>` - Backend package manager
-- `--monorepo-package-manager <pm>` - Monorepo package manager
-
-#### **Database & Monorepo Options**
-- `-d, --databases <dbs>` - Comma-separated list of databases
-- `-m, --monorepo <tool>` - Monorepo tool: none, lerna, nx, turborepo (default: none)
-
-#### **Tech Stack Options**
-- `--techstack <stack>` - Predefined tech stack: MERN, MERN_TS, MEAN, MEAN_TS, MEVN, MEVN_TS, FULLSTACK_TS
-
-### **config Command Options**
-- `-p, --path <path>` - Project path (default: current directory)
-- `--show` - Show current configuration
-- `--validate` - Validate configuration
-- `--backup` - Create backup of configuration
-- `--restore <backup-path>` - Restore configuration from backup
-
-### **info Command Options**
-- `-p, --path <path>` - Project path (default: current directory)
-
-### **help Command Options**
-- `-c, --command <name>` - Show help for specific command
-
-## 📚 **Available Options & Values**
-
-### **Frontend Frameworks**
-```bash
-react, nextjs, vue, svelte, angular, nuxtjs, astro, remix, solid, qwik, preact, lit
-```
-
-### **Backend Frameworks**
-```bash
-express, nestjs, fastify
-```
-
-### **Databases**
-```bash
-mongodb, postgres, mysql, redis, neo4j, cassandra, couchdb, mariadb, cockroachdb, edgedb, surrealdb, yugabytedb
-```
-
-### **Package Managers**
-```bash
-npm, pnpm, bun
-```
-
-### **Monorepo Tools**
-```bash
-none, lerna, nx, turborepo
-```
-
-### **Tech Stacks**
-```bash
-MERN, MERN_TS, MEAN, MEAN_TS, MEVN, MEVN_TS, FULLSTACK_TS
-```
-
 
 ## 📄 **License**
 

@@ -1,29 +1,40 @@
+import { mkdirSync, existsSync } from 'fs';
 import consola from 'consola';
-import { writeFileSync, readFileSync, mkdirSync, existsSync } from 'fs';
-import * as path from 'path';
 import type { Language, PackageManager } from '../../../types/index.js';
-import { getBackendConfig } from '../../../core/FrameworkConfig.js';
 import { PackageManagerUtils } from '../../../core/PackageManagerUtils.js';
 
+// Express framework configuration
+const EXPRESS_CONFIG = {
+  name: 'Express',
+  supportedLanguages: ['typescript', 'javascript'] as Language[],
+  supportedPackageManagers: ['npm', 'pnpm', 'bun'] as PackageManager[], // Yarn entfernt
+  defaultLanguage: 'typescript' as Language,
+  defaultPort: 3000,
+  installCommand: {
+    default: 'npm init -y', // Express benötigt manuelle Installation
+  },
+  createCommands: {
+    typescript: 'npm install express typescript @types/node @types/express --save-dev && npm install nodemon ts-node --save-dev',
+    javascript: 'npm install express --save',
+  },
+};
+
 export async function installExpress(
-  targetPath: string, 
-  language: Language = 'javascript',
+  targetPath: string,
+  language: Language = 'typescript',
   packageManager: PackageManager = 'npm'
-) {
+): Promise<void> {
   try {
-    // Get Express configuration
-    const config = getBackendConfig('express');
-    
     // Validate language support
-    if (!config.supportedLanguages.includes(language)) {
-      throw new Error(`Express does not support language: ${language}. Supported: ${config.supportedLanguages.join(', ')}`);
+    if (!EXPRESS_CONFIG.supportedLanguages.includes(language)) {
+      throw new Error(`Express does not support language: ${language}. Supported: ${EXPRESS_CONFIG.supportedLanguages.join(', ')}`);
     }
-    
+
     // Validate package manager support
-    if (!config.supportedPackageManagers.includes(packageManager)) {
-      throw new Error(`Express does not support package manager: ${packageManager}. Supported: ${config.supportedPackageManagers.join(', ')}`);
+    if (!EXPRESS_CONFIG.supportedPackageManagers.includes(packageManager)) {
+      throw new Error(`Express does not support package manager: ${packageManager}. Supported: ${EXPRESS_CONFIG.supportedPackageManagers.join(', ')}`);
     }
-    
+
     consola.info(`📦 Installing Express (${language}) in "${targetPath}"...`);
 
     // Ensure target directory exists
@@ -32,128 +43,20 @@ export async function installExpress(
       consola.info(`Created directory: ${targetPath}`);
     }
 
-    // Initialize project with package manager
-    PackageManagerUtils.initProject(packageManager, targetPath);
-    
-    // Install main dependencies
-    const mainDependencies = config.dependencies?.common || ['express'];
-    PackageManagerUtils.installDependencies(packageManager, mainDependencies, targetPath, false);
-    
-    if (language === 'typescript') {
-      consola.info('⚙️ Setting up TypeScript configuration...');
-      
-      // Install TypeScript dev dependencies
-      const tsDevDependencies = config.devDependencies?.typescript || 
-        ['typescript', '@types/express', 'ts-node-dev', '@types/node'];
-      PackageManagerUtils.installDependencies(packageManager, tsDevDependencies, targetPath, true);
-      
-      // Initialize TypeScript configuration
-      PackageManagerUtils.execCommand('npx tsc --init', targetPath);
+    const packageManagerUtils = new PackageManagerUtils(packageManager);
 
-      const tsConfig = {
-        compilerOptions: {
-          target: "ES2020",
-          module: "commonjs",
-          outDir: "./dist",
-          rootDir: "./src",
-          strict: true,
-          esModuleInterop: true,
-          skipLibCheck: true,
-          forceConsistentCasingInFileNames: true,
-          resolveJsonModule: true
-        },
-        include: ["src/**/*"],
-        exclude: ["node_modules", "dist"]
-      };
+    // Initialize project
+    await packageManagerUtils.executeCommand(targetPath, EXPRESS_CONFIG.installCommand.default.split(' ')[0], EXPRESS_CONFIG.installCommand.default.split(' ').slice(1));
 
-      writeFileSync(
-        path.join(targetPath, 'tsconfig.json'),
-        JSON.stringify(tsConfig, null, 2)
-      );
+    // Install dependencies
+    const command = EXPRESS_CONFIG.createCommands[language];
+    await packageManagerUtils.executeCommand(targetPath, command.split(' ')[0], command.split(' ').slice(1));
 
-      // Create src directory and main file
-      mkdirSync(path.join(targetPath, 'src'), { recursive: true });
-      const mainContent = `import express from 'express';
-
-const app = express();
-const PORT = process.env.PORT || ${config.defaultPort};
-
-app.use(express.json());
-
-app.get('/', (req, res) => {
-  res.json({ message: 'Hello from Express with TypeScript!' });
-});
-
-app.listen(PORT, () => {
-  console.log(\`Server running on port \${PORT}\`);
-});
-`;
-      writeFileSync(path.join(targetPath, 'src/index.ts'), mainContent);
-
-    } else {
-      consola.info('⚙️ Setting up JavaScript configuration...');
-
-      // Create src directory and main file
-      mkdirSync(path.join(targetPath, 'src'), { recursive: true });
-      const mainContent = `import express from 'express';
-
-const app = express();
-const PORT = process.env.PORT || ${config.defaultPort};
-
-app.use(express.json());
-
-app.get('/', (req, res) => {
-  res.json({ message: 'Hello from Express with JavaScript!' });
-});
-
-app.listen(PORT, () => {
-  console.log(\`Server running on port \${PORT}\`);
-});
-`;
-      writeFileSync(path.join(targetPath, 'src/index.js'), mainContent);
-    }
-    
-    // Update package.json with configured scripts
-    const packageJsonPath = path.join(targetPath, 'package.json');
-    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
-    
-    // Add module type for JavaScript
-    if (language === 'javascript') {
-      packageJson.type = 'module';
-    }
-    
-    // Use configuration scripts with appropriate file extension
-    const fileExt = language === 'typescript' ? 'ts' : 'js';
-    packageJson.scripts = {
-      ...packageJson.scripts,
-      dev: language === 'typescript' ? 
-        'ts-node-dev --respawn --transpile-only src/index.ts' : 
-        config.scripts.dev.replace('index.js', `src/index.${fileExt}`),
-      build: language === 'typescript' ? config.scripts.build : undefined,
-      start: language === 'typescript' ? 
-        config.scripts.start : 
-        config.scripts.start.replace('index.js', `src/index.${fileExt}`)
-    };
-    
-    // Remove undefined scripts
-    Object.keys(packageJson.scripts).forEach(key => {
-      if (packageJson.scripts[key] === undefined) {
-        delete packageJson.scripts[key];
-      }
-    });
-    
-    writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
-
-    // Create environment file
-    const envContent = `# Server Configuration
-PORT=${config.defaultPort}
-NODE_ENV=development
-`;
-    writeFileSync(path.join(targetPath, '.env.example'), envContent);
-    
     consola.success(`✅ Express (${language}) installed successfully with ${packageManager}`);
   } catch (error) {
     consola.error(`❌ Failed to install Express:`, error);
     throw error;
   }
 }
+
+export const getExpressConfig = () => EXPRESS_CONFIG;

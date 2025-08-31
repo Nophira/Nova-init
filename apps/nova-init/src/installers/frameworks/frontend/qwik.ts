@@ -1,49 +1,64 @@
-import { execSync } from 'child_process';
+import { mkdirSync, existsSync } from 'fs';
 import consola from 'consola';
 import type { Language, PackageManager } from '../../../types/index.js';
+import { PackageManagerUtils } from '../../../core/PackageManagerUtils.js';
+
+
+const QWIK_CONFIG = {
+  name: 'Qwik',
+  supportedLanguages: ['typescript', 'javascript'] as Language[],
+  supportedPackageManagers: ['npm', 'pnpm', 'bun'] as PackageManager[],
+  supportsVite: true,
+  defaultLanguage: 'typescript' as Language,
+  defaultPort: 3000,
+
+  installCommands: {
+    'standart': 'npm create qwik@latest',
+    'vite-ts': 'npm create vite@latest . -- --template qwik-ts',
+    'vite-js': 'npm create vite@latest . -- --template qwik',
+  },
+};
 
 export async function installQwik(
-  targetPath: string, 
-  projectName: string, 
+  targetPath: string,
+  projectName: string,
   language: Language = 'typescript', 
-  packageManager: PackageManager = 'npm'
-) {
+  packageManager: PackageManager = 'npm',
+  starter: 'standart' | 'vite-ts' | 'vite-js'
+): Promise<void> {
   try {
-    consola.info(`⚛️ Installing Qwik (${language}) in "${targetPath}"...`);
-
-    const templateFlag = language === 'typescript' ? '--yes' : '--yes';
-
-    execSync(`npm create qwik@latest . ${templateFlag}`, {
-      cwd: targetPath,
-      stdio: 'inherit',
-      shell: '/bin/bash'
-    });
-    
-    // Install dependencies with specified package manager
-    if (packageManager !== 'npm') {
-      consola.info(`📦 Installing dependencies with ${packageManager}...`);
-      
-      // Remove package-lock.json if exists
-      try {
-        execSync('rm -f package-lock.json', { cwd: targetPath, stdio: 'ignore', shell: '/bin/bash' });
-      } catch (error) {
-        // Ignore error if file doesn't exist
-      }
-      
-      // Install with specified package manager
-      switch (packageManager) {
-        case 'pnpm':
-          execSync('pnpm install', { cwd: targetPath, stdio: 'inherit', shell: '/bin/bash' });
-          break;
-        case 'bun':
-          execSync('bun install', { cwd: targetPath, stdio: 'inherit', shell: '/bin/bash' });
-          break;
-      }
+  
+    if (!QWIK_CONFIG.supportedPackageManagers.includes(packageManager)) {
+      throw new Error(`Qwik does not support package manager: ${packageManager}. Supported: ${QWIK_CONFIG.supportedPackageManagers.join(', ')}`);
     }
+
+    consola.info(`📦 Installing Qwik with "${starter}" starter in "${targetPath}"...`);
+
+
+    if (!existsSync(targetPath)) {
+      mkdirSync(targetPath, { recursive: true });
+      consola.info(`Created directory: ${targetPath}`);
+    }
+
+    const packageManagerUtils = new PackageManagerUtils(packageManager);
+
+
+    const command = QWIK_CONFIG.installCommands[starter];
+
+    if (!command) {
+      throw new Error(`Invalid Qwik starter option: ${starter}`);
+    }
+
+
+    const [mainCommand, ...args] = command.split(' ');
     
-    consola.success(`✅ Qwik (${language}) installed successfully with ${packageManager}`);
+    await packageManagerUtils.executeCommand(targetPath, mainCommand, args);
+
+    consola.success(`✅ Qwik installed successfully with ${packageManager} using the "${starter}" starter.`);
   } catch (error) {
     consola.error(`❌ Failed to install Qwik:`, error);
     throw error;
   }
 }
+
+export const getQwikConfig = () => QWIK_CONFIG;

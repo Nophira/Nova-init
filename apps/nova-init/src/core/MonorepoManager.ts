@@ -36,7 +36,7 @@ export class MonorepoManager {
 
   private async setupLerna(projectPath: string, packageManager: PackageManager): Promise<void> {
     try {
-      // Verwende den bestehenden Lerna-Installer
+    
       const { installLerna } = await import('../installers/monorepo/lerna.js');
       await installLerna(projectPath, packageManager);
     } catch (error) {
@@ -47,7 +47,7 @@ export class MonorepoManager {
 
   private async setupNx(projectPath: string, packageManager: PackageManager): Promise<void> {
     try {
-      // Verwende den bestehenden Nx-Installer
+
       const { installNx } = await import('../installers/monorepo/nx.js');
       await installNx(projectPath, packageManager);
     } catch (error) {
@@ -58,7 +58,7 @@ export class MonorepoManager {
 
   private async setupTurborepo(projectPath: string, packageManager: PackageManager): Promise<void> {
     try {
-      // Verwende den bestehenden Turborepo-Installer
+  
       const { installTurborepo } = await import('../installers/monorepo/turborepo.js');
       await installTurborepo(projectPath, packageManager);
     } catch (error) {
@@ -67,7 +67,7 @@ export class MonorepoManager {
     }
   }
 
-  // Fallback-Implementierungen
+
   private async setupLernaFallback(projectPath: string, packageManager: PackageManager): Promise<void> {
     console.log('  📦 Installiere Lerna...');
     
@@ -98,7 +98,7 @@ export class MonorepoManager {
     
     await fs.writeJson(lernaJsonPath, lernaConfig, { spaces: 2 });
     
-    // Workspaces in package.json aktivieren
+ 
     await this.enableWorkspaces(projectPath, packageManager);
     
     console.log('    ✅ Lerna erfolgreich eingerichtet');
@@ -107,13 +107,13 @@ export class MonorepoManager {
   private async setupNxFallback(projectPath: string, packageManager: PackageManager): Promise<void> {
     console.log('  📦 Installiere Nx...');
     
-    // Nx installieren
+
     await this.installPackage(projectPath, packageManager, '@nrwl/workspace', true);
     
-    // Nx initialisieren
+
     await this.runCommand(projectPath, packageManager, 'npx', ['nx', 'init', '--yes']);
     
-    // Nx-Konfiguration anpassen
+
     const nxJsonPath = path.join(projectPath, 'nx.json');
     const nxConfig = {
       extends: '@nrwl/workspace/presets/npm.json',
@@ -138,7 +138,7 @@ export class MonorepoManager {
     
     await fs.writeJson(nxJsonPath, nxConfig, { spaces: 2 });
     
-    // Workspaces in package.json aktivieren
+
     await this.enableWorkspaces(projectPath, packageManager);
     
     console.log('    ✅ Nx erfolgreich eingerichtet');
@@ -147,10 +147,10 @@ export class MonorepoManager {
   private async setupTurborepoFallback(projectPath: string, packageManager: PackageManager): Promise<void> {
     console.log('  📦 Installiere Turborepo...');
     
-    // Turborepo installieren
+
     await this.installPackage(projectPath, packageManager, 'turbo', true);
     
-    // Turborepo-Konfiguration erstellen
+
     const turboJsonPath = path.join(projectPath, 'turbo.json');
     const turboConfig = {
       $schema: 'https://turbo.build/schema.json',
@@ -174,7 +174,7 @@ export class MonorepoManager {
     
     await fs.writeJson(turboJsonPath, turboConfig, { spaces: 2 });
     
-    // Workspaces in package.json aktivieren
+
     await this.enableWorkspaces(projectPath, packageManager);
     
     console.log('    ✅ Turborepo erfolgreich eingerichtet');
@@ -186,10 +186,10 @@ export class MonorepoManager {
     if (await fs.pathExists(packageJsonPath)) {
       const packageJson = await fs.readJson(packageJsonPath);
       
-      // Workspaces hinzufügen
+   
       packageJson.workspaces = ['apps/*', 'packages/*'];
       
-      // Scripts für Monorepo hinzufügen
+
       if (packageManager === 'npm') {
         packageJson.scripts = {
           ...packageJson.scripts,
@@ -278,7 +278,7 @@ export class MonorepoManager {
   async createMonorepoStructure(projectPath: string): Promise<void> {
     console.log('  📁 Erstelle Monorepo-Struktur...');
     
-    // Standard-Ordnerstruktur
+
     const directories = [
       'apps',
       'packages',
@@ -289,7 +289,7 @@ export class MonorepoManager {
       await fs.ensureDir(path.join(projectPath, dir));
     }
     
-    // README für Monorepo
+
     const readmeContent = `# Monorepo
 
 Dies ist ein Monorepo, das mit Nova-Init erstellt wurde.

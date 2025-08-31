@@ -9,30 +9,30 @@ export class GitManager {
     try {
       consola.info('🐙 Initialisiere Git Repository...');
       
-      // Prüfe ob bereits ein Git-Repository existiert
+    
       const gitPath = path.join(projectPath, '.git');
       if (existsSync(gitPath)) {
         consola.info('ℹ️ Git-Repository existiert bereits, überspringe Initialisierung');
         return;
       }
       
-      // Initialisiere neues Git-Repository
+
       await execa('git', ['init'], { cwd: projectPath });
       
-      // Erstelle .gitignore
+
       await this.createGitignore(projectPath);
       
-      // Für Monorepo-Setups: Nur Root-Dateien hinzufügen, nicht Subverzeichnisse
+
       try {
-        // Füge nur Root-Dateien hinzu
+
         await execa('git', ['add', '.'], { cwd: projectPath });
         await execa('git', ['commit', '-m', 'Initial commit: Project created with Nova-Init'], { cwd: projectPath });
         consola.success('✅ Git Repository erfolgreich initialisiert');
       } catch (gitError) {
-        // Falls Git-Fehler auftreten, versuche es ohne problematische Verzeichnisse
+       
         consola.warn('⚠️ Git-Fehler aufgetreten, versuche alternative Methode...');
         
-        // Füge Dateien einzeln hinzu, ignoriere problematische Verzeichnisse
+     
         const files = await fs.readdir(projectPath);
         for (const file of files) {
           if (file !== '.git' && file !== 'node_modules') {
@@ -257,7 +257,7 @@ DB/volumes/
       const hooksPath = path.join(projectPath, '.git', 'hooks');
       await fs.ensureDir(hooksPath);
       
-      // Pre-commit Hook
+
       const preCommitHook = `#!/bin/sh
 # Pre-commit Hook
 echo "🔍 Führe Pre-commit Checks aus..."
@@ -278,7 +278,7 @@ echo "✅ Pre-commit Checks bestanden"
       await fs.writeFile(path.join(hooksPath, 'pre-commit'), preCommitHook);
       await fs.chmod(path.join(hooksPath, 'pre-commit'), 0o755);
       
-      // Pre-push Hook
+  
       const prePushHook = `#!/bin/sh
 # Pre-push Hook
 echo "🧪 Führe Tests aus..."
@@ -303,7 +303,7 @@ echo "✅ Pre-push Checks bestanden"
       
     } catch (error) {
       console.error('  ❌ Fehler beim Einrichten der Git Hooks:', error);
-      // Git Hooks sind optional, daher keinen Fehler werfen
+   
     }
   }
 }

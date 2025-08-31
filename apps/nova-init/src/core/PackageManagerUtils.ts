@@ -1,7 +1,3 @@
-// ============================================================================
-// PACKAGE MANAGER UTILITIES - Cross-platform package manager operations
-// ============================================================================
-
 import { execSync } from 'child_process';
 import { unlinkSync, existsSync } from 'fs';
 import path from 'path';
@@ -9,23 +5,19 @@ import consola from 'consola';
 import type { PackageManager } from '../types/index.js';
 
 export class PackageManagerUtils {
+  private packageManager: PackageManager;
   private static isWindows = process.platform === 'win32';
 
-  /**
-   * Execute a command with proper cross-platform handling
-   */
-  static execCommand(command: string, cwd: string, options: { stdio?: 'inherit' | 'pipe' } = {}): void {
+  constructor(packageManager: PackageManager) {
+    this.packageManager = packageManager;
+  }
+
+  private execCommand(command: string, cwd: string, options: { stdio?: 'inherit' | 'pipe' } = {}): void {
     const execOptions: any = {
       cwd,
       stdio: options.stdio || 'inherit' as const,
+      shell: PackageManagerUtils.isWindows ? true : '/bin/bash',
     };
-
-    // Only add shell option if needed
-    if (!this.isWindows) {
-      execOptions.shell = '/bin/bash';
-    } else {
-      execOptions.shell = true;
-    }
 
     try {
       execSync(command, execOptions);
@@ -35,13 +27,11 @@ export class PackageManagerUtils {
     }
   }
 
-  /**
-   * Initialize a project with the specified package manager
-   */
-  static initProject(packageManager: PackageManager, targetPath: string): void {
-    consola.info(`Initializing project with ${packageManager}...`);
-    
-    switch (packageManager) {
+  
+  public initProject(targetPath: string): void {
+    consola.info(`Initializing project with ${this.packageManager}...`);
+
+    switch (this.packageManager) {
       case 'npm':
         this.execCommand('npm init -y', targetPath);
         break;
@@ -54,21 +44,14 @@ export class PackageManagerUtils {
     }
   }
 
-  /**
-   * Install dependencies with the specified package manager
-   */
-  static installDependencies(
-    packageManager: PackageManager, 
-    dependencies: string[], 
-    targetPath: string,
-    isDev: boolean = false
-  ): void {
+  
+  public installDependencies(dependencies: string[], targetPath: string, isDev: boolean = false): void {
     if (dependencies.length === 0) return;
 
     const depList = dependencies.join(' ');
     consola.info(`Installing ${isDev ? 'dev ' : ''}dependencies: ${depList}`);
 
-    switch (packageManager) {
+    switch (this.packageManager) {
       case 'npm':
         const npmFlag = isDev ? '--save-dev' : '--save';
         this.execCommand(`npm install ${npmFlag} ${depList}`, targetPath);
@@ -84,11 +67,9 @@ export class PackageManagerUtils {
     }
   }
 
-  /**
-   * Run a script with the specified package manager
-   */
-  static runScript(packageManager: PackageManager, script: string, targetPath: string): void {
-    switch (packageManager) {
+
+  public runScript(script: string, targetPath: string): void {
+    switch (this.packageManager) {
       case 'npm':
         this.execCommand(`npm run ${script}`, targetPath);
         break;
@@ -101,10 +82,8 @@ export class PackageManagerUtils {
     }
   }
 
-  /**
-   * Clean up lock files from other package managers
-   */
-  static cleanupLockFiles(currentPackageManager: PackageManager, targetPath: string): void {
+ 
+  public cleanupLockFiles(targetPath: string): void {
     const lockFiles = {
       npm: 'package-lock.json',
       pnpm: 'pnpm-lock.yaml',
@@ -112,32 +91,27 @@ export class PackageManagerUtils {
     };
 
     Object.entries(lockFiles).forEach(([pm, lockFile]) => {
-      if (pm !== currentPackageManager) {
+      if (pm !== this.packageManager) {
         const lockFilePath = path.join(targetPath, lockFile);
         if (existsSync(lockFilePath)) {
           try {
             unlinkSync(lockFilePath);
             consola.info(`Removed ${lockFile}`);
           } catch (error) {
-            // Ignore errors when removing lock files
+           
           }
         }
       }
     });
   }
 
-  /**
-   * Install dependencies after project creation, switching package managers if needed
-   */
-  static switchAndInstallDependencies(
-    targetPackageManager: PackageManager, 
-    targetPath: string
-  ): void {
-    // Clean up lock files from other package managers
-    this.cleanupLockFiles(targetPackageManager, targetPath);
 
-    // Install dependencies with the target package manager
-    switch (targetPackageManager) {
+  public switchAndInstallDependencies(targetPath: string): void {
+   
+    this.cleanupLockFiles(targetPath);
+
+  
+    switch (this.packageManager) {
       case 'npm':
         this.execCommand('npm install', targetPath);
         break;
@@ -150,11 +124,8 @@ export class PackageManagerUtils {
     }
   }
 
-  /**
-   * Get the install command for a specific package manager
-   */
-  static getInstallCommand(packageManager: PackageManager): string {
-    switch (packageManager) {
+  public getInstallCommand(): string {
+    switch (this.packageManager) {
       case 'npm':
         return 'npm install';
       case 'pnpm':
@@ -164,11 +135,9 @@ export class PackageManagerUtils {
     }
   }
 
-  /**
-   * Get the run command for a specific package manager
-   */
-  static getRunCommand(packageManager: PackageManager, script: string): string {
-    switch (packageManager) {
+  
+  public getRunCommand(script: string): string {
+    switch (this.packageManager) {
       case 'npm':
         return `npm run ${script}`;
       case 'pnpm':
@@ -178,60 +147,63 @@ export class PackageManagerUtils {
     }
   }
 
-  /**
-   * Check if package manager is available in the system
-   */
-  static isPackageManagerAvailable(packageManager: PackageManager): boolean {
+
+  public static isPackageManagerAvailable(packageManager: PackageManager): boolean {
     try {
-      this.execCommand(`${packageManager} --version`, process.cwd(), { stdio: 'pipe' });
+      execSync(`${packageManager} --version`, { stdio: 'pipe' });
       return true;
     } catch (error) {
       return false;
     }
   }
 
-  /**
-   * Get available package managers on the system
-   */
-  static getAvailablePackageManagers(): PackageManager[] {
+ 
+  public static getAvailablePackageManagers(): PackageManager[] {
     const managers: PackageManager[] = ['npm', 'pnpm', 'bun'];
-    return managers.filter(pm => this.isPackageManagerAvailable(pm));
+    return managers.filter(pm => PackageManagerUtils.isPackageManagerAvailable(pm));
   }
 
-  /**
-   * Validate package manager choice and suggest alternatives
-   */
-  static validatePackageManager(packageManager: PackageManager): void {
-    if (!this.isPackageManagerAvailable(packageManager)) {
-      const available = this.getAvailablePackageManagers();
+ 
+  public static validatePackageManager(packageManager: PackageManager): void {
+    if (!PackageManagerUtils.isPackageManagerAvailable(packageManager)) {
+      const available = PackageManagerUtils.getAvailablePackageManagers();
       throw new Error(
         `Package manager '${packageManager}' is not available. Available options: ${available.join(', ')}`
       );
     }
   }
+
+  
+  public executeCommand(cwd: string, command: string, args: string[]): Promise<void> {
+    return new Promise((resolve, reject) => {
+      try {
+        const cmd = `${command} ${args.join(' ')}`;
+        consola.info(`Executing: ${cmd} in ${cwd}`);
+        this.execCommand(cmd, cwd);
+        resolve();
+      } catch (error) {
+        consola.error(`Failed to execute ${command} with ${this.packageManager}`);
+        reject(error);
+      }
+    });
+  }
 }
 
-/**
- * Cross-platform file system utilities
- */
+
 export class FileSystemUtils {
-  /**
-   * Remove files cross-platform
-   */
-  static removeFile(filePath: string): void {
+ 
+  public static removeFile(filePath: string): void {
     try {
       if (existsSync(filePath)) {
         unlinkSync(filePath);
       }
     } catch (error) {
-      // Ignore errors when removing files
+      
     }
   }
 
-  /**
-   * Remove multiple files cross-platform
-   */
-  static removeFiles(filePaths: string[]): void {
+ 
+  public static removeFiles(filePaths: string[]): void {
     filePaths.forEach(filePath => this.removeFile(filePath));
   }
 }

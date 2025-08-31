@@ -91,7 +91,7 @@ export class TechstackManager {
       throw new Error(`Unknown tech stack: ${techStackName}`);
     }
 
-    // Determine if this is a TypeScript tech stack
+
     const isTypeScript = techStackName.includes('_TS') || techStackName === 'FULLSTACK_TS';
     const language = isTypeScript ? 'typescript' : 'javascript';
 
@@ -109,11 +109,12 @@ export class TechstackManager {
         framework: techStack.frontend,
         folderName: 'frontend',
         packageManager: techStack.packageManager,
+        buildTool: techStack.frontend === 'react' ? 'vite' : undefined,
       },
       backend: {
         language,
         framework: techStack.backend,
-        useMicroservices: false, // Removed microservices support
+        useMicroservices: false, 
         microserviceNames: undefined,
         folderName: 'backend',
         packageManager: techStack.packageManager,
@@ -121,32 +122,11 @@ export class TechstackManager {
       databases: techStack.databases.map(db => ({
         type: db,
         name: db,
-        port: this.getDefaultDbPort(db),
-        containerName: `${db}_db`,
-        networkName: 'local_dbs_network',
-        volumeName: `${db}_data`,
+        useDocker: true,
+        connectionString: undefined,
       })),
-      hosting: 'none',
       initializeGit: true,
       techStack: techStackName,
     };
-  }
-
-  private static getDefaultDbPort(db: DatabaseType): number {
-    const mapping: Record<DatabaseType, number> = {
-      postgres: 5432,
-      mysql: 3306,
-      mariadb: 3306,
-      mongodb: 27017,
-      redis: 6379,
-      cassandra: 9042,
-      cockroachdb: 26257,
-      couchdb: 5984,
-      edgedb: 5656,
-      neo4j: 7687,
-      surrealdb: 8000,
-      yugabytedb: 5433,
-    };
-    return mapping[db] ?? 5432;
   }
 }

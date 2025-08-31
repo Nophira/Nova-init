@@ -10,10 +10,10 @@ export class DatabaseManager {
       const dbPath = path.join(projectPath, 'DB');
       await fs.ensureDir(dbPath);
       
-      // Docker Compose für alle Datenbanken erstellen
+
       await this.createDockerCompose(dbPath, databases);
       
-      // Einzelne Datenbank-Konfigurationsdateien erstellen
+  
       for (const db of databases) {
         await this.createDatabaseConfig(dbPath, db);
       }
@@ -30,7 +30,7 @@ export class DatabaseManager {
 
   private async createDockerCompose(dbPath: string, databases: DatabaseSetup[]): Promise<void> {
     try {
-      // Verwende den bestehenden Docker-Generator
+  
       const { generateDockerCompose } = await import('../installers/database/databasedocker-generator.js');
       
       const composePath = path.join(dbPath, 'docker-compose.yml');
@@ -63,7 +63,7 @@ networks:
 volumes:
 `;
 
-    // Volumes definieren
+   
     for (const db of databases) {
       content += `  ${db.volumeName}:\n`;
     }
@@ -72,7 +72,7 @@ volumes:
 services:
 `;
 
-    // Services definieren
+
     for (const db of databases) {
       content += this.generateDatabaseService(db);
     }
@@ -92,12 +92,12 @@ services:
     environment:
 `;
 
-    // Environment-Variablen
+    
     for (const [key, value] of Object.entries(serviceConfig.environment)) {
       service += `      ${key}: ${value}\n`;
     }
 
-    // Volumes
+
     if (serviceConfig.volumes.length > 0) {
       service += `    volumes:\n`;
       for (const volume of serviceConfig.volumes) {
@@ -105,12 +105,12 @@ services:
       }
     }
 
-    // Networks
+   
     service += `    networks:
       - ${db.networkName}
 `;
 
-    // Healthcheck
+   
     if (serviceConfig.healthcheck) {
       service += `    healthcheck:
       test: ${JSON.stringify(serviceConfig.healthcheck.test)}
