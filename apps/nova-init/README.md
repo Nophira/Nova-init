@@ -10,6 +10,7 @@ npx nova-init
 bunx nova-init
 
 pnpm dlx nova-init
+
 ---
 
 
