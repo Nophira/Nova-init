@@ -1,5 +1,5 @@
 {
-  "name": "create-nova-init",
+  "name": "nova-init",
   "version": "v2.0.0",
   "author": "Nophira",
   "description": "A modern CLI tool for scaffolding your next project – choose from a variety of frameworks and customizable addons to tailor your architecture.",
@@ -7,7 +7,7 @@
   "main": "dist/src/index.js",
   "type": "module",
   "bin": {
-    "create-nova-init": "./dist/src/index.js"
+    "nova-init": "./dist/src/index.js"
   },
   "files": [
     "dist/**"

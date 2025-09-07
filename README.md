@@ -5,11 +5,11 @@
 Nova-Init is a powerful command-line tool that helps you create complete full-stack projects with various frameworks, databases, and monorepo tools.
 
 ## **How too start**
-npx create-nova-init
+npx nova-init
 
-bunx create-nova-init
+bunx nova-init
 
-pnpm dlx create-nova-init
+pnpm dlx nova-init
 ---
 
 
