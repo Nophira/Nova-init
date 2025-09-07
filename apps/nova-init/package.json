@@ -1,6 +1,6 @@
 {
   "name": "create-nova-init",
-  "version": "2.0.0",
+  "version": "v2.0.0",
   "author": "Nophira",
   "description": "A modern CLI tool for scaffolding your next project – choose from a variety of frameworks and customizable addons to tailor your architecture.",
   "license": "MIT",

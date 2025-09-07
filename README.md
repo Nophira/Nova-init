@@ -1,129 +1,90 @@
-# Turborepo starter
+# 🚀 Nova-Init
 
-This Turborepo starter is maintained by the Turborepo core team.
+**A modern CLI tool for scaffolding your next project**
 
-## Using this example
+Nova-Init is a powerful command-line tool that helps you create complete full-stack projects with various frameworks, databases, and monorepo tools.
 
-Run the following command:
+## **How too start**
+npx create-nova-init
 
-```sh
-npx create-turbo@latest
-```
+bunx create-nova-init
 
-## What's inside?
+pnpm dlx create-nova-init
+---
 
-This Turborepo includes the following packages/apps:
 
-### Apps and Packages
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## ✨ **Features**
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+### 🎯 **Predefined Tech Stacks**
+- **MERN** - MongoDB, Express.js, React, Node.js (JavaScript)
+- **MERN_TS** - MongoDB, Express.js, React, Node.js (TypeScript)
+- **MEAN** - MongoDB, Express.js, Angular, Node.js (TypeScript)
+- **MEAN_TS** - MongoDB, Express.js, Angular, Node.js (TypeScript)
+- **MEVN** - MongoDB, Express.js, Vue.js, Node.js (JavaScript)
+- **MEVN_TS** - MongoDB, Express.js, Vue.js, Node.js (TypeScript)
+- **FULLSTACK_TS** - Next.js, NestJS, PostgreSQL, TypeScript
 
-### Utilities
+### 🛠 **Supported Frameworks**
 
-This Turborepo has some additional tools already setup for you:
+#### **Frontend:**
+- **React** (with Vite) - JavaScript library for building UIs
+- **Next.js** - React framework for production
+- **Vue.js** (with Vite) - Progressive JavaScript framework
+- **Svelte** - Cybernetically enhanced web apps
+- **Angular** - Platform for building mobile and desktop applications
+- **Nuxt.js** - Intuitive Vue framework
+- **Astro** - Build faster websites with less JavaScript
+- **Remix** - Full-stack web framework (currently under maintenance)
+- **Solid.js** - Declarative JavaScript library
+- **Qwik** - The HTML-first framework
+- **Preact** - Fast 3kB React alternative
+- **Lit** - Simple. Fast. Web Components
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+#### **Backend:**
+- **Express.js** - Fast, unopinionated, minimalist web framework
+- **NestJS** - Progressive Node.js framework
+- **Fastify** - Fast and low overhead web framework
 
-### Build
+### 🗄 **Databases**
+- **PostgreSQL** - Advanced open source relational database
+- **MySQL** - World's most popular open source database
+- **MongoDB** - The database for modern applications
+- **Redis** - In-memory data structure store
+- **MariaDB** - Open source relational database
+- **Neo4j** - The graph database platform
+- **Cassandra** - Distributed NoSQL database
+- **CouchDB** - The database that embraces the web
+- **CockroachDB** - Distributed SQL database
+- **EdgeDB** - Next generation database
+- **SurrealDB** - Ultimate cloud database
+- **YugabyteDB** - Distributed SQL database
 
-To build all apps and packages, run the following command:
+### 📦 **Package Managers**
+- **npm** - Node Package Manager (default)
+- **pnpm** - Fast, disk space efficient package manager
+- **bun** - All-in-one JavaScript runtime & package manager
 
-```
-cd my-turborepo
+### 🏗 **Monorepo Tools**
+- **Lerna** - Tool for managing JavaScript projects with multiple packages
+- **Nx** - Smart, fast and extensible build system
+- **Turborepo** - High-performance build system
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+### **Available Commands**
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-pnpm exec turbo build
-```
+- **`setup-cli`** - Command-line setup mode
+- **`config`** - Manage nova-init.json configuration
+- **`info`** - Show project information
+- **`help`** - Show detailed help
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+## 📄 **License**
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+---
 
-### Develop
+**Built with ❤️ for the developer community**
 
-To develop all apps and packages, run the following command:
 
-```
-cd my-turborepo
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
