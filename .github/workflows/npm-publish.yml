@@ -48,11 +48,15 @@ jobs:
             fi
 
         
-        - name: Publish
+        - name: Build and Publish
           if: steps.check.outputs.version_changed == 'true'
-          run: cd apps/nova-init && npm run build && npm publish --access public --no-git-checks
+          run: |
+                cd apps/nova-init
+                npm install
+                npm run build
+                npm publish --access public --no-git-checks
           env:
-            NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+               NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
         - name: Tag release
           if: steps.check.outputs.version_changed == 'true'
