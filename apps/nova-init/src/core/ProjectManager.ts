@@ -33,7 +33,8 @@ export class ProjectManager {
         await this.monorepoManager.setupMonorepo(
           projectPath,
           config.monorepo,
-          config.packageManagers.monorepo!
+          config.packageManagers.monorepo!,
+          config.projectName
         );
       }
 

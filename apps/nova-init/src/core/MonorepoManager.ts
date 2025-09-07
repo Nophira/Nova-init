@@ -7,7 +7,8 @@ export class MonorepoManager {
   async setupMonorepo(
     projectPath: string, 
     monorepoTool: MonorepoTool, 
-    packageManager: PackageManager
+    packageManager: PackageManager,
+    projectName: string
   ): Promise<void> {
     try {
       console.log(`🏗️  Richte Monorepo ein: ${monorepoTool}`);
@@ -17,7 +18,7 @@ export class MonorepoManager {
           await this.setupLerna(projectPath, packageManager);
           break;
         case 'nx':
-          await this.setupNx(projectPath, packageManager);
+          await this.setupNx(projectPath, packageManager,projectName);
           break;
         case 'turborepo':
           await this.setupTurborepo(projectPath, packageManager);
@@ -45,11 +46,11 @@ export class MonorepoManager {
     }
   }
 
-  private async setupNx(projectPath: string, packageManager: PackageManager): Promise<void> {
+  private async setupNx(projectPath: string, packageManager: PackageManager,projectName:string): Promise<void> {
     try {
 
       const { installNx } = await import('../installers/monorepo/nx.js');
-      await installNx(projectPath, packageManager);
+      await installNx(projectPath, packageManager,projectName);
     } catch (error) {
       console.log('  ⚠️  Fehler beim Verwenden des bestehenden Nx-Installers, verwende Fallback...');
       await this.setupNxFallback(projectPath, packageManager);
