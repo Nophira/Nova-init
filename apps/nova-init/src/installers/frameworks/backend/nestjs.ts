@@ -45,7 +45,7 @@ export async function installNestJS(
     const packageManagerUtils = new PackageManagerUtils(packageManager);
 
     // Install NestJS app
-    await packageManagerUtils.executeCommand(targetPath, 'npm', ['init', 'nestjs-app', '.', '-p', packageManager]);
+    await packageManagerUtils.executeCommand(targetPath, 'npx', ['init', 'nestjs-app', '.', '-p', packageManager]);
 
     consola.success(`✅ NestJS (${language}) installed successfully with ${packageManager}`);
   } catch (error) {
