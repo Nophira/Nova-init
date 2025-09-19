@@ -142,7 +142,7 @@ async function promptFrontendSetup(packageManager: PackageManager, monorepo: Mon
     const language = await select({
         message: 'Which programming language do you want to use?',
         options: [
-            { value: 'typescript', label: 'TypeScript (recommended)' },
+            { value: 'typescript', label: 'TypeScript' },
             { value: 'javascript', label: 'JavaScript' }
         ]
     });
@@ -172,7 +172,15 @@ async function promptFrontendSetup(packageManager: PackageManager, monorepo: Mon
             buildTool = 'vite';
         }
     }
-
+    if (framework === 'angular') {
+      buildTool = 'standard';
+     }
+    if (framework === 'astro') {
+      buildTool = 'standard';
+     }
+     if (framework === 'nextjs') {
+      buildTool = 'standard';
+     }
    
     if (framework === 'vue') {
         const starter = await select({
@@ -203,14 +211,18 @@ async function promptFrontendSetup(packageManager: PackageManager, monorepo: Mon
         initialValue: 'frontend'
     });
 
-    const frontendPackageManager = await select({
-        message: 'Which package manager for the frontend?',
-        options: [
-            { value: 'npm', label: 'npm' },
-            { value: 'pnpm', label: 'pnpm' },
-            { value: 'bun', label: 'Bun' }
-        ]
-    });
+   
+const packageManagerOptions = [
+    { value: 'npm', label: 'npm' },
+    { value: 'pnpm', label: 'pnpm' },
+    
+    ...(framework === 'astro' ? [] : [{ value: 'bun', label: 'Bun' }])
+  ];
+
+  const frontendPackageManager = await select({
+    message: 'Which package manager for the backend?',
+    options: packageManagerOptions
+  });
 
     return {
         language: language as any,
@@ -321,45 +333,6 @@ async function promptDatabases(): Promise<DatabaseSetup[]> {
     })) as unknown as DatabaseSetup[];
 }
 
-/*function getSupportedFrontendFrameworkOptions(language: string) {
-    const frameworks = [
-       ['react', getReactConfig()],
-       ['vue', getVueConfig()],
-       ['angular', getAngularConfig()],
-       ['nextjs', getNextjsConfig()],
-       ['nuxtjs', getNuxtjsConfig()],
-       ['astro', getAstroConfig()],
-       ['lit', getLitConfig()],
-       ['preact', getPreactConfig()],
-       ['qwik', getQwikConfig()],
-       //['remix', getRemixConfig()], // Deaktiviert
-       ['solid', getSolidConfig()],
-       ['svelte', getSvelteConfig()],
-      
-    ]
-        .filter(([key, config]) => key !== 'remix' && (config as any).supportedLanguages.includes(language as any))
-        .map(([key, config]) => ({
-            value: key,
-            label: `${(config as any).name}${(config as any).supportsVite ? ' (Vite supported)' : ''}${((config as any).supportedLanguages.length === 1) ? ' (TS-only)' : ''}`
-        }));
-
-    return frameworks;
-}
-
-function getSupportedBackendFrameworkOptions(language: string) {
-    const frameworks = [
-        ['express', getExpressConfig()],
-        ['nestjs', getNestJSConfig()],
-        ['fastify', getFastifyConfig()],
-    ]
-        .filter(([_, config]) => (config as any).supportedLanguages.includes(language as any))
-        .map(([key, config]) => ({
-            value: key,
-            label: `${(config as any).name}${((config as any).supportedLanguages.length === 1) ? ' (TS-only)' : ''}`
-        }));
-
-    return frameworks;
-}*/
 
 function getSupportedFrontendFrameworkOptions(language: string) {
     return Object.entries(FRAMEWORKS)
