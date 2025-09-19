@@ -13,7 +13,7 @@ const QWIK_CONFIG = {
   defaultPort: 3000,
 
   installCommands: {
-    'standart': 'npm create qwik@latest',
+    'standard': 'npm create qwik@latest',
     'vite-ts': 'npm create vite@latest . -- --template qwik-ts',
     'vite-js': 'npm create vite@latest . -- --template qwik',
   },
@@ -24,7 +24,7 @@ export async function installQwik(
   projectName: string,
   language: Language = 'typescript', 
   packageManager: PackageManager = 'npm',
-  starter: 'standart' | 'vite-ts' | 'vite-js'
+  starter: 'standard' | 'vite-ts' | 'vite-js'
 ): Promise<void> {
   try {
   

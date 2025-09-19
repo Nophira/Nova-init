@@ -73,7 +73,7 @@ export interface FrontendSetup {
 }
 
 
-export type BuildTool = 'vite';
+export type BuildTool = 'vite' | 'standard';
 
 
 export interface BackendSetup {

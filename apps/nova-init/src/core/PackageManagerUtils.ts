@@ -20,7 +20,7 @@ export class PackageManagerUtils {
     };
 
     try {
-      execSync(command, execOptions);
+      execSync(command,execOptions);
     } catch (error) {
       consola.error(`Failed to execute command: ${command}`);
       throw error;
@@ -28,21 +28,7 @@ export class PackageManagerUtils {
   }
 
   
-  public initProject(targetPath: string): void {
-    consola.info(`Initializing project with ${this.packageManager}...`);
 
-    switch (this.packageManager) {
-      case 'npm':
-        this.execCommand('npm init -y', targetPath);
-        break;
-      case 'pnpm':
-        this.execCommand('pnpm init', targetPath);
-        break;
-      case 'bun':
-        this.execCommand('bun init -y', targetPath);
-        break;
-    }
-  }
 
   
   public installDependencies(dependencies: string[], targetPath: string, isDev: boolean = false): void {
@@ -68,47 +54,14 @@ export class PackageManagerUtils {
   }
 
 
-  public runScript(script: string, targetPath: string): void {
-    switch (this.packageManager) {
-      case 'npm':
-        this.execCommand(`npm run ${script}`, targetPath);
-        break;
-      case 'pnpm':
-        this.execCommand(`pnpm run ${script}`, targetPath);
-        break;
-      case 'bun':
-        this.execCommand(`bun run ${script}`, targetPath);
-        break;
-    }
-  }
 
  
-  public cleanupLockFiles(targetPath: string): void {
-    const lockFiles = {
-      npm: 'package-lock.json',
-      pnpm: 'pnpm-lock.yaml',
-      bun: 'bun.lockb',
-    };
-
-    Object.entries(lockFiles).forEach(([pm, lockFile]) => {
-      if (pm !== this.packageManager) {
-        const lockFilePath = path.join(targetPath, lockFile);
-        if (existsSync(lockFilePath)) {
-          try {
-            unlinkSync(lockFilePath);
-            consola.info(`Removed ${lockFile}`);
-          } catch (error) {
-           
-          }
-        }
-      }
-    });
-  }
+  
 
 
   public switchAndInstallDependencies(targetPath: string): void {
    
-    this.cleanupLockFiles(targetPath);
+
 
   
     switch (this.packageManager) {
