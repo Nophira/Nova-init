@@ -2,22 +2,8 @@ import { consola } from 'consola';
 import { intro, outro, text, select, confirm, multiselect, spinner } from '@clack/prompts';
 import { ProjectManager } from '../core/ProjectManager.js';
 import { NovaInitWriter } from '../core/nova-init-writer.js';
-import { getReactConfig } from '../installers/frameworks/frontend/react.js';
-import { getVueConfig } from '../installers/frameworks/frontend/vue.js';
-import { getAngularConfig } from '../installers/frameworks/frontend/angular.js';
-import { getExpressConfig } from '../installers/frameworks/backend/express.js';
-import { getNestJSConfig } from '../installers/frameworks/backend/nestjs.js';
-import { getFastifyConfig } from '../installers/frameworks/backend/fastify.js';
-import { getNextjsConfig } from '../installers/frameworks/frontend/nextjs.js';
-import { getNuxtjsConfig } from '../installers/frameworks/frontend/nuxtjs.js';
-import { getAstroConfig } from '../installers/frameworks/frontend/astro.js';
-import { getLitConfig } from '../installers/frameworks/frontend/lit.js';
-import { getPreactConfig } from '../installers/frameworks/frontend/preact.js';
-import { getQwikConfig } from '../installers/frameworks/frontend/qwik.js';
-import { getRemixConfig } from '../installers/frameworks/frontend/remix.js';
-import { getSolidConfig } from '../installers/frameworks/frontend/solid.js';
-import { getSvelteConfig } from '../installers/frameworks/frontend/svelte.js';
 import type { ProjectStructure, DatabaseSetup, FrontendSetup, BackendSetup, PackageManager, MonorepoTool } from '../types/index.js';
+import { FRAMEWORKS } from '../installers/frameworks/frameworks-installers.js';
 
 export async function setupPrompt(): Promise<void> {
     try {
@@ -169,15 +155,17 @@ async function promptFrontendSetup(packageManager: PackageManager, monorepo: Mon
         }))
     });
 
-    let buildTool: 'vite' | undefined = undefined;
+    //buildTool variable
+  let buildTool: 'vite' | 'standard' | undefined = undefined;
+
 
     // Additional prompt for Qwik starter
     if (framework === 'qwik') {
         const starter = await select({
-            message: 'Which Qwik starter do you want to use?',
+            message: 'Which Qwik setup do you want to use?',
             options: [
-                { value: 'vite', label: 'Vite-based Starter (recommended)' },
-                { value: 'standart', label: 'Standard Starter' }
+                { value: 'vite', label: 'Vite-based Setup (recommended)' },
+                { value: 'standard', label: 'Standard Setup' }
             ]
         });
         if (starter === 'vite') {
@@ -185,7 +173,7 @@ async function promptFrontendSetup(packageManager: PackageManager, monorepo: Mon
         }
     }
 
-    // Additional prompt for Vue starter
+   
     if (framework === 'vue') {
         const starter = await select({
             message: 'Which Vue starter do you want to use?',
@@ -199,13 +187,14 @@ async function promptFrontendSetup(packageManager: PackageManager, monorepo: Mon
     }
 
     if (framework === 'react') {
-        const useVite = await confirm({
-            message: 'Do you want to use Vite instead of Create React App?',
-            initialValue: true
+        const reactChoice = await select({
+            message: 'Do you want to use Vite ',
+            options: [
+                { value: 'vite', label: 'Vite-based Setup (recommended)' },
+                //{ value: 'standard', label: 'Standard Setup'}
+            ]
         });
-        if (useVite) {
-            buildTool = 'vite';
-        }
+         buildTool = reactChoice as 'vite' | 'standard';
     }
 
     const folderName = await text({
@@ -249,20 +238,24 @@ async function promptBackendSetup(packageManager: PackageManager, monorepo: Mono
         }))
     });
 
+
     const folderName = await text({
         message: 'What should the backend folder be called?',
         placeholder: 'backend',
         initialValue: 'backend'
     });
 
-    const backendPackageManager = await select({
-        message: 'Which package manager for the backend?',
-        options: [
-            { value: 'npm', label: 'npm' },
-            { value: 'pnpm', label: 'pnpm' },
-            { value: 'bun', label: 'Bun' }
-        ]
-    });
+    const packageManagerOptions = [
+    { value: 'npm', label: 'npm' },
+    { value: 'pnpm', label: 'pnpm' },
+    
+    ...(framework === 'nestjs' ? [] : [{ value: 'bun', label: 'Bun' }])
+  ];
+
+  const backendPackageManager = await select({
+    message: 'Which package manager for the backend?',
+    options: packageManagerOptions
+  });
 
     const useMicroservices = await confirm({
         message: 'Do you want to use a microservices architecture?',
@@ -328,20 +321,21 @@ async function promptDatabases(): Promise<DatabaseSetup[]> {
     })) as unknown as DatabaseSetup[];
 }
 
-function getSupportedFrontendFrameworkOptions(language: string) {
+/*function getSupportedFrontendFrameworkOptions(language: string) {
     const frameworks = [
-        ['react', getReactConfig()],
-        ['vue', getVueConfig()],
-        ['angular', getAngularConfig()],
-        ['nextjs', getNextjsConfig()],
-        ['nuxtjs', getNuxtjsConfig()],
-        ['astro', getAstroConfig()],
-        ['lit', getLitConfig()],
-        ['preact', getPreactConfig()],
-        ['qwik', getQwikConfig()],
-        // ['remix', getRemixConfig()], // Deaktiviert
-        ['solid', getSolidConfig()],
-        ['svelte', getSvelteConfig()],
+       ['react', getReactConfig()],
+       ['vue', getVueConfig()],
+       ['angular', getAngularConfig()],
+       ['nextjs', getNextjsConfig()],
+       ['nuxtjs', getNuxtjsConfig()],
+       ['astro', getAstroConfig()],
+       ['lit', getLitConfig()],
+       ['preact', getPreactConfig()],
+       ['qwik', getQwikConfig()],
+       //['remix', getRemixConfig()], // Deaktiviert
+       ['solid', getSolidConfig()],
+       ['svelte', getSvelteConfig()],
+      
     ]
         .filter(([key, config]) => key !== 'remix' && (config as any).supportedLanguages.includes(language as any))
         .map(([key, config]) => ({
@@ -365,4 +359,23 @@ function getSupportedBackendFrameworkOptions(language: string) {
         }));
 
     return frameworks;
+}*/
+
+function getSupportedFrontendFrameworkOptions(language: string) {
+    return Object.entries(FRAMEWORKS)
+        .filter(([_, config]) => config.type === 'frontend')
+        .filter(([_, config]) => (config.commands as any)[language])
+        .map(([key, config]) => ({
+            value: key,
+            label: `${config.name}${config.supportsVite ? ' (Vite supported)' : ''}`
+        }));
+}
+function getSupportedBackendFrameworkOptions(language: string) {
+    return Object.entries(FRAMEWORKS)
+        .filter(([_, config]) => config.type === 'backend')
+        .filter(([_, config]) => (config.commands as any)[language])
+        .map(([key, config]) => ({
+            value: key,
+            label: config.name
+        }));
 }
