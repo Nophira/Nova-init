@@ -5,69 +5,84 @@ on:
     branches:
       - main
 
-      
-
 jobs:
-    publish:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
-          with:
-            fetch-depth: 0
-        
-        - name: Setup Node.js
-          uses: actions/setup-node@v2
-          with:
-            node-version: '20'
-            registry-url: 'https://registry.npmjs.org'
-        
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      # ---------------------------
+      # 1. Repository auschecken
+      # ---------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Alle Tags/Commits holen, wichtig für git describe
 
+      # ---------------------------
+      # 2. Node.js vorbereiten
+      # ---------------------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
 
-        - name: Install dependencies
-          run: npm install
+      # ---------------------------
+      # 3. Root-Abhängigkeiten
+      # ---------------------------
+      - name: Install dependencies
+        run: npm install
 
+      # ---------------------------
+      # 4. Version prüfen
+      # ---------------------------
+      - name: Check the version
+        id: check
+        run: |
+          CURRENT_VERSION=$(jq -r .version package.json)
+          echo "Current version: $CURRENT_VERSION"
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "Latest tag: $LATEST_TAG"
 
-        - name: Check the version
-          id: check
-          run: |
-            CURRENT_VERSION=$(jq -r .version package.json)
-            echo "Current version: $CURRENT_VERSION"
-            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-            echo "Latest tag: $LATEST_TAG"
+          LATEST_VERSION=${LATEST_TAG#v}
 
-            LATEST_VERSION=${LATEST_TAG#v}
+          if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ]; then
+            echo "Version changed"
+            echo "version_changed=true" >> "$GITHUB_OUTPUT"
+            echo "new_version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+          else
+            echo "Version not changed"
+            echo "version_changed=false" >> "$GITHUB_OUTPUT"
+            echo "new_version=" >> "$GITHUB_OUTPUT"
+          fi
 
-            if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ]; 
-            then
-              echo "Version changed"
-              echo "version_changed=true" >> $GITHUB_OUTPUT
-              echo "new_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-            else
-              echo "Version not changed"
-              echo "version_changed=false" >> $GITHUB_OUTPUT
-            fi
+      # ---------------------------
+      # 5. Debug-Ausgabe (optional)
+      # ---------------------------
+      - name: Debug outputs
+        run: |
+          echo "version_changed=${{ steps.check.outputs.version_changed }}"
+          echo "new_version=${{ steps.check.outputs.new_version }}"
 
-        
-        - name: Build and Publish
-          if: steps.check.outputs.version_changed == 'true'
-          run: |
-                cd apps/nova-init
-                npm install
-                npm run build
-                npm publish --access public --no-git-checks
-          env:
-               NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # ---------------------------
+      # 6. Build & Publish (nur wenn Version neu)
+      # ---------------------------
+      - name: Build and Publish
+        if: steps.check.outputs.version_changed == 'true' && steps.check.outputs.new_version != ''
+        run: |
+          cd apps/nova-init
+          npm install
+          npm run build
+          npm publish --access public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-        - name: Tag release
-          if: steps.check.outputs.version_changed == 'true'
-          run: |
-            git config --local user.email "github-actions[bot]@users.noreply.github.com"
-            git config --local user.name "github-actions[bot]"
-            git tag -a "v${{ steps.check.outputs.new_version }}" -m "v${{ steps.check.outputs.new_version }}"
-            git push origin "v${{ steps.check.outputs.new_version }}"
-
-
-
-
-
-        
+      # ---------------------------
+      # 7. Tag setzen (nur wenn Version neu)
+      # ---------------------------
+      - name: Tag release
+        if: steps.check.outputs.version_changed == 'true' && steps.check.outputs.new_version != ''
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git tag -f "v${{ steps.check.outputs.new_version }}" -m "v${{ steps.check.outputs.new_version }}"
+          git push origin "v${{ steps.check.outputs.new_version }}" --force
