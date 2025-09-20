@@ -39,7 +39,7 @@ export type FrontendFramework =
   | 'lit';
 
 
-export type BackendFramework = 'express' | 'nestjs' | 'fastify';
+export type BackendFramework = 'express' | 'nestjs' | 'fastify' | 'hono';
 
 
 export type DatabaseType =

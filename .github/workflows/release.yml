@@ -1,0 +1,43 @@
+name: Create GitHub Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get tag info
+        id: vars
+        run: |
+          TAG_NAME=$(git describe --tags --exact-match)
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+
+          AUTHOR=$(git log -1 --pretty=format:'%an')
+          echo "author=$AUTHOR" >> "$GITHUB_OUTPUT"
+
+          CHANGELOG=$(git log -1 --pretty=format:'%s')
+          echo "changelog=$CHANGELOG" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.vars.outputs.tag_name }}
+          name: Release ${{ steps.vars.outputs.tag_name }}
+          body: |
+            **Release:** ${{ steps.vars.outputs.tag_name }}
+            
+            **Author:** ${{ steps.vars.outputs.author }}
+            
+            **Changes:**
+            ${{ steps.vars.outputs.changelog }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

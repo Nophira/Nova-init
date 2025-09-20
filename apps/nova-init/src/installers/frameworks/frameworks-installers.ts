@@ -261,7 +261,19 @@ svelte: {
         bun: 'npm init -y && bun add fastify && npm i -D typescript @types/node && npx tsc --init',
       },
     }
-  }
+  },
+  hono:{
+    name: 'Hono',
+    type: 'backend',
+    commands: {
+      typescript: {
+        npm: 'npm create hono@latest .',
+        pnpm: 'pnpm create hono@latest . ',
+        bun: 'bun create hono@latest . ',
+      }
+    }
+
+  },
 };
 
 // Install function
