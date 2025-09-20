@@ -112,7 +112,109 @@ const FRAMEWORKS: Record<string, FrameworkConfig> = {
   }
 },
 
+nuxtjs:{
+  name: 'Nuxt.js',
+  type: 'frontend',
+  supportsVite: false,
+  commands: {
+    typescript: {
+      npm: {standard:'npx nuxi@latest init . --template --packageManager npm -f --no-install'},
+      pnpm:{standard:'npx nuxi@latest init . --template --packageManager pnpm -f --no-install'},
+      bun: {standard:'bunx nuxi@latest init . --template --packageManager bun -f --no-install'},
+    }
+  }
+},
 
+preact:{
+    name: 'Preact',
+    type: 'frontend',
+    supportsVite: true,
+    commands: {
+      typescript: {
+        npm: { vite: 'npm create vite@latest . -- --template preact-ts' },
+        pnpm: { vite: 'pnpm create vite . --template preact-ts' },
+        bun: { vite: 'bun create vite . --template preact-ts' },
+      },
+      javascript: {
+        npm: { vite: 'npm create vite@latest . -- --template preact' },
+        pnpm: { vite: 'pnpm create vite . --template preact' },
+        bun: { vite: 'bun create vite . --template preact' },
+      },
+    }
+},
+qwik:{
+    name: 'Qwik',
+    type: 'frontend',
+    supportsVite: true,
+    commands: {
+      typescript: {
+        npm: { vite: 'npm create vite@latest . -- --template qwik-ts' },
+        pnpm: { vite: 'pnpm create vite . --template qwik-ts' },
+        bun: { vite: 'bun create vite . --template qwik-ts' },
+      },
+      javascript: {
+        npm: { vite: 'npm create vite@latest . -- --template qwik' },
+        pnpm: { vite: 'pnpm create vite . --template qwik' },
+        bun: { vite: 'bun create vite . --template qwik' },
+      },
+    }
+},
+/*
+remix:{
+    name: 'Remix',
+    type: 'frontend',
+    supportsVite: false,
+    commands: {
+      typescript: {
+        npm: { standard: 'npx create-remix@latest . --typescript --install --no-git' },
+        pnpm: { standard: 'npx create-remix@latest . --typescript --install --no-git' },
+        bun: { standard: 'bun create remix . --typescript --install --no-git' },
+      },
+      javascript: {
+        npm: { standard: 'npx create-remix@latest . --javascript --install --no-git' },
+        pnpm: { standard: 'npx create-remix@latest . --javascript --install --no-git' },
+        bun: { standard: 'bun create remix . --javascript --install --no-git' },
+      },
+    }
+},
+*/
+solid:{
+  name: 'Solid',
+  type: 'frontend',
+  supportsVite: true,
+  commands: {
+    typescript: {
+      npm: { vite: 'npm create vite@latest . -- --template solid-ts' },
+      pnpm: { vite: 'pnpm create vite . --template solid-ts' },
+      bun: { vite: 'bun create vite . --template solid-ts' },
+    },
+    javascript: {
+      npm: { vite: 'npm create vite@latest . -- --template solid' },
+      pnpm: { vite: 'pnpm create vite . --template solid' },
+      bun: { vite: 'bun create vite . --template solid' },
+    },
+  }
+},
+
+svelte: {
+    name: 'Svelte',
+    type: 'frontend',
+    supportsVite: true,
+    commands: {
+      typescript: {
+        npm: { vite: 'npm create vite@latest . -- --template svelte-ts' },
+        pnpm: { vite: 'pnpm create vite . --template svelte-ts' },
+        bun: { vite: 'bun create vite . --template svelte-ts' },
+      },
+      javascript: {
+        npm: { vite: 'npm create vite@latest . -- --template svelte' },
+        pnpm: { vite: 'pnpm create vite . --template svelte' },
+        bun: { vite: 'bun create vite . --template svelte' },
+      },
+    }
+  },
+
+  
   // Backend
   express: {
     name: 'Express',

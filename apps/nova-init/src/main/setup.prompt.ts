@@ -161,17 +161,12 @@ async function promptFrontendSetup(packageManager: PackageManager, monorepo: Mon
 
     // Additional prompt for Qwik starter
     if (framework === 'qwik') {
-        const starter = await select({
-            message: 'Which Qwik setup do you want to use?',
-            options: [
-                { value: 'vite', label: 'Vite-based Setup (recommended)' },
-                { value: 'standard', label: 'Standard Setup' }
-            ]
-        });
-        if (starter === 'vite') {
-            buildTool = 'vite';
-        }
+        buildTool = 'vite';
     }
+    if (framework === 'solid') {
+        buildTool = 'vite';
+    }
+
     if (framework === 'angular') {
       buildTool = 'standard';
      }
@@ -179,6 +174,9 @@ async function promptFrontendSetup(packageManager: PackageManager, monorepo: Mon
       buildTool = 'standard';
      }
      if (framework === 'nextjs') {
+      buildTool = 'standard';
+     }
+      if (framework === 'nuxtjs') {
       buildTool = 'standard';
      }
    
