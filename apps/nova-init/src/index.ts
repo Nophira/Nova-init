@@ -4,7 +4,6 @@ import consola from 'consola';
 import { Command } from 'commander';
 import { setupPrompt } from './main/setup.prompt.js';
 import { setupCommandLine } from './main/setup.commandline.js';
-import { TechstackManager } from './core/TechstackManager.js';
 import { NovaInitWriter } from './core/nova-init-writer.js';
 import * as path from 'path';
 import { createHelpCommand } from './main/help.js';
@@ -23,7 +22,7 @@ program.addCommand(createHelpCommand());
 function addHelpOption(command: Command) {
   command.addHelpText('after', `
   Examples:
-    create-nova-init ${command.name()} --help
+    nova-init ${command.name()} --help
 `);
 }
 

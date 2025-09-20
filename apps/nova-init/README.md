@@ -46,6 +46,7 @@ pnpm dlx nova-init
 - **Express.js** - Fast, unopinionated, minimalist web framework
 - **NestJS** - Progressive Node.js framework
 - **Fastify** - Fast and low overhead web framework
+- **Hono** - Fast Web framework built on Web Standards
 
 ### 🗄 **Databases**
 - **PostgreSQL** - Advanced open source relational database

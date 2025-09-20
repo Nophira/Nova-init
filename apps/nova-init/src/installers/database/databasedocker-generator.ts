@@ -1,5 +1,4 @@
 import * as fs from 'fs/promises';
-import path from 'path';
 import consola from 'consola';
 import type { DatabaseSetup } from '../../types/index.js';
 

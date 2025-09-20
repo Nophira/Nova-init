@@ -1,6 +1,5 @@
 import { execSync } from 'child_process';
 import { unlinkSync, existsSync } from 'fs';
-import path from 'path';
 import consola from 'consola';
 import type { PackageManager } from '../types/index.js';
 

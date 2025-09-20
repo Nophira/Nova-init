@@ -1,5 +1,3 @@
-import fs from 'fs-extra';
-import path from 'path';
 import type { FrontendSetup, BackendSetup } from '../types/index.js';
 import { installFramework } from '../installers/frameworks/frameworks-installers.js';
 
