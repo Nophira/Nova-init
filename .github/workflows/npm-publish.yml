@@ -2,86 +2,68 @@ name: Publish NPM package
 
 on:
   push:
-    branches: [ main ]
-    tags: [ 'v*' ]   # <-- auch Tag-Pushes triggern
-
-permissions:
-  contents: write    # <-- damit wir Tags und Releases erstellen dürfen
+    branches:
+      - main
+    tags:
+      - 'v*' # falls du direkt Tags pushst
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-
     steps:
-      # 1. Repository auschecken (alle Tags/Commits)
+      # 1️⃣ Checkout (inkl. Tags)
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # 2. Node.js vorbereiten
+      # 2️⃣ Node.js Setup
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
-      # 3. Root-Abhängigkeiten
+      # 3️⃣ Dependencies
       - name: Install dependencies
         run: npm install
 
-      # 4. Version prüfen
-      - name: Check version
-        id: check
+      # 4️⃣ Determine Tag
+      - name: Determine tag
+        id: vars
         run: |
-          CURRENT_VERSION=$(jq -r .version package.json)
-          echo "Current version: $CURRENT_VERSION"
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          echo "Latest tag: $LATEST_TAG"
-
-          LATEST_VERSION=${LATEST_TAG#v}
-
-          if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ]; then
-            echo "version_changed=true" >> "$GITHUB_OUTPUT"
-            echo "new_version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+          # Prüfen, ob GITHUB_REF ein Tag ist
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            TAG_NAME=${GITHUB_REF#refs/tags/}
           else
-            echo "version_changed=false" >> "$GITHUB_OUTPUT"
+            # Falls Commit auf main, der einen Tag enthält, den letzten Tag verwenden
+            TAG_NAME=$(git describe --tags --exact-match || echo "")
           fi
 
-      # 5. Debug
-      - name: Debug
-        run: |
-          echo "version_changed=${{ steps.check.outputs.version_changed }}"
-          echo "new_version=${{ steps.check.outputs.new_version }}"
+          if [ -z "$TAG_NAME" ]; then
+            echo "No tag found for this commit. Skipping publish."
+            exit 0
+          fi
 
-      # 6. Build & Publish
+          echo "Using tag: $TAG_NAME"
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+
+      # 5️⃣ Build & Publish
       - name: Build and Publish
-        if: steps.check.outputs.version_changed == 'true'
         run: |
           cd apps/nova-init
-          npm ci
+          npm install
           npm run build
           npm publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # 7. Tag setzen
-      - name: Tag release
-        if: steps.check.outputs.version_changed == 'true'
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git tag -a "v${{ steps.check.outputs.new_version }}" -m "v${{ steps.check.outputs.new_version }}"
-          git push origin "v${{ steps.check.outputs.new_version }}"
-
-      # 8. GitHub Release erstellen
+      # 6️⃣ Create GitHub Release
       - name: Create GitHub Release
-        if: steps.check.outputs.version_changed == 'true'
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.vars.outputs.tag_name }}
+          name: Release ${{ steps.vars.outputs.tag_name }}
+          body: "Automatisches Release für Version ${{ steps.vars.outputs.tag_name }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ steps.check.outputs.new_version }}
-          release_name: v${{ steps.check.outputs.new_version }}
-          body: |
-            Release v${{ steps.check.outputs.new_version }}
