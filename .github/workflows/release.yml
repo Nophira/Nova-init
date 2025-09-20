@@ -34,10 +34,14 @@ jobs:
           name: Release ${{ steps.vars.outputs.tag_name }}
           body: |
             **Release:** ${{ steps.vars.outputs.tag_name }}
-            
             **Author:** ${{ steps.vars.outputs.author }}
-            
             **Changes:**
             ${{ steps.vars.outputs.changelog }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify Discord
+        run: |
+          curl -H "Content-Type: application/json" \
+               -d "{\"content\": \"🚀 New release: **${{ steps.vars.outputs.tag_name }}** by ${{ steps.vars.outputs.author }} – [Changelog](${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ steps.vars.outputs.tag_name }})\"}" \
+               ${{ secrets.DISCORD_WEBHOOK }}
