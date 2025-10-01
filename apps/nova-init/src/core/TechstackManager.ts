@@ -30,15 +30,6 @@ export class TechstackManager {
       packageManager: 'npm',
       monorepo: 'none'
     },
-    MEAN: {
-      name: 'MEAN Stack',
-      description: 'MongoDB, Express, Angular, Node.js - Full-stack TypeScript',
-      frontend: 'angular',
-      backend: 'express',
-      databases: ['mongodb'],
-      packageManager: 'npm',
-      monorepo: 'none'
-    },
     MEAN_TS: {
       name: 'MEAN Stack (TypeScript)',
       description: 'MongoDB, Express, Angular, Node.js - Full-stack TypeScript',

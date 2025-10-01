@@ -51,7 +51,7 @@ export async function setupPrompt(): Promise<void> {
         const writer = new NovaInitWriter(projectConfig.projectName);
         await writer.writeConfig(projectConfig);
 
-        outro(`Project "${projectName}" was created successfully!\n\nProject folder: ${projectName}\nNext steps:\n 1. cd ${projectName}\n 2. npm run dev (or appropriate command)\n\nTip: Use 'npx create-nova-init info' to display project information`);
+        outro(`Project "${projectName}" was created successfully!\n\nProject folder: ${projectName}\nNext steps:\n 1. cd ${projectName}\n 2. npm run dev (or appropriate command)\n\nTip: Use 'npx nova-init info' to display project information`);
     } catch (error) {
         consola.error('Interactive setup failed:', error);
         throw error;
@@ -64,11 +64,10 @@ async function promptPredefinedSetup(projectName: string): Promise<ProjectStruct
         options: [
             { value: 'MERN', label: 'MERN Stack (MongoDB + Express + React + Node.js)' },
             { value: 'MERN_TS', label: 'MERN Stack + TypeScript' },
-            { value: 'MEAN', label: 'MEAN Stack (MongoDB + Express + Angular + Node.js)' },
-            { value: 'MEAN_TS', label: 'MEAN Stack + TypeScript' },
+            { value: 'MEAN_TS', label: 'MEAN Stack (MongoDB + Express + Angular + Node.js)' },
             { value: 'MEVN', label: 'MEVN Stack (MongoDB + Express + Vue + Node.js)' },
             { value: 'MEVN_TS', label: 'MEVN Stack + TypeScript' },
-            { value: 'FULLSTACK_TS', label: 'Fullstack TypeScript (React + Express + PostgreSQL)' }
+            { value: 'FULLSTACK_TS', label: 'Fullstack TypeScript (Nextjs + Nestjs + PostgreSQL)' }
         ]
     });
     if (!techStack) {
