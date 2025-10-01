@@ -302,8 +302,12 @@ export async function installFramework(
       // Platzhalter in Angular ersetzen
       command = rawCmd.replace('my-app', projectName);
     } else {
-      const tool = buildTool ?? 'vite';
-      command = (config.commands as FrontendCommandMap)[language]?.[packageManager]?.[tool];
+      let tool = buildTool;
+if (!tool) {
+  tool = config.supportsVite ? 'vite' : 'standard';
+}
+command = (config.commands as FrontendCommandMap)[language]?.[packageManager]?.[tool];
+
       if (!command) {
         throw new FrameworkInstallationError(framework, {
           reason: `No command defined for ${language} + ${packageManager} + ${tool}`

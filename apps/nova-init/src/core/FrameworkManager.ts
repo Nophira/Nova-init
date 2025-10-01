@@ -11,9 +11,7 @@ export class FrameworkManager {
   ): Promise<void> {
     const { framework, language, packageManager, buildTool } = frontend;
 
-   
 
-    // Neue vereinfachte Variante
     return installFramework(framework, targetPath, language, packageManager, buildTool);
   }
 
