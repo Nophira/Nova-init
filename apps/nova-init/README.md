@@ -21,7 +21,6 @@ pnpm dlx nova-init
 - **MERN** - MongoDB, Express.js, React, Node.js (JavaScript)
 - **MERN_TS** - MongoDB, Express.js, React, Node.js (TypeScript)
 - **MEAN** - MongoDB, Express.js, Angular, Node.js (TypeScript)
-- **MEAN_TS** - MongoDB, Express.js, Angular, Node.js (TypeScript)
 - **MEVN** - MongoDB, Express.js, Vue.js, Node.js (JavaScript)
 - **MEVN_TS** - MongoDB, Express.js, Vue.js, Node.js (TypeScript)
 - **FULLSTACK_TS** - Next.js, NestJS, PostgreSQL, TypeScript
@@ -74,10 +73,7 @@ pnpm dlx nova-init
 
 ### **Available Commands**
 
-- **`setup-cli`** - Command-line setup mode
-- **`config`** - Manage nova-init.json configuration
-- **`info`** - Show project information
-- **`help`** - Show detailed help
+
 
 ## 📄 **License**
 
