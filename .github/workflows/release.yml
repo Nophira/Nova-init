@@ -1,28 +1,62 @@
-name: Publish Package
+name: Release and Publish (OIDC)
 
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*'  
 
 permissions:
-  id-token: write  
-  contents: read
+  contents: write      
+  id-token: write      
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
+    steps:
+      # 1️⃣ Checkout
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Tags & Historie nötig
+
+      # 2️⃣ Extract version from tag
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      # 3️⃣ Setup Node + Registry (OIDC)
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
           registry-url: 'https://registry.npmjs.org'
 
-      # Ensure npm 11.5.1 or later is installed
-      - name: Update npm
-        run: npm install -g npm@latest
-      - run: npm install
-      - run: npm run build 
-      - run: npm publish
+      # 4️⃣ Setup pnpm
+      - uses: pnpm/action-setup@v4
+
+      # 5️⃣ Install dependencies
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # 6️⃣ Build nova-init (direkter Build ohne Turborepo)
+      - name: Build nova-init
+        run: cd apps/nova-init && pnpm run build
+
+      # 7️⃣ Create GitHub Release
+      - name: Create GitHub Release
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            pnpm dlx changelogithub
+          else
+            echo "Release $TAG already exists, skipping"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 8️⃣ Publish to npm (OIDC)
+      - name: Publish to npm
+        run: |
+          cd apps/nova-init
+          pnpm publish --provenance --access public --no-git-checks
