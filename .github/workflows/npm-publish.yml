@@ -53,8 +53,7 @@ jobs:
         run: npm install
 
       - name: Build nova-init
-        working-directory: ./apps/nova-init
-        run: npm run build
+        run: cd apps/nova-init && npm run build
 
 
       - name: Create GitHub Release
