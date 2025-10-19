@@ -52,8 +52,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build CLI
-        run: npm run build --workspace=apps/nova-init
+      - name: Build nova-init
+        working-directory: ./apps/nova-init
+        run: npm run build
+
 
       - name: Create GitHub Release
         if: steps.version.outputs.version != ''
