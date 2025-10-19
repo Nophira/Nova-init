@@ -1,4 +1,4 @@
-# 🚀 Nova-Init
+#  Nova-init
 
 **A modern CLI tool for scaffolding your next project**
 
