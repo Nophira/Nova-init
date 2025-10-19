@@ -50,7 +50,7 @@ jobs:
         run: npm config set provenance true
 
       - name: Install dependencies
-        run: npm install
+        run: npm install && npm install -g tsdown
 
       - name: Build nova-init
         run: cd apps/nova-init && npm run build
