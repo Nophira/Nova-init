@@ -18,7 +18,8 @@
     "directory": "apps/nova-init"
   },
  "publishConfig": {
-    "provenance": false
+    "provenance": false,
+    "access": "public"
   },
   "keywords": [
     "nova-init",
