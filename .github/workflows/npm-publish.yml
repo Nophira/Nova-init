@@ -47,13 +47,13 @@ jobs:
           always-auth: true
 
       - name: Enable npm provenance
-        run: npm config set provenance true
+        run: pnpm config set provenance true
 
       - name: Install dependencies
-        run: npm install 
+        run: pnpm install 
 
       - name: Build nova-init
-        run: cd apps/nova-init && npm run build
+        run: cd apps/nova-init && pnpm run build
 
 
       - name: Create GitHub Release
@@ -61,7 +61,7 @@ jobs:
         run: |
           TAG="v${{ steps.version.outputs.version }}"
           if ! gh release view "$TAG" >/dev/null 2>&1; then
-            npx changelogithub
+            pnpm dlx changelogithub
           else
             echo "Release $TAG already exists, skipping"
           fi
@@ -70,5 +70,4 @@ jobs:
 
       - name: Publish to npm (OIDC)
         if: steps.version.outputs.version != ''
-        working-directory: ./apps/nova-init
-        run: npm publish --provenance --access public
+        run: cd apps/nova-init && pnpm publish --access public

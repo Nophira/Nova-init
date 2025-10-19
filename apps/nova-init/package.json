@@ -1,6 +1,6 @@
 {
   "name": "nova-init",
-  "version": "v2.1.18",
+  "version": "v2.1.19",
   "author": "Nophira",
   "description": "A modern CLI tool for scaffolding your next project – choose from a variety of frameworks and customizable addons to tailor your architecture.",
   "license": "MIT",
@@ -18,8 +18,7 @@
     "directory": "apps/nova-init"
   },
   "publishConfig": {
-    "registry": "https://registry.npmjs.org",
-    "directory": "./dist"
+    "access": "public"
   },
   "keywords": [
     "nova-init",
@@ -61,7 +60,7 @@
   ],
   "scripts": {
     "dev": "ts-node src/index.ts",
-    "build": "npx tsdown --format esm",
+    "build": "tsdown --publint",
     "start": "node dist/index.js"
   },
   "dependencies": {
@@ -80,6 +79,7 @@
     "@nrwl/workspace": "^19.8.4",
     "@types/node": "^22.18.1",
     "eslint": "^9.32.0",
+    "publint": "^0.3.14",
     "tsdown": "^0.15.7",
     "typescript": "5.8.2"
   }
