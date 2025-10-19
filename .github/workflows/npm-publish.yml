@@ -8,7 +8,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  id-token: write   
+  id-token: write
 
 jobs:
   release:
@@ -46,15 +46,21 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           always-auth: true
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
       - name: Enable npm provenance
         run: pnpm config set provenance true
 
       - name: Install dependencies
-        run: pnpm install 
+        working-directory: ./apps/nova-init
+        run: pnpm install
 
       - name: Build nova-init
-        run: cd apps/nova-init && pnpm run build
-
+        working-directory: ./apps/nova-init
+        run: pnpm run build
 
       - name: Create GitHub Release
         if: steps.version.outputs.version != ''
@@ -70,4 +76,5 @@ jobs:
 
       - name: Publish to npm (OIDC)
         if: steps.version.outputs.version != ''
-        run: cd apps/nova-init && pnpm publish --access public
+        working-directory: ./apps/nova-init
+        run: pnpm publish --access public
