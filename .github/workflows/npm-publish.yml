@@ -1,24 +1,46 @@
-name: Publish Package
+name: Release and Publish (OIDC)
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
 
 permissions:
-  id-token: write
-  contents: read
+  contents: write
+  pull-requests: write
+  id-token: write   
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./apps/nova-init  
+    if: startsWith(github.event.head_commit.message, 'chore(release):')
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - name: Extract version from commit message
+        id: version
+        run: |
+          VERSION=$(echo "${{ github.event.head_commit.message }}" | sed -E 's/^chore\(release\): //')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create and push tag
+        if: steps.version.outputs.version != ''
+        run: |
+          git config --local user.email "nophira.it@gmail.com"
+          git config --local user.name "nophira"
+          TAG="v${{ steps.version.outputs.version }}"
+          if ! git rev-parse "$TAG" >/dev/null 2>&1; then
+            git tag -a "$TAG" -m "Release $TAG"
+            git push origin "$TAG"
+          else
+            echo "Tag $TAG already exists, skipping"
+          fi
+
+      - name: Setup Node (OIDC)
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
@@ -27,11 +49,25 @@ jobs:
       - name: Enable npm provenance
         run: npm config set provenance true
 
-      - name: Install deps
-        run: npm install
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Build package
-        run: npm run build
+      - name: Build CLI
+        run: npm run build --workspace=apps/nova-init
+
+      - name: Create GitHub Release
+        if: steps.version.outputs.version != ''
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            npx changelogithub
+          else
+            echo "Release $TAG already exists, skipping"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to npm (OIDC)
-        run: npm publish 
+        if: steps.version.outputs.version != ''
+        working-directory: ./apps/nova-init
+        run: npm publish --provenance --access public
