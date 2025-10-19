@@ -6,24 +6,23 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
   id-token: write
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    if: startsWith(github.event.head_commit.message, 'chore(release):')
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Extract version
+      - name: Extract version from package.json
         id: version
         run: |
-          VERSION=$(echo "${{ github.event.head_commit.message }}" | sed -E 's/^chore\(release\): //')
+          VERSION=$(jq -r '.version' apps/nova-init/package.json)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Create and push tag
@@ -45,9 +44,11 @@ jobs:
 
       - uses: pnpm/action-setup@v4
 
-      - run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - run: cd apps/nova-init && pnpm run build
+      - name: Build nova-init
+        run: cd apps/nova-init && pnpm run build
 
       - name: Create GitHub Release
         if: steps.version.outputs.version != ''
@@ -62,7 +63,5 @@ jobs:
       - name: Publish to npm (OIDC)
         if: steps.version.outputs.version != ''
         run: |
-             cd apps/nova-init
-             pnpm publish --provenance --access public --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          cd apps/nova-init
+          pnpm publish --provenance --access public --no-git-checks
