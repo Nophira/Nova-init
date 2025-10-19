@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+
 import consola from 'consola';
 import { Command } from 'commander';
 import { setupPrompt } from "./main/setup.prompt.js";
