@@ -1,13 +1,13 @@
 {
   "name": "nova-init",
-  "version": "v2.1.6",
+  "version": "v2.1.7",
   "author": "Nophira",
   "description": "A modern CLI tool for scaffolding your next project – choose from a variety of frameworks and customizable addons to tailor your architecture.",
   "license": "MIT",
-  "main": "dist/src/index.js",
+  "main": "dist/index.js",
   "type": "module",
   "bin": {
-    "nova-init": "./dist/src/index.js"
+    "nova-init": "./dist/index.js"
   },
   "files": [
     "dist/**"
@@ -58,8 +58,8 @@
   ],
   "scripts": {
     "dev": "ts-node src/index.ts",
-    "build": "tsc",
-    "start": "node dist/src/index.js"
+    "build": "tsdown --watch --format esm",
+    "start": "node dist/index.js"
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
@@ -77,8 +77,7 @@
     "@nrwl/workspace": "^19.8.4",
     "@types/node": "^22.18.1",
     "eslint": "^9.32.0",
-    "ts-node": "^10.9.2",
-    "ts-node-dev": "^2.0.0",
+    "tsdown": "^0.15.7",
     "typescript": "5.8.2"
   }
 }

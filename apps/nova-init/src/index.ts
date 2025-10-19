@@ -1,20 +1,20 @@
 #!/usr/bin/env node
-
 import consola from 'consola';
 import { Command } from 'commander';
-import { setupPrompt } from './main/setup.prompt.js';
+import { setupPrompt } from "./main/setup.prompt.js";
 import { setupCommandLine } from './main/setup.commandline.js';
 import { NovaInitWriter } from './core/nova-init-writer.js';
+import { showHelp } from './main/help.js';
+
 import * as path from 'path';
-
-
-
 
 const program = new Command();
 
 function normalize(val: string) {
   return val.replace(/^=/, ''); 
 }
+
+
 program
   .name('nova-init')
   .description('A modern CLI tool for scaffolding your next project')
@@ -34,20 +34,7 @@ program
   .option('--microservices', 'Enable microservices architecture')
   .option('--techstack <stack>', 'Predefined tech stack: MERN, MERN_TS, MEAN, MEVN, MEVN_TS, FULLSTACK_TS',normalize)
   .option('-g, --git', 'Initialize git repository')
-  .action(async (options) => {
-  try {
- 
-    if (options.projectName) {
-      await setupCommandLine(options);
-    } else {
-
-      await setupPrompt();
-    }
-  } catch (error) {
-    consola.error('Setup failed:', error);
-    process.exit(1);
-  }
-});
+  
 
 
 
@@ -157,43 +144,31 @@ const configCommand = program
     }
   });
 
-  // General flags helper
-program
-  .helpOption(false) 
-  .option('-h, --help', 'Show all available flags for nova-init and config commands')
-  .action(() => {
-    const opts = program.opts();
-    if (opts.help) {
-      console.log(`
-🚀 **nova-init CLI Flags**
+ 
 
-General project setup:
-  -n, --project-name <name>          Project name (required)
-  -t, --setup-type <type>            Setup type: custom or predefined (default: custom)
-  -f, --frontend <framework>         Frontend framework (default: react)
-  -b, --backend <framework>          Backend framework (default: express)
-  -d, --databases <dbs>              Comma-separated list of databases (default: none)
-  -m, --monorepo <tool>              Monorepo tool: none, lerna, nx, turborepo (default: none)
-  -p, --package-manager <pm>         Package manager: npm, pnpm, bun (default: npm)
-  --frontend-package-manager <pm>    Frontend package manager
-  --backend-package-manager <pm>     Backend package manager
-  --frontend-folder <folder>         Frontend folder name
-  --backend-folder <folder>          Backend folder name
-  --vite                             Use Vite for React projects
-  --microservices                    Enable microservices architecture
-  --techstack <stack>                Predefined tech stack
-  -g, --git                          Initialize git repository
 
-Configuration commands:
-  nova-init config -p <path> [--info|--show|--validate|--backup|--restore <backup-path>]
-      `);
-      process.exit(0);
+
+program.action(async (options) => {
+ 
+ try {
+    if (options.projectName) {
+      await setupCommandLine(options);
+    } else if(options.help) {
+       showHelp();
+    } else {
+      await setupPrompt();
     }
-  });
+  } catch (error) {
+    consola.error('Setup failed:', error);
+    process.exit(1);
+  }
+});
+
+
+await program.parseAsync(process.argv);
 
 
 
-program.parse(process.argv);
 
 
 

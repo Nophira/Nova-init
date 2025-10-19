@@ -79,47 +79,75 @@ export class ProjectManager {
     return projectPath;
   }
 
-  private async createProjectStructure(projectPath: string, config: ProjectStructure): Promise<void> {
-    console.log('📁 Creating project structure...');
+private async createProjectStructure(projectPath: string, config: ProjectStructure): Promise<void> {
+  console.log('📁 Creating project structure...');
 
-    const basePath = config.monorepo !== 'none' ? path.join(projectPath, 'apps') : projectPath;
+  const basePath = config.monorepo !== 'none' ? path.join(projectPath, 'apps') : projectPath;
 
-
-    if (config.frontend) {
-      const frontendPath = path.join(basePath, config.frontend.folderName || 'frontend');
-      await fs.ensureDir(frontendPath);
-      console.log(`  📁 Frontend folder: ${frontendPath}`);
-    }
-
-
-    if (config.backend) {
-      if (config.backend.useMicroservices && config.backend.microserviceNames) {
- 
-        const servicesPath = path.join(basePath, 'services');
-        await fs.ensureDir(servicesPath);
-
-        for (const serviceName of config.backend.microserviceNames) {
-          const servicePath = path.join(servicesPath, serviceName);
-          await fs.ensureDir(servicePath);
-          console.log(`  📁 Microservice: ${servicePath}`);
-        }
-      } else {
-      
-        const backendPath = path.join(basePath, config.backend.folderName || 'backend');
-        await fs.ensureDir(backendPath);
-        console.log(`  📁 Backend folder: ${backendPath}`);
-      }
-    }
-
- 
-    if (config.databases.length > 0) {
-      const dbPath = path.join(projectPath, 'DB');
-      await fs.ensureDir(dbPath);
-      console.log(`  📁 Database folder: ${dbPath}`);
-    }
-
-
+  // Frontend
+  if (config.frontend) {
+    const frontendPath = path.join(basePath, config.frontend.folderName || 'frontend');
+    await fs.ensureDir(frontendPath);
+    console.log(`  📁 Frontend folder: ${frontendPath}`);
   }
+
+  // Backend
+  if (config.backend) {
+    const backendPath = path.join(basePath, config.backend.folderName || 'backend');
+    await fs.ensureDir(backendPath);
+    console.log(`  📁 Backend folder: ${backendPath}`);
+
+    if (config.backend.framework === 'express') {
+      // Standard Express-Ordnerstruktur
+      const dirs = ['controllers', 'routes', 'models', 'services', 'middlewares'];
+      for (const dir of dirs) {
+        await fs.ensureDir(path.join(backendPath, dir));
+      }
+
+      const ext = config.backend.language === 'typescript' ? 'ts' : 'js';
+
+      // server Datei
+      const serverFile = path.join(backendPath, `server.${ext}`);
+      if (!await fs.pathExists(serverFile)) {
+        await fs.writeFile(serverFile, `
+import express from 'express';
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get('/', (req, res) => res.send('Hello World'));
+
+app.listen(PORT, () => console.log(\`Server running on port \${PORT}\`));
+        `.trim());
+      }
+
+      if (ext === 'js') {
+        // Für JS, import/export zu require/exports anpassen
+        await fs.writeFile(serverFile, `
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get('/', (req, res) => res.send('Hello World'));
+
+app.listen(PORT, () => console.log('Server running on port ' + PORT));
+        `.trim());
+      }
+
+      
+
+      console.log('✅ Express backend structure created with basic server');
+    }
+  }
+
+  // Datenbanken
+  if (config.databases.length > 0) {
+    const dbPath = path.join(projectPath, 'DB');
+    await fs.ensureDir(dbPath);
+    console.log(`  📁 Database folder: ${dbPath}`);
+  }
+}
+
+
 
   private async installFrameworks(projectPath: string, config: ProjectStructure): Promise<void> {
     console.log('🔧 Installing frameworks...');
