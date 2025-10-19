@@ -3,53 +3,27 @@ name: Publish Package
 on:
   push:
     tags:
-      - 'v*'  
+      - 'v*'
 
 permissions:
-  contents: write      
-  id-token: write      
+  id-token: write  # Required for OIDC
+  contents: read
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-
     steps:
-
       - uses: actions/checkout@v4
-    
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Extract version from tag
-        id: version
-        run: |
-          VERSION="${GITHUB_REF#refs/tags/}"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      # 5️⃣ Install dependencies
-      - name: Install dependencies
+      # Ensure npm 11.5.1 or later is installed
+      - name: Update npm
         run: npm install -g npm@latest
       - run: npm ci
-
-      # 6️⃣ Build nova-init
-      - name: Build nova-init
-        run: cd apps/nova-init && npm run build
-
-      # 7️⃣ Create GitHub Release
-      - name: Create GitHub Release
-        run: |
-          TAG="v${{ steps.version.outputs.version }}"
-          if ! gh release view "$TAG" >/dev/null 2>&1; then
-            pnpm dlx changelogithub
-          else
-            echo "Release $TAG already exists, skipping"
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # 8️⃣ Publish to npm (OIDC)
-      - name: Publish to npm
-        run: cd apps/nova-init && npm publish 
-        
+      - run: npm run build --if-present
+      - run: npm test
+      - run: npm publish
