@@ -6,22 +6,32 @@ on:
       - 'v*'
 
 permissions:
-  id-token: write 
+  id-token: write
   contents: read
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./apps/nova-init  
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
           registry-url: 'https://registry.npmjs.org'
+          always-auth: true
 
-      
-      - name: Update npm
-        run: npm install -g npm@latest
-      - run: npm run build 
-      - run: npm publish
+      - name: Enable npm provenance
+        run: npm config set provenance true
+
+      - name: Install deps
+        run: npm install
+
+      - name: Build package
+        run: npm run build
+
+      - name: Publish to npm (OIDC)
+        run: npm publish 
