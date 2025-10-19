@@ -1,48 +1,41 @@
-name: Release and Publish (OIDC)
+name: Publish Package
 
 on:
   push:
     tags:
-      - 'v*'  # Trigger bei Versionstags wie v2.1.28
+      - 'v*'  
 
 permissions:
-  contents: write      # Für Tag-Push & GitHub Release
-  id-token: write      # Für OIDC Authentifizierung
+  contents: write      
+  id-token: write      
 
 jobs:
-  release:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Tags und Historie benötigen
 
-      # 2️⃣ Extract version from tag
+      - uses: actions/checkout@v4
+    
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
       - name: Extract version from tag
         id: version
         run: |
           VERSION="${GITHUB_REF#refs/tags/}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      # 3️⃣ Setup Node + Registry (OIDC)
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          registry-url: 'https://registry.npmjs.org'
-          always-auth: true
-
-      # 4️⃣ Setup pnpm
-      - uses: pnpm/action-setup@v4
-
       # 5️⃣ Install dependencies
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install -g npm@latest
+      - run: npm ci
 
       # 6️⃣ Build nova-init
       - name: Build nova-init
-        run: cd apps/nova-init && pnpm run build
+        run: cd apps/nova-init && npm run build
 
       # 7️⃣ Create GitHub Release
       - name: Create GitHub Release
@@ -58,6 +51,5 @@ jobs:
 
       # 8️⃣ Publish to npm (OIDC)
       - name: Publish to npm
-        run: |
-          cd apps/nova-init
-          pnpm publish --access public --no-git-checks
+        run: cd apps/nova-init && npm publish 
+        

@@ -1,6 +1,6 @@
 {
   "name": "nova-init",
-  "version": "v2.1.29",
+  "version": "v2.1.30",
   "author": "Nophira",
   "description": "A modern CLI tool for scaffolding your next project – choose from a variety of frameworks and customizable addons to tailor your architecture.",
   "license": "MIT",
@@ -17,9 +17,8 @@
     "url": "git+https://github.com/Nophira/Nova-init.git",
     "directory": "apps/nova-init"
   },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org",
-    "access": "public"
+ "publishConfig": {
+    "provenance": false
   },
   "keywords": [
     "nova-init",
