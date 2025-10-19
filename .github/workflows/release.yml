@@ -6,9 +6,9 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
   pull-requests: write
-  id-token: write   # notwendig für OIDC
+  id-token: write
 
 jobs:
   release:
@@ -16,12 +16,11 @@ jobs:
     if: startsWith(github.event.head_commit.message, 'chore(release):')
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Extract version from commit message
+      - name: Extract version
         id: version
         run: |
           VERSION=$(echo "${{ github.event.head_commit.message }}" | sed -E 's/^chore\(release\): //')
@@ -36,26 +35,19 @@ jobs:
           if ! git rev-parse "$TAG" >/dev/null 2>&1; then
             git tag -a "$TAG" -m "Release $TAG"
             git push origin "$TAG"
-          else
-            echo "Tag $TAG already exists, skipping"
           fi
 
-      - name: Setup Node (with OIDC for npm)
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
-  
+          always-auth: true
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        
+      - uses: pnpm/action-setup@v4
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
 
-      - name: Build nova-init
-        run: cd apps/nova-init && pnpm run build
+      - run: cd apps/nova-init && pnpm run build
 
       - name: Create GitHub Release
         if: steps.version.outputs.version != ''
@@ -63,15 +55,14 @@ jobs:
           TAG="v${{ steps.version.outputs.version }}"
           if ! gh release view "$TAG" >/dev/null 2>&1; then
             pnpm dlx changelogithub
-          else
-            echo "Release $TAG already exists, skipping"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish to npm (using OIDC)
+      - name: Publish to npm (OIDC)
         if: steps.version.outputs.version != ''
         run: |
-          cd apps/nova-init
-          pnpm publish --provenance --access public
-       
+             cd apps/nova-init
+             pnpm publish --provenance --access public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
