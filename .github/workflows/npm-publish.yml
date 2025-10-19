@@ -8,12 +8,13 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  id-token: write
+  id-token: write   # notwendig für OIDC
 
 jobs:
   release:
     runs-on: ubuntu-latest
     if: startsWith(github.event.head_commit.message, 'chore(release):')
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -29,8 +30,8 @@ jobs:
       - name: Create and push tag
         if: steps.version.outputs.version != ''
         run: |
-          git config --local user.email "nophira.it@gmail.com"
-          git config --local user.name "nophira"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           TAG="v${{ steps.version.outputs.version }}"
           if ! git rev-parse "$TAG" >/dev/null 2>&1; then
             git tag -a "$TAG" -m "Release $TAG"
@@ -39,7 +40,7 @@ jobs:
             echo "Tag $TAG already exists, skipping"
           fi
 
-      - name: Setup Node (OIDC)
+      - name: Setup Node (with OIDC for npm)
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -47,20 +48,16 @@ jobs:
           always-auth: true
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
           version: 9
-
-      - name: Enable npm provenance
-        run: pnpm config set provenance true
+          run_install: false
 
       - name: Install dependencies
-        working-directory: ./apps/nova-init
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build nova-init
-        working-directory: ./apps/nova-init
-        run: pnpm run build
+        run: cd apps/nova-init && pnpm run build
 
       - name: Create GitHub Release
         if: steps.version.outputs.version != ''
@@ -74,7 +71,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish to npm (OIDC)
+      - name: Publish to npm (using OIDC)
         if: steps.version.outputs.version != ''
-        working-directory: ./apps/nova-init
-        run: pnpm publish --access public
+        run: |
+          cd apps/nova-init
+          pnpm publish --provenance --access public
