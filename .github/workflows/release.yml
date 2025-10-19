@@ -30,7 +30,7 @@ jobs:
         if: steps.version.outputs.version != ''
         run: |
           git config --local user.email "nophira.it@gmail.com"
-          git config --local user.name "Nophira"
+          git config --local user.name "Nophira-admin"
           TAG="v${{ steps.version.outputs.version }}"
           if ! git rev-parse "$TAG" >/dev/null 2>&1; then
             git tag -a "$TAG" -m "Release $TAG"
