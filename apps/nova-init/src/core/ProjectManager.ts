@@ -106,7 +106,7 @@ private async createProjectStructure(projectPath: string, config: ProjectStructu
 
       const ext = config.backend.language === 'typescript' ? 'ts' : 'js';
 
-      // server Datei
+    
       const serverFile = path.join(backendPath, `server.${ext}`);
       if (!await fs.pathExists(serverFile)) {
         await fs.writeFile(serverFile, `
@@ -121,7 +121,7 @@ app.listen(PORT, () => console.log(\`Server running on port \${PORT}\`));
       }
 
       if (ext === 'js') {
-        // Für JS, import/export zu require/exports anpassen
+       
         await fs.writeFile(serverFile, `
 const express = require('express');
 const app = express();
@@ -132,14 +132,25 @@ app.get('/', (req, res) => res.send('Hello World'));
 app.listen(PORT, () => console.log('Server running on port ' + PORT));
         `.trim());
       }
-
+    const files = [
+    path.join(backendPath, 'routes', `route.${ext}`),
+    path.join(backendPath, 'controllers', `controller.${ext}`),
+    path.join(backendPath, 'models', `model.${ext}`),
+    path.join(backendPath, 'services', `service.${ext}`),
+    path.join(backendPath, 'middlewares', `errorhandler.${ext}`)
+    ];
       
+      for (const file of files) {
+          if (!await fs.pathExists(file)) {
+             await fs.writeFile(file, '');
+              }
+          }
 
       console.log('✅ Express backend structure created with basic server');
     }
   }
 
-  // Datenbanken
+ 
   if (config.databases.length > 0) {
     const dbPath = path.join(projectPath, 'DB');
     await fs.ensureDir(dbPath);
