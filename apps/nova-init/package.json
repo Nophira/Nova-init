@@ -1,5 +1,5 @@
 {
-  "name": "@nophira.it/nova-init",
+  "name": "nova-init",
   "version": "v2.1.35",
   "author": "Nophira",
   "description": "A modern CLI tool for scaffolding your next project – choose from a variety of frameworks and customizable addons to tailor your architecture.",
