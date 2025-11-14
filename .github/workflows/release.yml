@@ -6,24 +6,40 @@ on:
       - 'v*'
 
 permissions:
-  id-token: write  
+  id-token: write
   contents: read
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
+      # Node + pnpm über Corepack
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
-      # Ensure npm 11.5.1 or later is installed
-      - name: Update npm
-        run: npm install -g npm@latest
-      - run: npm install
-      - run: npm run build --if-present
-      - run: npm test
-      - run: npm publish
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+
+      # Abhängigkeiten installieren
+      - name: Install dependencies
+        run: pnpm install
+
+      # Build ausführen (Turborepo kompatibel)
+      - name: Build
+        run: pnpm build --if-present
+
+      # Tests ausführen
+      - name: Test
+        run: pnpm test --if-present
+
+      # Veröffentlichen
+      - name: Publish
+        run: pnpm publish --access public
+
