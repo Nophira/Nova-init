@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 permissions:
-  id-token: write
+  id-token: write   # Required for npm OIDC
   contents: read
 
 jobs:
@@ -14,23 +14,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout des Repos
       - uses: actions/checkout@v4
 
+      # Node + OIDC Authentifizierung für npm
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: 20
+          registry-url: https://registry.npmjs.org/
+ 
 
+      # pnpm aktivieren
       - name: Enable pnpm
         run: |
           corepack enable
           corepack prepare pnpm@latest --activate
 
+      # Dependencies installieren
       - name: Install dependencies
         run: pnpm install
 
+      # Turborepo Build
       - name: Build
         run: pnpm run build
+
 
       - name: Publish nova-init
         working-directory: apps/nova-init
