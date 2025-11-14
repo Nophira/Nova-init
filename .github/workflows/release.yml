@@ -16,7 +16,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Node + pnpm über Corepack
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -27,19 +26,14 @@ jobs:
           corepack enable
           corepack prepare pnpm@latest --activate
 
-      # Abhängigkeiten installieren
       - name: Install dependencies
         run: pnpm install
 
-      # Build ausführen (Turborepo kompatibel)
       - name: Build
-        run: pnpm build --if-present
+        run: pnpm run build
 
-      # Tests ausführen
       - name: Test
-        run: pnpm test --if-present
+        run: pnpm run test --if-present
 
-      # Veröffentlichen
       - name: Publish
         run: pnpm publish --access public
-
