@@ -32,6 +32,6 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Publish
+      - name: Publish nova-init
+        working-directory: apps/nova-init
         run: pnpm publish --access public --no-git-checks
-
